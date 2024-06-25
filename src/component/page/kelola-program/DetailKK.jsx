@@ -11,7 +11,7 @@ import UseFetch from "../../util/UseFetch";
 import { data } from "jquery";
 
 export default function KKDetailProgram({ onChangePage, withID }) {
-    console.log("SDA",JSON.stringify(data));
+    console.log("SDA",JSON.stringify(withID));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -41,7 +41,7 @@ export default function KKDetailProgram({ onChangePage, withID }) {
           query: "",
           sort: "[Nama Anggota] asc",
           status: "Aktif",
-          kke_id: withID.id,
+          kke_id: withID.Key,
         });
 
         if (data === "ERROR") {
@@ -53,6 +53,7 @@ export default function KKDetailProgram({ onChangePage, withID }) {
         } else if (data.length === 0) {
           await new Promise((resolve) => setTimeout(resolve, 2000));
         } else {
+            console.log("AGT: "+JSON.stringify(data));
           setListAnggota(data);
           setIsLoading(false);
           break;
@@ -80,7 +81,7 @@ export default function KKDetailProgram({ onChangePage, withID }) {
           query: "",
           sort: "[Nama Program] ASC",
           status: "Aktif",
-          KKid: withID.id,
+          KKid: withID.Key,
         });
 
         if (data === "ERROR") {
@@ -107,14 +108,12 @@ export default function KKDetailProgram({ onChangePage, withID }) {
   useEffect(() => {
     if (withID) {
       setFormData({
-        key: withID.id,
-        nama: withID.title,
-        programStudi: withID.prodi.nama,
-        personInCharge: withID.pic.nama,
-        deskripsi: withID.desc,
-        status: withID.status,
-        members: withID.members,
-        memberCount: withID.memberCount,
+        key: withID.Key,
+        nama: withID["Nama Kelompok Keahlian"],
+        programStudi: withID["Prodi"],
+        personInCharge: withID["PIC"],
+        deskripsi: withID["Deskripsi"],
+        status: withID["Status"],
       });
       getListAnggota();
       getListProgram();
