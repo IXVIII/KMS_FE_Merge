@@ -1,7 +1,7 @@
 import { useState } from "react";
 import PICKKIndex from "./Index";
 import PICKKEdit from "./Edit";
-import KKDetail from "./Detail";
+import PICKKDetailPublish from "./Detail";
 
 export default function PICKK() {
   const [pageMode, setPageMode] = useState("index");
@@ -13,6 +13,8 @@ export default function PICKK() {
         return <PICKKIndex onChangePage={handleSetPageMode} />;
       case "edit":
         return <PICKKEdit onChangePage={handleSetPageMode} withID={dataID} />;
+        case "detail":
+        return <PICKKDetailPublish onChangePage={handleSetPageMode} withID={dataID} />;
     }
   }
 
