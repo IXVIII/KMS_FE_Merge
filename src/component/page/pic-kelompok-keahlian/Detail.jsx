@@ -10,7 +10,7 @@ import { API_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 
 export default function PICKKDetailPublish({ onChangePage, withID }) {
-    console.log("SDA");
+    console.log("SDA : ",JSON.stringify(withID));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);

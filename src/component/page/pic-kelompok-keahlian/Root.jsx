@@ -13,7 +13,7 @@ export default function PICKK() {
         return <PICKKIndex onChangePage={handleSetPageMode} />;
       case "edit":
         return <PICKKEdit onChangePage={handleSetPageMode} withID={dataID} />;
-        case "detail":
+        case "detailPublish":
         return <PICKKDetailPublish onChangePage={handleSetPageMode} withID={dataID} />;
     }
   }
