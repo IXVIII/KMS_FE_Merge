@@ -2,6 +2,38 @@ a div:hover {
   background-color: #eee;
 }
 
+.sidebarMenu {
+  width: 13vw;
+}
+
+.sidebarMenu-hidden {
+  display: none;
+}
+
+:root {
+  --responsiveContainer-margin-left: 13vw;
+  --sidebarMenu-width: 13vw;
+}
+
+.responsiveContainer {
+  margin-left: var(--responsiveContainer-margin-left);
+}
+
+
+@media only screen and (max-width: 1280px) {
+  .sidebarMenu {
+    width: var(---sidebarMenu-width);
+  }
+
+  :root {
+    --responsiveContainer-margin-left: 0;
+  }
+
+  .sidebarMenu-hidden {
+    display: none;
+  }
+}
+
 dialog {
   margin-top: 20px;
   overflow-x: auto;
@@ -18,24 +50,6 @@ dialog {
 dialog::backdrop {
   backdrop-filter: blur(10px);
   background-color: rgba(0, 0, 0, 0.5);
-}
-
-.sidebarMenu {
-  width: 14vw;
-}
-
-.responsiveContainer {
-  margin-left: 14vw;
-}
-
-@media only screen and (max-width: 1280px) {
-  .sidebarMenu {
-    display: none;
-  }
-
-  .responsiveContainer {
-    margin-left: 0;
-  }
 }
 
 .fixed-when-scroll {

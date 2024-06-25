@@ -4,6 +4,8 @@ import PengajuanKKs from "../page/pengajuan_kk/Root";
 import PICKKbyProdi from "../page/pic-kelompok-keahlian/Root";
 import KonfirmasiAnggota from "../page/konfirmasi-anggota-kelompok-keahlian/Root";
 import RiwayatPengajuan from "../page/riwayat-pengajuan-kk/Root";
+import MasterTest from "../page/master-test/Root";
+import MasterProses from "../page/master-proses/Root";
 
 const Beranda = lazy(() => import("../page/beranda/Root"));
 const KelolaKK = lazy(() => import("../page/kelola-kelompok-keahlian/Root"));
@@ -51,6 +53,14 @@ const routeList = [
   {
     path: "/riwayat_pengajuan_anggota",
     element: <RiwayatPengajuan />,
+  },
+  {
+    path: "/master_test",
+    element: <MasterTest />,
+  },
+  {
+    path: "/master_proses",
+    element: <MasterProses />,
   },
 ];
 
