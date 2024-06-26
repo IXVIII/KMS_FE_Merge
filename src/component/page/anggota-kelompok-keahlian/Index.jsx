@@ -19,13 +19,6 @@ const dataFilterSort = [
   },
 ];
 
-const dataFilterStatus = [
-  { Value: "", Text: "No Filter" },
-  { Value: "Draft", Text: "Draft" },
-  { Value: "Aktif", Text: "Aktif" },
-  { Value: "Tidak Aktif", Text: "Tidak Aktif" },
-];
-
 export default function AnggotaKKIndex({ onChangePage }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -40,7 +33,6 @@ export default function AnggotaKKIndex({ onChangePage }) {
 
   const searchQuery = useRef();
   const searchFilterSort = useRef();
-  const searchFilterStatus = useRef();
 
   function handleSearch() {
     setIsLoading(true);
@@ -50,7 +42,7 @@ export default function AnggotaKKIndex({ onChangePage }) {
         page: 1,
         query: searchQuery.current.value,
         sort: searchFilterSort.current.value,
-        status: searchFilterStatus.current.value,
+        status: "Aktif",
       };
     });
   }
@@ -122,7 +114,7 @@ export default function AnggotaKKIndex({ onChangePage }) {
       {isLoading ? (
         <Loading />
       ) : (
-        <div className="d-flex flex-column">
+        <div className="d-flex flex-column bg-logo-astra">
           <div className="flex-fill">
             <div className="input-group">
               <Button
@@ -150,14 +142,6 @@ export default function AnggotaKKIndex({ onChangePage }) {
                   type="none"
                   arrData={dataFilterSort}
                   defaultValue="[Nama Kelompok Keahlian] asc"
-                />
-                <DropDown
-                  ref={searchFilterStatus}
-                  forInput="ddStatus"
-                  label="Status"
-                  type="none"
-                  arrData={dataFilterStatus}
-                  defaultValue=""
                 />
               </Filter>
             </div>

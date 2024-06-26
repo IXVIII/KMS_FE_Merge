@@ -10,7 +10,7 @@ import CardKonfirmasi from "../../part/CardKonfirmasi";
 import Icon from "../../part/Icon";
 import Loading from "../../part/Loading";
 import Alert from "../../part/Alert";
-import axios from 'axios';
+import axios from "axios";
 
 export default function KonfrimasiAnggotaIndex({ onChangePage }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -64,12 +64,13 @@ export default function KonfrimasiAnggotaIndex({ onChangePage }) {
       } else {
         setListAnggota((prevListAnggota) => {
           const newListAnggota = [...prevListAnggota];
-          newListAnggota[index] = data.data[0] === "data kosong" ? [] : data.data;
+          newListAnggota[index] =
+            data.data[0] === "data kosong" ? [] : data.data;
           return newListAnggota;
         });
-        console.log("terpanggil " + idKK + "di index " + index)
+        console.log("terpanggil " + idKK + "di index " + index);
         if (currentData.length === index + 1) {
-          console.log("berenti")
+          console.log("berenti");
           setIsLoading(false);
         }
       }
@@ -129,7 +130,8 @@ export default function KonfrimasiAnggotaIndex({ onChangePage }) {
         } else {
           setListAnggota((prevListAnggota) => {
             const newListAnggota = [...prevListAnggota];
-            newListAnggota[index] = data.data[0] === "data kosong" ? [] : data.data;
+            newListAnggota[index] =
+              data.data[0] === "data kosong" ? [] : data.data;
             return newListAnggota;
           });
           console.log("terpanggil " + idKK + "di index " + index);
@@ -148,15 +150,16 @@ export default function KonfrimasiAnggotaIndex({ onChangePage }) {
     });
   };
 
-
   useEffect(() => {
     getListKK();
   }, []);
 
   useEffect(() => {
     if (currentData.length > 0) {
-      setIsLoading(true); 
-      const promises = currentData.map((val, index) => getListAnggota(val.Key, index));
+      setIsLoading(true);
+      const promises = currentData.map((val, index) =>
+        getListAnggota(val.Key, index)
+      );
       Promise.all(promises)
         .then(() => {
           setIsLoading(false);
@@ -184,8 +187,30 @@ export default function KonfrimasiAnggotaIndex({ onChangePage }) {
             </div>
           )}
           <div className="flex-fill">
+            <div className="mb-3 d-flex">
+              <p className="mb-0 me-3">
+                <span
+                  style={{
+                    padding: "0px 10px 0px 10px",
+                    margin: "0px 10px",
+                    backgroundColor: "#67ACE9",
+                  }}
+                ></span>
+                Tidak ada pengajuan anggota
+              </p>
+              <p className="mb-0 me-3">
+                <span
+                  style={{
+                    padding: "0px 10px 0px 10px",
+                    margin: "0px 10px",
+                    backgroundColor: "#FFC107",
+                  }}
+                ></span>
+                Menunggu persetujuan
+              </p>
+            </div>
             <div className="container">
-              <div className="row mt-3 gx-4">
+              <div className="row mt-0 gx-4">
                 {currentData
                   .filter((value) => {
                     return value.Status === "Aktif";

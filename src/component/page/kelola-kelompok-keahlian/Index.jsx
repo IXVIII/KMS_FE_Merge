@@ -66,13 +66,6 @@ export default function KKIndex({ onChangePage }) {
     });
   }
 
-  useEffect(() => {
-    if (document.getElementById("spanMenuRoute")) {
-      document.getElementById("spanMenuRoute").innerHTML =
-        "<strong> - Index</strong>";
-    }
-  }, []);
-
   const getListKK = async () => {
     setIsError(false);
     setIsLoading(true);
@@ -203,8 +196,8 @@ export default function KKIndex({ onChangePage }) {
       {isLoading ? (
         <Loading />
       ) : (
-        <div className="">
-          <div className="input-group fixed-content">
+        <div className="bg-logo-astra">
+          <div className="input-group fixed">
             <Button
               iconName="add"
               classType="success"
@@ -241,6 +234,30 @@ export default function KKIndex({ onChangePage }) {
               />
             </Filter>
           </div>
+          {/* Legend Start */}
+          {/* <div className="mt-3 d-flex fixed">
+            <p className="mb-0 me-3">
+              <span
+                style={{
+                  padding: "0px 10px 0px 10px",
+                  margin: "0px 10px",
+                  backgroundColor: "#67ACE9",
+                }}
+              ></span>
+              Aktif / Sudah dipublikasi
+            </p>
+            <p className="mb-0 me-3">
+              <span
+                style={{
+                  padding: "0px 10px 0px 10px",
+                  margin: "0px 10px",
+                  backgroundColor: "#6c757d",
+                }}
+              ></span>
+              Draft / Menunggu PIC Prodi
+            </p>
+          </div> */}
+          {/* Legend End */}
           <div className="container">
             {currentData[0].Message ? (
               <Alert
@@ -248,13 +265,37 @@ export default function KKIndex({ onChangePage }) {
                 message="Tidak ada data! Silahkan klik tombol tambah kelompok keahlian diatas.."
               />
             ) : (
-              <div className="row mt-3 gx-4">
+              <div className="row mt-0 gx-4">
                 {!currentFilter.status ? (
-                  <div className="my-3">
-                    <span className="badge fw-normal fs-6 text-dark-emphasis bg-primary-subtle">
-                      <Icon name="arrow-down" /> Data Aktif / Menunggu PIC dari
-                      Prodi
-                    </span>
+                  <div className="d-flex justify-content-between">
+                    <div className="my-3">
+                      <span className="badge fw-normal fs-6 text-dark-emphasis bg-primary-subtle">
+                        <Icon name="arrow-down" /> Data Aktif / Menunggu PIC
+                        dari Prodi
+                      </span>
+                    </div>
+                    <div className="mt-3 d-flex">
+                      <p className="mb-0 me-3">
+                        <span
+                          style={{
+                            padding: "0px 10px 0px 10px",
+                            margin: "0px 10px",
+                            backgroundColor: "#67ACE9",
+                          }}
+                        ></span>
+                        Aktif / Sudah dipublikasi
+                      </p>
+                      <p className="mb-0 me-3">
+                        <span
+                          style={{
+                            padding: "0px 10px 0px 10px",
+                            margin: "0px 10px",
+                            backgroundColor: "#6c757d",
+                          }}
+                        ></span>
+                        Draft / Menunggu PIC Prodi
+                      </p>
+                    </div>
                   </div>
                 ) : (
                   ""

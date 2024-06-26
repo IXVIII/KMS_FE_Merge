@@ -11,7 +11,7 @@ import UseFetch from "../../util/UseFetch";
 import { data } from "jquery";
 
 export default function KKDetailProgram({ onChangePage, withID }) {
-    console.log("SDA",JSON.stringify(withID));
+  console.log("SDA", JSON.stringify(withID));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -53,7 +53,7 @@ export default function KKDetailProgram({ onChangePage, withID }) {
         } else if (data.length === 0) {
           await new Promise((resolve) => setTimeout(resolve, 2000));
         } else {
-            console.log("AGT: "+JSON.stringify(data));
+          console.log("AGT: " + JSON.stringify(data));
           setListAnggota(data);
           setIsLoading(false);
           break;
@@ -93,7 +93,43 @@ export default function KKDetailProgram({ onChangePage, withID }) {
         } else if (data.length === 0) {
           await new Promise((resolve) => setTimeout(resolve, 2000));
         } else {
-          setListProgram(data);
+          const updatedListProgram = await Promise.all(
+            data.map(async (program) => {
+              try {
+                while (true) {
+                  let data = await UseFetch(
+                    API_LINK + "KategoriProgram/GetKategoriByProgram",
+                    {
+                      page: 1,
+                      query: "",
+                      sort: "[Nama Kategori] asc",
+                      status: "",
+                      kkeID: program.Key,
+                    }
+                  );
+
+                  if (data === "ERROR") {
+                    throw new Error(
+                      "Terjadi kesalahan: Gagal mengambil data kategori."
+                    );
+                  } else if (data === "data kosong") {
+                    return { ...program, kategori: [] };
+                  } else if (data.length === 0) {
+                    await new Promise((resolve) => setTimeout(resolve, 2000));
+                  } else {
+                    return { ...program, kategori: data };
+                  }
+                }
+              } catch (e) {
+                console.log(e.message);
+                setIsError({ error: true, message: e.message });
+                return { ...program, kategori: [] }; // Handle error case by returning program with empty kategori
+              }
+            })
+          );
+
+          console.log(updatedListProgram);
+          setListProgram(updatedListProgram);
           setIsLoading(false);
           break;
         }
@@ -119,13 +155,6 @@ export default function KKDetailProgram({ onChangePage, withID }) {
       getListProgram();
     }
   }, [withID]);
-
-  useEffect(() => {
-    if (document.getElementById("spanMenuRoute")) {
-      document.getElementById("spanMenuRoute").innerHTML =
-        "<strong> - Detail</strong>";
-    }
-  }, []);
 
   if (isLoading) return <Loading />;
 
@@ -169,49 +198,51 @@ export default function KKDetailProgram({ onChangePage, withID }) {
                 listAnggota[0].Message ? (
                   <p>Tidak Ada Anggota Aktif</p>
                 ) : (
-                  listAnggota.map((ag, index) => (
-                    <div
-                      className="card-profile mb-3 d-flex justify-content-between shadow-sm"
-                      key={ag.Key}
-                    >
-                      <div className="d-flex w-100">
-                        <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
-                          {index + 1}
-                        </p>
-                        <div
-                          className="bg-primary"
-                          style={{ width: "1.5%" }}
-                        ></div>
-                        <div className="p-1 ps-2 d-flex">
-                          <img
-                            src="https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg"
-                            alt={ag["Nama Anggota"]}
-                            className="img-fluid rounded-circle"
-                            width="45"
-                          />
-                          <div className="ps-3">
-                            <p className="mb-0">{ag["Nama Anggota"]}</p>
-                            <p className="mb-0" style={{ fontSize: "13px" }}>
-                              {ag.Prodi}
-                            </p>
+                  <div>
+                    {listAnggota.map((ag, index) => (
+                      <div
+                        className="card-profile mb-3 d-flex justify-content-between shadow-sm"
+                        key={ag.Key}
+                      >
+                        <div className="d-flex w-100">
+                          <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
+                            {index + 1}
+                          </p>
+                          <div
+                            className="bg-primary"
+                            style={{ width: "1.5%" }}
+                          ></div>
+                          <div className="p-1 ps-2 d-flex">
+                            <img
+                              src="https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg"
+                              alt={ag["Nama Anggota"]}
+                              className="img-fluid rounded-circle"
+                              width="45"
+                            />
+                            <div className="ps-3">
+                              <p className="mb-0">{ag["Nama Anggota"]}</p>
+                              <p className="mb-0" style={{ fontSize: "13px" }}>
+                                {ag.Prodi}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
+                    ))}
+                    <div className="text-end">
+                      <Button
+                        classType="light btn-sm text-primary text-decoration-underline px-3 mt-2"
+                        type="submit"
+                        label="Lihat Semua"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalAnggota"
+                      />
                     </div>
-                  ))
+                  </div>
                 )
               ) : (
                 <p>Tidak Ada Anggota Aktif</p>
               )}
-              <div className="text-end">
-                <Button
-                  classType="light btn-sm text-primary text-decoration-underline px-3 mt-2"
-                  type="submit"
-                  label="Lihat Semua"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modalAnggota"
-                />
-              </div>
             </div>
           </div>
           <h5 className="text-primary pt-2">
@@ -242,6 +273,39 @@ export default function KKDetailProgram({ onChangePage, withID }) {
                       {data.Deskripsi}
                     </p>
                   </div>
+                  <div className="p-3 pt-0">
+                    <p className="text-primary fw-semibold mb-0 mt-2">
+                      Daftar Kategori Program
+                    </p>
+                    <div className="row row-cols-3">
+                      {data.kategori.map((kat, indexKat) => (
+                        <div className="col">
+                          <div className="card card-kategori-program mt-3">
+                            <div className="card-body">
+                              <div className="d-flex justify-content-between">
+                                <h6 className="card-title">
+                                  {index + 1}
+                                  {"-"}
+                                  {indexKat + 1}
+                                  {". "}
+                                  {kat["Nama Kategori"]}
+                                </h6>
+                              </div>
+                              <div className="d-flex mt-2">
+                                <div className="me-2 bg-primary ps-1"></div>
+                                <p
+                                  className="card-subtitle"
+                                  style={{ textAlign: "justify" }}
+                                >
+                                  {kat.Deskripsi}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ))
             )
@@ -257,7 +321,6 @@ export default function KKDetailProgram({ onChangePage, withID }) {
           onClick={() => onChangePage("index")}
         />
       </div>
-
       <div
         class="modal fade"
         id="modalAnggota"

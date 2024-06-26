@@ -91,11 +91,35 @@ export default function PICIndex({ onChangePage }) {
         <div className="d-flex flex-column">
           <div className="flex-fill">
             <div className="container">
-              <div className="row mt-3 gx-4">
-                <div className="my-3">
-                  <span className="badge fw-normal fs-6 text-dark-emphasis bg-secondary-subtle">
-                    <Icon name="arrow-down" /> Menunggu PIC dari Prodi
-                  </span>
+              <div className="row mt-0 gx-4">
+                <div className="d-flex justify-content-between">
+                  <div className="my-3">
+                    <span className="badge fw-normal fs-6 text-dark-emphasis bg-secondary-subtle">
+                      <Icon name="arrow-down" /> Menunggu PIC dari Prodi
+                    </span>
+                  </div>
+                  <div className="mt-3 d-flex">
+                    <p className="mb-0 me-3">
+                      <span
+                        style={{
+                          padding: "0px 10px 0px 10px",
+                          margin: "0px 10px",
+                          backgroundColor: "#6c757d",
+                        }}
+                      ></span>
+                      Menunggu PIC Prodi
+                    </p>
+                    <p className="mb-0 me-3">
+                      <span
+                        style={{
+                          padding: "0px 10px 0px 10px",
+                          margin: "0px 10px",
+                          backgroundColor: "#67ACE9",
+                        }}
+                      ></span>
+                      Aktif / Sudah dipublikasi
+                    </p>
+                  </div>
                 </div>
                 {currentData
                   .filter((value) => {

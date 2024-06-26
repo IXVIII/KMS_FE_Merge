@@ -59,9 +59,28 @@ dialog::backdrop {
   background: white;
 }
 
-.fixed-content {
+/* .fixed {
   position: fixed;
   width: 100%;
   z-index: 1000;
   background: white;
+} */
+
+.bg-logo-astra {
+  position: relative; /* Required for ::after positioning */
+}
+
+.bg-logo-astra::after {
+  content: "";
+  background-image: url('assets/Background_IMG_Logo.png');
+  background-repeat: no-repeat;
+  background-size: 350px 350px;
+  background-position: center;
+  opacity: 0.1; 
+  position: fixed;
+  top: 20%;
+  right: 0;
+  bottom: 0;
+  left: 13%;
+  z-index: -1; 
 }

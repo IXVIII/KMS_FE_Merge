@@ -190,6 +190,28 @@ export default function RiwayatIndex({ onChangePage }) {
               />
             </Filter>
           </div>
+          <div className="mt-3 d-flex">
+            <p className="mb-0 me-3">
+              <span
+                style={{
+                  padding: "0px 10px 0px 10px",
+                  margin: "0px 10px",
+                  backgroundColor: "#DC3545",
+                }}
+              ></span>
+              Ditolak oleh Prodi
+            </p>
+            <p className="mb-0 me-3">
+              <span
+                style={{
+                  padding: "0px 10px 0px 10px",
+                  margin: "0px 10px",
+                  backgroundColor: "#6c757d",
+                }}
+              ></span>
+              Dibatalkan (Kelompok Keahlian non-aktif)
+            </p>
+          </div>
           <div className="container">
             <div className="row mt-3 gx-4">
               {listKK[0]?.Message ? (
