@@ -55,11 +55,11 @@ const routeList = [
     element: <RiwayatPengajuan />,
   },
   {
-    path: "/master_test",
+    path: "/baca_materi",
     element: <MasterTest />,
   },
   {
-    path: "/master_proses",
+    path: "/kelola_materi",
     element: <MasterProses />,
   },
 ];

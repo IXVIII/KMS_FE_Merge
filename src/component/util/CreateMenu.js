@@ -38,11 +38,11 @@ const CreateMenu = async (role) => {
             sub: [
               {
                 title: "Materi",
-                link: ROOT_LINK + "/master_proses",
+                link: ROOT_LINK + "/kelola_materi",
               },
               {
                 title: "Baca Materi",
-                link: ROOT_LINK + "/master_test",
+                link: ROOT_LINK + "/baca_materi",
               },
             ],
           },
