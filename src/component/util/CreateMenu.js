@@ -31,21 +31,6 @@ const CreateMenu = async (role) => {
             link: ROOT_LINK + "/",
             sub: [],
           },
-          {
-            head: "Materi",
-            headkey: "materi",
-            link: "#",
-            sub: [
-              {
-                title: "Materi",
-                link: ROOT_LINK + "/kelola_materi",
-              },
-              {
-                title: "Baca Materi",
-                link: ROOT_LINK + "/baca_materi",
-              },
-            ],
-          },
         ];
   
         data.forEach((item) => {
