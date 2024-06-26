@@ -20,6 +20,7 @@ function checkIcon(menu) {
       menuIcon = "book";
       break;
     case "Materi":
+      menuIcon = "file";
       break;
   }
 
