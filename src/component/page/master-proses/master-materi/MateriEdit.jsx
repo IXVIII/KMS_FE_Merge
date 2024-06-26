@@ -18,7 +18,7 @@ import { Editor } from '@tinymce/tinymce-react';
 import AppContext_test from "../../master-test/TestContext";
 export default function MasterCourseEdit({onChangePage}) {
   // console.log("ID: " + JSON.stringify(Materi));
-  console.log("onChangePage prop:", onChangePage);
+  // console.log("onChangePage prop:", onChangePage);
 
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -31,9 +31,9 @@ export default function MasterCourseEdit({onChangePage}) {
   
   const kategori = AppContext_test.KategoriIdByKK;
   const Materi = AppContext_test.DetailMateriEdit;
-  console.log('deyail mat',Materi)
+  // console.log('deyail mat',Materi)
 
-  console.log("kategori di materi: " + AppContext_test.KategoriIdByKK);
+  // console.log("kategori di materi: " + AppContext_test.KategoriIdByKK);
   const formDataRef = useRef({
     mat_id:Materi.Key,
     kat_id: AppContext_test.KategoriIdByKK, 
@@ -47,7 +47,7 @@ export default function MasterCourseEdit({onChangePage}) {
     mat_gambar: "",
   });
 
-  console.log(formDataRef)
+  // console.log(formDataRef)
 
   // const formUpdateRef = useRef({
   //   mat_id:Materi.Key,
@@ -120,7 +120,7 @@ useEffect(() => {
           namaKK: item.namaKK
         }));
 
-        console.log("Mapped data: ", mappedData);
+        // console.log("Mapped data: ", mappedData);
         setListKategori(mappedData);
         return;
       } catch (error) {
@@ -179,7 +179,7 @@ useEffect(() => {
       // Setelah semua upload selesai
       Promise.all(uploadPromises).then(() => {
         // Log formDataRef akhir untuk memastikan semua field terisi dengan benar
-        console.log("Final formDataRef:", JSON.stringify(formDataRef.current));
+        // console.log("Final formDataRef:", JSON.stringify(formDataRef.current));
         UseFetch(API_LINK + "Materis/EditDataMateri", formDataRef.current)
           .then((data) => {
             if (data === "ERROR") {

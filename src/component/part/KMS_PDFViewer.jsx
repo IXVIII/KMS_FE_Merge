@@ -17,34 +17,65 @@ export default function KMS_PDFViewer({ pdfFileName }) {
   const defaultLayoutPluginInstance = defaultLayoutPlugin();
   
   useEffect(() => {
-  if (AppContext_test.urlMateri) {
-    setIsLoading(true); // Set loading state to true
-    const fetchData = async () => {
-      
+    let isMounted = true;
+
+    const fetchData_file = async (retries = 10, delay = 1000) => {
+    for (let i = 0; i < retries; i++) {
+      setIsLoading(true);
       try {
-        const response = await axios.get(`${API_LINK}Utilities/Upload/PreviewFile`, { 
-          params: {
-            namaFile: AppContext_test.urlMateri 
-          },
-          responseType: 'arraybuffer' 
-        });  
-        const blob = new Blob([response.data], { type: response.headers['content-type'] });
-        const url = URL.createObjectURL(blob);
-        setPdfUrl(url);
-        setIsLoading(false); // Set loading state to false
+        const data = await fetchData();
       } catch (error) {
-        setIsError(true);
-        setIsLoading(false);
-        console.error("Error fetching file:", error); 
+        if (isMounted) {
+          setIsError(true);
+          console.error("Fetch error:", error);
+          if (i < retries - 1) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+          } else {
+            return;
+          }
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+    };
+  
+    const fetchData = async (retries = 10, delay = 5000) => {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const response = await axios.get(`${API_LINK}Utilities/Upload/PreviewFile`, { 
+            params: {
+              namaFile: AppContext_test.urlMateri 
+            },
+            responseType: 'arraybuffer' 
+          });  
+
+          const blob = new Blob([response.data], { type: response.headers['content-type'] });
+          const url = URL.createObjectURL(blob);
+          setPdfUrl(url);
+          setIsLoading(false); 
+          return false;
+        } catch (error) {
+          console.error("Error fetching file:", error);
+          if (i < retries - 1) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+          } else {
+            throw error;
+          }
+        }
       }
     };
 
-    fetchData(); // Call the function to fetch data
-  } else {
-    setIsError(true);
-    setIsLoading(true);
-  }
-}, [fileName]); 
+    fetchData_file();
+
+    return () => {
+      isMounted = false; 
+    };
+  }, [AppContext_test.urlMateri]);
+
+    const [pdfHeight, setPdfHeight] = useState("500px");
   return (
     <>
       <div className="d-flex flex-column">
@@ -65,7 +96,7 @@ export default function KMS_PDFViewer({ pdfFileName }) {
           ) : (
             <>
               {pdfUrl && (
-                <Worker workerUrl={`https://unpkg.com/pdfjs-dist@2.16.105/build/pdf.worker.min.js`}>
+                <Worker workerUrl={`https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js`}>
                 <div style={{ height: '750px' }}>
                     <Viewer 
                         fileUrl={pdfUrl} 

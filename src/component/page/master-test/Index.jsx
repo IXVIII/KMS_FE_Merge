@@ -282,7 +282,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
 
     fetchData();
   }, [AppContext_test.refreshPage]);
-
+  
   return (
     <div className="container">
       <div className="row">
