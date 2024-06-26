@@ -4,6 +4,7 @@ import ProgramAdd from "./AddProgram";
 import KategoriProgramAdd from "./AddKategoriProgram";
 import ProgramEdit from "./EditProgram";
 import KategoriProgramEdit from "./EditKategoriProgram";
+import KKDetailProgram from "./DetailKK";
 
 export default function Program() {
   const [pageMode, setPageMode] = useState("index");
@@ -18,6 +19,13 @@ export default function Program() {
       case "addKategori":
         return (
           <KategoriProgramAdd
+            onChangePage={handleSetPageMode}
+            withID={dataID}
+          />
+        );
+        case "detailPublish":
+        return (
+          <KKDetailProgram
             onChangePage={handleSetPageMode}
             withID={dataID}
           />
