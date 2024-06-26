@@ -61,6 +61,7 @@ export default function ProgramIndex({ onChangePage }) {
             ...prevFilter,
             KKid: data[0].Key,
           }));
+          console.log(JSON.stringify(data));
           setIsLoading(false);
           break;
         }
@@ -190,6 +191,8 @@ export default function ProgramIndex({ onChangePage }) {
     if (currentFilter.KKid) {
       getListProgram(currentFilter);
       getListAnggota(currentFilter.KKid);
+      console.log(JSON.stringify("CURR: "+JSON.stringify(currentData)));
+
     }
   }, [currentFilter]);
 
@@ -445,6 +448,7 @@ export default function ProgramIndex({ onChangePage }) {
                               iconName="list"
                               classType="outline-primary btn-sm px-3 me-2"
                               title="Detail Kelompok Keahlian"
+                              onClick={() => onChangePage("detailPublish",currentData)}
                             />
                           </div>
                         </div>
