@@ -13,6 +13,7 @@ import uploadFile from "../../../util/UploadImageQuiz";
 import { Editor } from '@tinymce/tinymce-react';
 import Swal from 'sweetalert2';
 import AppContext_test from "../../master-test/TestContext";
+import Alert from "../../../part/Alert";
 
 export default function MasterPreTestEdit({ onChangePage, withID }) {
     const [formContent, setFormContent] = useState([]);
@@ -169,14 +170,23 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
         const totalQuestionPoint = formContent.reduce((total, question) => total + parseInt(question.point), 0);
         const totalOptionPoint = formContent.reduce((total, question) => {
         if (question.type === 'Pilgan') {
+            
             return total + question.options.reduce((optionTotal, option) => optionTotal + parseInt(option.point || 0), 0);
         }
         return total;
+
         }, 0);
         
         // Total point dari semua pertanyaan dan opsi harus berjumlah 100, tidak kurang dan tidak lebih
-        if (totalQuestionPoint + totalOptionPoint !== 100) {
-        alert('Total skor harus berjumlah 100');
+        // if (totalQuestionPoint + totalOptionPoint !== 100) {
+        if (totalQuestionPoint !== 100) {
+            console.log( totalQuestionPoint , totalOptionPoint )
+            Swal.fire({
+                title: 'Peringatan!',
+                text: 'Total skor harus berjumlah 100',
+                icon: 'warning',
+                confirmButtonText: 'OK'
+            });
         return;
         }
 
@@ -473,19 +483,20 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
             [validationError.name]: validationError.error,
         }));
     };
+    const Materi = AppContext_test.DetailMateriEdit;
+    const hasTest  = Materi.Posttest !== null && Materi.Posttest !== "";
 
     const convertSecondsToTimeFormat = (seconds) => {
         const hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
         const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
         return `${hours}:${minutes}`;
     };
-
     const getDataQuiz = async () => {
         setIsLoading(true);
         try {
             while (true) {
                 const data = await axios.post(API_LINK + 'Quiz/GetQuizByID', {
-                    id: AppContext_test.DetailMateriEdit?.Key, tipe: "Pretest"
+                    id: AppContext_test.DetailMateriEdit?.Key, tipe: "Posttest"
                 });
                 if (data === "ERROR") {
                     throw new Error("Terjadi kesalahan: Gagal mengambil data quiz.");
@@ -522,6 +533,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                 const { data } = await axios.post(API_LINK + 'Quiz/GetDataQuestion', {
                     id: formData.materiId, status: 'Aktif', tipe:'Posttest'
                 });
+                console.log('ds',data)
                 if (data === "ERROR") {
                     throw new Error("Terjadi kesalahan: Gagal mengambil data quiz.");
                 } else if (data.length === 0) {
@@ -679,276 +691,286 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                         Edit Posttest
                     </div>
                     <div className="card-body p-4">
-                        <div className="row mb-4">
-                            <div className="col-lg">
-                                <Input
-                                    type="text"
-                                    label="Deskripsi Quiz"
-                                    forInput="quizDeskripsi"
-                                    value={formData.quizDeskripsi}
-                                    onChange={handleInputChange}
-                                    isRequired={true}
-                                />
-                            </div>
-                        </div>
-                        <div className="row mb-4">
-                            <div className="col-lg-4">
-                                <Input
-                                    type="time"
-                                    name="timer"
-                                    label="Durasi (dalam menit)"
-                                    forInput="timerInput"
-                                    value={timer}
-                                    onChange={handleTimerChange}
-                                    isRequired={true}
-                                />
-                            </div>
-                            <div className="col-lg-4">
-                                <Input
-                                    label="Tanggal Dimulai:"
-                                    type="date"
-                                    value={formData.tanggalAwal}
-                                    onChange={(e) => handleChange('tanggalAwal', e.target.value)}
-                                    isRequired={true}
-                                />
-                            </div>
-                            <div className="col-lg-4">
-                                <Input
-                                    label="Tanggal Berakhir:"
-                                    type="date"
-                                    value={formData.tanggalAkhir}
-                                    onChange={(e) => handleChange('tanggalAkhir', e.target.value)}
-                                    isRequired={true}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="row mb-4">
-                            <div className="mb-2">
-                            </div>
-                            <div className="col-lg-4">
-                                <Button
-                                    onClick={() => addQuestion("Essay")}
-                                    iconName="plus"
-                                    classType="primary btn-sm px-3 py-1"
-                                />
-                                <input
-                                    type="file"
-                                    id="fileInput"
-                                    style={{ display: 'none' }}
-                                    onChange={handleFileChange}
-                                />
-                                <Button
-                                    iconName="upload"
-                                    classType="primary btn-sm mx-2 px-3 py-1"
-                                    onClick={() => document.getElementById('fileInput').click()} // Memicu klik pada input file
-                                />
-                                {/* Tampilkan nama file yang dipilih */}
-                                {selectedFile && <span>{selectedFile.name}</span>}
-                            </div>
-                            <div className="p-2">
-                                <Button
-                                    iconName="upload"
-                                    classType="primary btn-sm px-3 py-1"
-                                    onClick={handleUploadFile}
-                                    label="Unggah File"
-                                />
-
-                                <Button
-                                    iconName="download"
-                                    label="Unduh Template"
-                                    classType="warning btn-sm px-3 py-1 mx-2"
-                                    onClick={handleDownloadTemplate}
-                                />
-                            </div>
-                        </div>
-                        {formContent.map((question, index) => (
-                            <div key={index} className="card mb-4">
-                                <div className="card-header bg-white fw-medium text-black d-flex justify-content-between align-items-center">
-                                    <span>Pertanyaan</span>
-                                    <span>
-                                        Skor: {parseInt(question.point) + (question.type === 'Pilgan' ? (question.options || []).reduce((acc, option) => acc + parseInt(option.point), 0) : 0)}
-                                    </span>                                    <div className="col-lg-2">
-                                        <select className="form-select" aria-label="Default select example"
-                                            value={question.type}
-                                            onChange={(e) => handleQuestionTypeChange(e, index)}>
-                                            <option value="Essay">Essay</option>
-                                            <option value="Pilgan">Pilihan Ganda</option>
-                                            <option value="Praktikum">Praktikum</option>
-                                        </select>
+                        {hasTest ? ( 
+                            <div>
+                                <div className="row mb-4">
+                                    <div className="col-lg">
+                                        <Input
+                                            type="text"
+                                            label="Deskripsi Quiz"
+                                            forInput="quizDeskripsi"
+                                            value={formData.quizDeskripsi}
+                                            onChange={handleInputChange}
+                                            isRequired={true}
+                                        />
                                     </div>
-
                                 </div>
-                                <div className="card-body p-4">
+                                <div className="row mb-4">
+                                    <div className="col-lg-4">
+                                        <Input
+                                            type="time"
+                                            name="timer"
+                                            label="Durasi (dalam menit)"
+                                            forInput="timerInput"
+                                            value={timer}
+                                            onChange={handleTimerChange}
+                                            isRequired={true}
+                                        />
+                                    </div>
+                                    <div className="col-lg-4">
+                                        <Input
+                                            label="Tanggal Dimulai:"
+                                            type="date"
+                                            value={formData.tanggalAwal}
+                                            onChange={(e) => handleChange('tanggalAwal', e.target.value)}
+                                            isRequired={true}
+                                        />
+                                    </div>
+                                    <div className="col-lg-4">
+                                        <Input
+                                            label="Tanggal Berakhir:"
+                                            type="date"
+                                            value={formData.tanggalAkhir}
+                                            onChange={(e) => handleChange('tanggalAkhir', e.target.value)}
+                                            isRequired={true}
+                                        />
+                                    </div>
+                                </div>
 
-                                    <div className="row">
-                                        <div className="col-lg-12 question-input">
+                                <div className="row mb-4">
+                                    <div className="mb-2">
+                                    </div>
+                                    <div className="col-lg-4">
+                                        {/* <Button
+                                            onClick={() => addQuestion("Essay")}
+                                            iconName="plus"
+                                            classType="primary btn-sm px-3 py-1"
+                                        />
+                                        <input
+                                            type="file"
+                                            id="fileInput"
+                                            style={{ display: 'none' }}
+                                            onChange={handleFileChange}
+                                        />
+                                        <Button
+                                            iconName="upload"
+                                            classType="primary btn-sm mx-2 px-3 py-1"
+                                            onClick={() => document.getElementById('fileInput').click()} // Memicu klik pada input file
+                                        />
+                                        {/* Tampilkan nama file yang dipilih */}
+                                    </div>
+                                    <div className="p-2">
+                                        {/* <Button
+                                            iconName="upload"
+                                            classType="primary btn-sm px-3 py-1"
+                                            onClick={handleUploadFile}
+                                            label="Unggah File"
+                                        />
 
-                                            <label htmlFor="deskripsiMateri" className="form-label fw-bold">
-                                                Pertanyaan <span style={{ color: "Red" }}> *</span>
-                                            </label>
-                                            <Editor
-                                                forInput={'pertanyaan_${index}'}
-                                                value={question.text}
-                                                onEditorChange={(content) => {
-                                                    const updatedFormContent = [...formContent];
-                                                    updatedFormContent[index].text = content;
-                                                    setFormContent(updatedFormContent);
-
-                                                    // Update formQuestion.soal
-                                                    setFormQuestion((prevFormQuestion) => ({
-                                                        ...prevFormQuestion,
-                                                        soal: content,
-                                                    }));
-                                                }}
-                                                apiKey="la2hd1ehvumeir6fa5kxxltae8u2whzvx1jptw6dqm4dgf2g"
-                                                init={{
-                                                    height: 300,
-                                                    menubar: false,
-                                                    plugins: [
-                                                        'advlist autolink lists link image charmap print preview anchor',
-                                                        'searchreplace visualblocks code fullscreen',
-                                                        'insertdatetime media table paste code help wordcount',
-                                                    ],
-                                                    toolbar:
-                                                        'undo redo | formatselect | bold italic backcolor | ' +
-                                                        'alignleft aligncenter alignright alignjustify | ' +
-                                                        'bullist numlist outdent indent | removeformat | help',
-                                                }}
-                                            />
-                                        </div>
-
-                                        {/* Tampilkan tombol gambar dan PDF hanya jika type = essay */}
-                                        {(question.type === "Essay" || question.type === "Praktikum") && (
-                                            <div className="col-lg-12 d-flex align-items-center form-check">
-                                                <div className="d-flex flex-column w-100">
-                                                    <FileUpload
-                                                        forInput={`fileInput_${index}`}
-                                                        formatFile=".jpg,.png"
-                                                        label={<span className="file-upload-label">Gambar (.jpg, .png)</span>}
-                                                        onChange={(e) => handleFileChange(e, index)} // Memanggil handleFileChange dengan indeks
-                                                        hasExisting={question.gambar}
-                                                        style={{ fontSize: '12px' }}
-                                                    />{/* Tampilkan preview gambar jika ada gambar yang dipilih */}
-                                                    {question.selectedFile && (
-                                                        <div style={{
-                                                            maxWidth: '300px', // Set maximum width for the image container
-                                                            maxHeight: '300px', // Set maximum height for the image container
-                                                            overflow: 'hidden', // Hide any overflow beyond the set dimensions
-                                                            marginLeft: '10px'
-                                                        }}>
-                                                            <img
-                                                                src={URL.createObjectURL(question.selectedFile)}
-                                                                alt="Preview Gambar"
-                                                                style={{
-                                                                    width: '100%', // Ensure image occupies full width of container
-                                                                    height: 'auto', // Maintain aspect ratio
-                                                                    objectFit: 'contain' // Fit image within container without distortion
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                    {question.gambar && !question.selectedFile && (
-                                                        <div style={{
-                                                            maxWidth: '300px', // Set maximum width for the image container
-                                                            maxHeight: '300px', // Set maximum height for the image container
-                                                            overflow: 'hidden', // Hide any overflow beyond the set dimensions
-                                                            marginLeft: '10px'
-                                                        }}>
-                                                            <img
-                                                                src={question.gambar}
-                                                                alt="Preview Gambar"
-                                                                style={{
-                                                                    width: '100%', // Ensure image occupies full width of container
-                                                                    height: 'auto', // Maintain aspect ratio
-                                                                    objectFit: 'contain' // Fit image within container without distortion
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    )}
-                                                    <div className="mt-2">
-                                                        <label className="form-label fw-bold">
-                                                            Point <span style={{ color: "Red" }}> *</span>
-                                                        </label> {/* Memberikan margin atas kecil untuk jarak yang rapi */}
-                                                        <Input
-                                                            type="number"
-                                                            value={question.point}
-                                                            onChange={(e) => handlePointChange(e, index)}
-                                                        />
-                                                    </div>
-                                                </div>
+                                        <Button
+                                            iconName="download"
+                                            label="Unduh Template"
+                                            classType="warning btn-sm px-3 py-1 mx-2"
+                                            onClick={handleDownloadTemplate}
+                                        /> */}
+                                    </div>
+                                </div>
+                                {formContent.map((question, index) => (
+                                    <div key={index} className="card mb-4">
+                                        <div className="card-header bg-white fw-medium text-black d-flex justify-content-between align-items-center">
+                                            <span>Pertanyaan</span>
+                                            <span>
+                                                Skor: {(question.type === 'Essay' || question.type ===  'Praktikum' ? parseInt(question.point) : 0) + (question.type === 'Pilgan' ? (question.options || []).reduce((acc, option) => acc + parseInt(option.point), 0) : 0)}
+                                            </span>                                    <div className="col-lg-2">
+                                                <select className="form-select" aria-label="Default select example"
+                                                    value={question.type}
+                                                    onChange={(e) => handleQuestionTypeChange(e, index)}
+                                                    disabled>
+                                                    <option value="Essay">Essay</option>
+                                                    <option value="Pilgan">Pilihan Ganda</option>
+                                                    <option value="Praktikum">Praktikum</option>
+                                                </select>
                                             </div>
-                                        )}
-                                        {question.type === "Pilgan" && (
-                                            <div className="col-lg-12">
-                                                {question.options.map((option, optionIndex) => (
-                                                    <div key={optionIndex} className="form-check" style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
 
-                                                        <input
-                                                            type="radio"
-                                                            id={`option_${index}_${optionIndex}`}
-                                                            name={`option_${index}`}
-                                                            value={option.value}
-                                                            checked={selectedOptions[index] === option.value}
-                                                            onChange={(e) => handleOptionChange(e, index)}
-                                                            style={{ marginRight: '10px' }}
-                                                        />
-                                                        <input
-                                                            type="text"
-                                                            value={option.label}
-                                                            onChange={(e) => handleOptionLabelChange(e, index, optionIndex)}
-                                                            className="option-input"
-                                                            readOnly={question.type === "answer"}
-                                                            style={{ marginRight: '10px' }}
+                                        </div>
+                                        <div className="card-body p-4">
+
+                                            <div className="row">
+                                                <div className="col-lg-12 question-input">
+
+                                                    <label htmlFor="deskripsiMateri" className="form-label fw-bold">
+                                                        Pertanyaan <span style={{ color: "Red" }}> *</span>
+                                                    </label>
+                                                    <Editor
+                                                        forInput={'pertanyaan_${index}'}
+                                                        value={question.text}
+                                                        onEditorChange={(content) => {
+                                                            const updatedFormContent = [...formContent];
+                                                            updatedFormContent[index].text = content;
+                                                            setFormContent(updatedFormContent);
+
+                                                            // Update formQuestion.soal
+                                                            setFormQuestion((prevFormQuestion) => ({
+                                                                ...prevFormQuestion,
+                                                                soal: content,
+                                                            }));
+                                                        }}
+                                                        apiKey="la2hd1ehvumeir6fa5kxxltae8u2whzvx1jptw6dqm4dgf2g"
+                                                        init={{
+                                                            height: 300,
+                                                            menubar: false,
+                                                            plugins: [
+                                                                'advlist autolink lists link image charmap print preview anchor',
+                                                                'searchreplace visualblocks code fullscreen',
+                                                                'insertdatetime media table paste code help wordcount',
+                                                            ],
+                                                            toolbar:
+                                                                'undo redo | formatselect | bold italic backcolor | ' +
+                                                                'alignleft aligncenter alignright alignjustify | ' +
+                                                                'bullist numlist outdent indent | removeformat | help',
+                                                        }}
+                                                    />
+                                                </div>
+
+                                                {/* Tampilkan tombol gambar dan PDF hanya jika type = essay */}
+                                                {(question.type === "Essay" || question.type === "Praktikum") && (
+                                                    <div className="col-lg-12 d-flex align-items-center form-check">
+                                                        <div className="d-flex flex-column w-100">
+                                                            <FileUpload
+                                                                forInput={`fileInput_${index}`}
+                                                                formatFile=".jpg,.png"
+                                                                label={<span className="file-upload-label">Gambar (.jpg, .png)</span>}
+                                                                onChange={(e) => handleFileChange(e, index)} // Memanggil handleFileChange dengan indeks
+                                                                hasExisting={question.gambar}
+                                                                style={{ fontSize: '12px' }}
+                                                            />{/* Tampilkan preview gambar jika ada gambar yang dipilih */}
+                                                            {question.selectedFile && (
+                                                                <div style={{
+                                                                    maxWidth: '300px', // Set maximum width for the image container
+                                                                    maxHeight: '300px', // Set maximum height for the image container
+                                                                    overflow: 'hidden', // Hide any overflow beyond the set dimensions
+                                                                    marginLeft: '10px'
+                                                                }}>
+                                                                    <img
+                                                                        src={URL.createObjectURL(question.selectedFile)}
+                                                                        alt="Preview Gambar"
+                                                                        style={{
+                                                                            width: '100%', // Ensure image occupies full width of container
+                                                                            height: 'auto', // Maintain aspect ratio
+                                                                            objectFit: 'contain' // Fit image within container without distortion
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                            {question.gambar && !question.selectedFile && (
+                                                                <div style={{
+                                                                    maxWidth: '300px', // Set maximum width for the image container
+                                                                    maxHeight: '300px', // Set maximum height for the image container
+                                                                    overflow: 'hidden', // Hide any overflow beyond the set dimensions
+                                                                    marginLeft: '10px'
+                                                                }}>
+                                                                    <img
+                                                                        src={question.gambar}
+                                                                        alt="Preview Gambar"
+                                                                        style={{
+                                                                            width: '100%', // Ensure image occupies full width of container
+                                                                            height: 'auto', // Maintain aspect ratio
+                                                                            objectFit: 'contain' // Fit image within container without distortion
+                                                                        }}
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                            <div className="mt-2">
+                                                                <label className="form-label fw-bold">
+                                                                    Point <span style={{ color: "Red" }}> *</span>
+                                                                </label> {/* Memberikan margin atas kecil untuk jarak yang rapi */}
+                                                                <Input
+                                                                    type="number"
+                                                                    value={question.point}
+                                                                    onChange={(e) => handlePointChange(e, index)}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                {question.type === "Pilgan" && (
+                                                    <div className="col-lg-12">
+                                                        {question.options.map((option, optionIndex) => (
+                                                            <div key={optionIndex} className="form-check" style={{ display: 'flex', alignItems: 'center', marginBottom: '10px' }}>
+
+                                                                <input
+                                                                    type="radio"
+                                                                    id={`option_${index}_${optionIndex}`}
+                                                                    name={`option_${index}`}
+                                                                    value={option.value}
+                                                                    checked={selectedOptions[index] === option.value}
+                                                                    onChange={(e) => handleOptionChange(e, index)}
+                                                                    style={{ marginRight: '10px' }}
+                                                                />
+                                                                <input
+                                                                    type="text"
+                                                                    value={option.label}
+                                                                    onChange={(e) => handleOptionLabelChange(e, index, optionIndex)}
+                                                                    className="option-input"
+                                                                    readOnly={question.type === "answer"}
+                                                                    style={{ marginRight: '10px' }}
+                                                                />
+                                                                {/* <Button
+                                                                    iconName="delete"
+                                                                    classType="btn-sm ms-2 px-2 py-0"
+                                                                    onClick={() => handleDeleteOption(index, optionIndex)}
+                                                                    style={{ marginRight: '10px' }}
+                                                                /> */}
+                                                                <input
+                                                                    type="number"
+                                                                    id={`optionPoint_${index}_${optionIndex}`}
+                                                                    value={option.point}
+                                                                    className="btn-sm ms-2 px-2 py-0"
+                                                                    onChange={(e) => handleOptionPointChange(e, index, optionIndex)}
+                                                                    style={{ width: '50px' }}
+                                                                />
+
+                                                            </div>
+                                                        ))}
+                                                        {/* <Button
+                                                            onClick={() => handleAddOption(index)}
+                                                            iconName="add"
+                                                            classType="success btn-sm ms-2 px-3 py-1"
+                                                            label="Opsi Baru"
+                                                        /> */}
+                                                    </div>
+                                                )}
+                                                <div className="d-flex justify-content-between my-2 mx-1">
+                                                    <div>
+
+                                                    </div>
+                                                    {/* <div>
+                                                        <Button
+                                                            iconName="trash"
+                                                            classType="btn-sm ms-2 px-3 py-1"
+                                                            onClick={() => handleDeleteQuestion(index)}
                                                         />
                                                         <Button
-                                                            iconName="delete"
-                                                            classType="btn-sm ms-2 px-2 py-0"
-                                                            onClick={() => handleDeleteOption(index, optionIndex)}
-                                                            style={{ marginRight: '10px' }}
-                                                        />
-                                                        <input
-                                                            type="number"
-                                                            id={`optionPoint_${index}_${optionIndex}`}
-                                                            value={option.point}
-                                                            className="btn-sm ms-2 px-2 py-0"
-                                                            onChange={(e) => handleOptionPointChange(e, index, optionIndex)}
-                                                            style={{ width: '50px' }}
+                                                            iconName="duplicate"
+                                                            classType="btn-sm ms-2 px-3 py-1"
+                                                            onClick={() => handleDuplicateQuestion(index)}
                                                         />
 
-                                                    </div>
-                                                ))}
-                                                <Button
-                                                    onClick={() => handleAddOption(index)}
-                                                    iconName="add"
-                                                    classType="success btn-sm ms-2 px-3 py-1"
-                                                    label="Opsi Baru"
-                                                />
+                                                    </div> */}
+                                                </div>
                                             </div>
-                                        )}
-                                        <div className="d-flex justify-content-between my-2 mx-1">
-                                            <div>
 
-                                            </div>
-                                            <div>
-                                                <Button
-                                                    iconName="trash"
-                                                    classType="btn-sm ms-2 px-3 py-1"
-                                                    onClick={() => handleDeleteQuestion(index)}
-                                                />
-                                                <Button
-                                                    iconName="duplicate"
-                                                    classType="btn-sm ms-2 px-3 py-1"
-                                                    onClick={() => handleDuplicateQuestion(index)}
-                                                />
-
-                                            </div>
                                         </div>
                                     </div>
-
-                                </div>
+                                ))}
                             </div>
-                        ))}
+                        ) : (
+                            <Alert type="warning" message={(
+                                <span>
+                                Post Test belum ditambahkan. <a onClick={() => onChangePage("posttestEditNot")} className="text-primary">Tambah Data</a>
+                                </span>
+                            )} />
+                        )}
                     </div>
                 </div>
                 <div className="float my-4 mx-1">

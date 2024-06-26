@@ -111,7 +111,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
   };
 
   function handleSubmitAction() {
-    // window.location.href = ROOT_LINK + "/hasil_test";
     if (quizType == "Pretest"){
       onChangePage("pretest", true, materiId)
     } else if (quizType == "Posttest"){
@@ -136,13 +135,13 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
     }, 0);
     formDataRef.current.nilai = totalNilai;
     formDataRef.current.answers = submittedAnswers;
-    console.log("Form data yang akan dikirim ke API: ", formDataRef.current);
 
     try {
       const response1 = await axios.post(
         "http://localhost:8080/Quiz/SaveTransaksiQuiz",
         formDataRef.current
       );
+      console.log(response1)
       if (response1.data) {
         const response2 = await axios.post(
           "http://localhost:8080/Materis/SaveProgresMateri",
@@ -264,6 +263,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
           status: 'Aktif',
           quizType: quizType,
         });
+        console.log('ds',AppContext_test)
         const checkIsDone = await axios.post("http://localhost:8080/Quiz/GetDataResultQuiz", {
           materiId: AppContext_test.materiId,
           karyawanId: "1",

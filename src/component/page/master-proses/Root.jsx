@@ -24,6 +24,7 @@ import MasterForumDetail from "./master-forum/ForumDetail";
 // Post Test
 import MasterPostTestAdd from "./master-posttest/PostTestAdd";
 import MasterPostTestEdit from "./master-posttest/PostTestEdit";
+import MasterPostTestEditNot from "./master-posttest/PostTestEditNot";
 import MasterPostTestDetail from "./master-posttest/PostTestDetail";
 // Kelompok Keahlian
 import PilihKelompokKeahlian from "./Kelompok_Keahlian";
@@ -121,6 +122,10 @@ export default function MasterProses() {
                 withID={dataID}/>;
       case "posttestEdit":
         return <MasterPostTestEdit 
+                onChangePage={handleSetPageMode}
+                withID={dataID}/>;
+      case "posttestEditNot":
+        return <MasterPostTestEditNot
                 onChangePage={handleSetPageMode}
                 withID={dataID}/>;
       case "posttestDetail":

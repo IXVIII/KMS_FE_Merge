@@ -67,8 +67,8 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
             return response.data;
           }
         } catch (error) {
-          console.error("Error fetching quiz data:", error);
-          console.log("halo", AppContext_test.materiId)
+          // console.error("Error fetching quiz data:", error);
+          // console.log("halo", AppContext_test.materiId)
           if (i < retries - 1) {
             await new Promise(resolve => setTimeout(resolve, delay));
           } else {
@@ -83,7 +83,7 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
     return () => {
       isMounted = false; 
     };
-  }, [AppContext_test.materiId, AppContext_test.refreshPage]);
+  }, [AppContext_test.materiId]);
 
   useEffect(() => {
     let isMounted = true;
@@ -142,7 +142,7 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
         if (isMounted) {
           if (data) {
                 setCurrentData(data);
-                console.log(currentData)
+                // console.log(currentData)
           } else {
             // console.error("Response data is undefined or null");
           }
@@ -292,8 +292,8 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
         ...(currentDataMateri[0]?.Sharing_pdf != null || currentDataMateri[0]?.Sharing_video != null ? [{
           name: 'Sharing Expert',
           items: [
-            ...(currentDataMateri[0]?.Sharing_pdf != null ? [{ label: 'Materi PDF', onClick: () => handleItemClick("materipdf", currentDataMateri[0]?.Sharing_pdf, "sharing_pdf") }] : []),
-            ...(currentDataMateri[0]?.Sharing_video != null ? [{ label: 'Materi Video', onClick: () => handleItemClick("materivideo", currentDataMateri[0]?.Sharing_video, "sharing_video") }] : [])
+            ...(currentDataMateri[0]?.Sharing_pdf != null ? [{ label: 'Sharing Expert PDF', onClick: () => handleItemClick("materipdf", currentDataMateri[0]?.Sharing_pdf, "sharing_pdf") }] : []),
+            ...(currentDataMateri[0]?.Sharing_video != null ? [{ label: 'Sharing Expert Video', onClick: () => handleItemClick("materivideo", currentDataMateri[0]?.Sharing_video, "sharing_video") }] : [])
           ],
           countDone: 2
         }] : [])

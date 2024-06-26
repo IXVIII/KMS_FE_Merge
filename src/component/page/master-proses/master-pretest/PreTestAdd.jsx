@@ -136,15 +136,21 @@ export default function MasterPreTestAdd({ onChangePage }) {
     }
   
     // Hitung total point dari semua pertanyaan dan opsi
-    const totalQuestionPoint = formContent.reduce((total, question) => total + parseInt(question.point), 0);
+    
+    const totalQuestionPoint = formContent.reduce((total, question) => {
+      if (question.type !== 'Pilgan') {
+        total = total + parseInt(question.point)
+      }
+        return total;
+    }, 0);
+
     const totalOptionPoint = formContent.reduce((total, question) => {
       if (question.type === 'Pilgan') {
         return total + question.options.reduce((optionTotal, option) => optionTotal + parseInt(option.point || 0), 0);
       }
       return total;
     }, 0);
-    
-    // Total point dari semua pertanyaan dan opsi harus berjumlah 100, tidak kurang dan tidak lebih
+
     if (totalQuestionPoint + totalOptionPoint !== 100) {
       Swal.fire({
         title: 'Gagal!',
@@ -157,7 +163,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
   
     try {
       formData.timer = convertTimeToSeconds(timer)
-  console.log(formData)
       const response = await axios.post(API_LINK + 'Quiz/SaveDataQuiz', formData);
       if (response.data.length === 0) {
         Swal.fire({
@@ -201,9 +206,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
           formQuestion.gambar = '';
         }
   
-        console.log("hasil questionn")
-        console.log(formQuestion);
-  
         try {
           const questionResponse = await axios.post(API_LINK + 'Questions/SaveDataQuestion', formQuestion);
           console.log('Pertanyaan berhasil disimpan:', questionResponse.data);
@@ -228,7 +230,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
               nilaiChoice: question.point,
               quecreatedby: 'Admin',
             };
-  
+            console.log(answerData)
             try {
               const answerResponse = await axios.post(API_LINK + 'Choices/SaveDataChoice', answerData);
               console.log('Jawaban Essay berhasil disimpan:', answerResponse.data);

@@ -14,23 +14,24 @@ export default function Forum({ onChangePage, isOpen }) {
   const [widthReply, setWidthReply] = useState("75%");
   const [replyMessage, setReplyMessage] = useState("");
   const [showReplyInput, setShowReplyInput] = useState(false);
+  const [tempItem, setTempItem] = useState([]);
   const formDataRef = useRef({
-    forumId:item.Key,
+    forumId:currentData[0]?.Key,
     karyawanId: "1", 
     isiDetailForum: "",
     statusDetailForum: "Aktif",
     createdBy: "I Made Dananjaya Adyatma",
-    detailId: item.DetailId,
+    detailId: currentData[0]?.Key,
   });
-  console.log(item)
   const handleReply = (item) => {
+    console.log('bjir', item)
     formDataRef.current = {
       forumId: item.Key,
       karyawanId: "1",
       isiDetailForum: "",
       statusDetailForum: "Aktif",
       createdBy: "Fahriel Dwifaldi",
-      detailId: item.DetailId,
+      detailId: item.ChildDetailId,
     };
     setReplyMessage(`Membalas: ${item.IsiDetailForum}`); 
     setShowReplyInput(true); 
@@ -42,12 +43,12 @@ export default function Forum({ onChangePage, isOpen }) {
   const handleCancelReply = () => {
     setReplyMessage(""); 
     formDataRef.current = {
-      forumId: item.Key,
+      forumId: currentData[0]?.Key,
       karyawanId: "1",
       isiDetailForum: "",
       statusDetailForum: "Aktif",
       createdBy: "Fahriel Dwifaldi",
-      detailId: item.DetailId,
+      detailId: currentData[0]?.Key,
     };
     setShowReplyInput(false); 
   };
@@ -87,6 +88,7 @@ export default function Forum({ onChangePage, isOpen }) {
         "http://localhost:8080/Forum/SaveTransaksiForum",
         formDataRef.current
       );
+      console.log("woi", formDataRef.current)
       const updatedForumData = await fetchDataWithRetry();
       setCurrentData(updatedForumData); 
       formDataRef.current.isiDetailForum = "";
@@ -97,46 +99,14 @@ export default function Forum({ onChangePage, isOpen }) {
         setIsLoading(false);
       }
     };
+  
+  useEffect(() => {
+    if (currentData) {
+      formDataRef.current.forumId = currentData[0]?.Key;
+      formDataRef.current.detailId = currentData[0]?.Key;
+    }
+  }, [currentData]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setIsError(false);
-  //     setIsLoading(true);
-
-  //     try {
-  //       const data = await fetchForumData();
-  //       setCurrentData(data);
-  //     } catch (error) {
-  //       setIsError(true);
-  //       console.error("Fetch error:", error);
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-  //   };
-
-  //   fetchData();
-  // }, []);
-
-
-  // const fetchForumData = async (retries = 3, delay = 1000) => {
-  //   try {
-  //     const response = await axios.post("http://localhost:8080/Forum/GetDataForum", {
-  //       materiId: '1',
-  //     });
-  //     if (response.data.length != 0) {
-  //         return response.data;
-  //       }
-  //   } catch (error) {
-  //     console.error("Error fetching forum data:", error);
-  //     if (i < retries - 1) {
-  //         await new Promise(resolve => setTimeout(resolve, delay));
-  //       } else {
-  //         throw error;
-  //       }
-  //   }
-  // };
-
-  //// THIS IT /////
   useEffect(() => {
     let isMounted = true;
 
@@ -149,7 +119,6 @@ export default function Forum({ onChangePage, isOpen }) {
             if (Array.isArray(data)) {
               if (data.length === 0) {
               } else {
-                console.log(data)
                 setCurrentData(data);
               }
               return;
@@ -171,15 +140,13 @@ export default function Forum({ onChangePage, isOpen }) {
         }
       }
     };
-    // console.log(materiId)
-    
 
     fetchData();
 
     return () => {
-      isMounted = false; // cleanup flag
+      isMounted = false; 
     };
-  }, []);
+  }, [AppContext_test.materiId]);
   // }, [materiId]);
 
   const fetchDataWithRetry = async (retries = 10, delay = 1000) => {
@@ -189,7 +156,7 @@ export default function Forum({ onChangePage, isOpen }) {
             materiId: AppContext_test.materiId,
           });
           if (response.data.length != 0) {
-            console.log(response.data)
+            setCurrentData(response.data)
             return response.data;
           }
         } catch (error) {
@@ -328,7 +295,6 @@ export default function Forum({ onChangePage, isOpen }) {
                           flex: 1
                         }}
                       >
-                        
                         <div dangerouslySetInnerHTML={{ __html: reply.IsiDetailForum }} />
                       </p>
                       <i

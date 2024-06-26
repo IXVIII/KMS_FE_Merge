@@ -146,6 +146,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
     
     // Total point dari semua pertanyaan dan opsi harus berjumlah 100, tidak kurang dan tidak lebih
     if (totalQuestionPoint + totalOptionPoint !== 100) {
+    // if (totalQuestionPoint !== 100) {
       Swal.fire({
         title: 'Gagal!',
         text: 'Total skor harus berjumlah 100',
@@ -183,7 +184,6 @@ export default function MasterPostTestAdd({ onChangePage }) {
           status: 'Aktif',
           quecreatedby: 'Admin',
         };
-  
         if (question.type === 'Essay' || question.type === 'Praktikum') {
           if (question.selectedFile) {
             try {

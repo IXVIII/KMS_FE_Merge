@@ -182,6 +182,10 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
     return date.toLocaleDateString('id-ID', options);
   };
 
+  const convertToMinutes = (duration) => {
+      return Math.floor(duration / 60); 
+  };
+
   return (
     <>
       <div className="d-flex flex-column">
@@ -228,7 +232,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
                 <h2 className="font-weight-bold mb-4 primary">Post Test - {currentData[0].JudulQuiz}</h2>
                 <p className="mb-5" style={{ maxWidth: '600px', margin: '0 auto', marginBottom: '60px' }}>
                 Tes ini terdiri dari {currentData[0].JumlahSoal} soal, nilai kelulusan minimal adalah 80% 
-                    dan Anda hanya memiliki waktu {currentData[0].Durasi} menit untuk mengerjakan semua soal, dimulai saat Anda mengklik tombol
+                    dan Anda hanya memiliki waktu {convertToMinutes(currentData[0].Durasi)} menit untuk mengerjakan semua soal, dimulai saat Anda mengklik tombol
                     "Mulai Post Test" di bawah ini.
                 </p>
                 <Button

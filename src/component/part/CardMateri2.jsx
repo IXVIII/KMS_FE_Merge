@@ -49,7 +49,6 @@ function CardMateri({
       {materis.map((book) => {
         if (book.Key == null) {
           return null;
-        
         }
         return (
           <div className="mt-4 col-lg-6" key={book.Key}>
@@ -63,6 +62,7 @@ function CardMateri({
                     height: "120px",
                     minWidth: "120px",
                     marginRight: "15px",
+                    objectFit: "cover",
                   }}
                 />
                 <div

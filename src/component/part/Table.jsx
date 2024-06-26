@@ -17,6 +17,62 @@ export default function Table({
   let colCount = 0;
 
   function generateActionButton(columnName, value, key, id, status) {
+    if (columnName === "StatusTest") {
+      let displayValue = value;
+  
+      switch (value) {
+        case "Lulus":
+          displayValue = "StatusGood";
+          break;
+        case "Tidak Lulus":
+          displayValue = "StatusBad";
+          break;
+        default:
+          break;
+      }
+    
+      let backgroundColor, borderColor, textColor;
+      
+      switch (displayValue) {
+        case "StatusGood":
+          backgroundColor = "#EEFFFC";
+          borderColor = "#1BCFB4";
+          textColor = "#1BCFB4";
+          break;
+        case "StatusBad":
+          backgroundColor = "#FFF1F2";
+          borderColor = "#FB7185";
+          textColor = "#FB7185";
+          break;
+        default:
+          backgroundColor = "#FFF1F2";
+          borderColor = "#FB7185";
+          textColor = "#FB7185";
+      }
+  
+      return (
+        <div
+          key={key}
+          className="status-container"
+          style={{
+            backgroundColor: backgroundColor,
+            borderColor: borderColor,
+            borderWidth: "2px",
+            borderStyle: "solid",
+            borderRadius: "4px",
+            textAlign: "center",
+            color: textColor,
+            padding: "4px 8px",
+            display: "inline-block",
+            width: "auto",
+            fontWeight: "bold",
+          }}
+        >
+          {value}
+        </div>
+      );
+    }
+    
     if (columnName !== "Aksi") return value;
 
     const listButton = value.map((action) => {

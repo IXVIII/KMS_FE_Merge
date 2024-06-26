@@ -220,71 +220,86 @@ export default function MasterPreTestAdd({ onChangePage, withId }) {
             }}
           />
         </div>
-        <div className="card mt-4" style={{ borderColor: "#67ACE9" }}>
-          <div className="card-header fw-medium text-white" style={{ backgroundColor: "#67ACE9" }}>
-            <h3 className="card-title">{formData.quizJudul}</h3>
-          </div>
-          <div className="card-body">
-            <div className="row mt-3">
-              <div className="col-md-12">
-                <h4 className="mb-3 mt-0">Deskripsi</h4>
-                <p className="pb-3">{formData.quizDeskripsi}</p>
-                <h4 className="mb-3 mt-0">Tipe Quiz</h4>
-                <p className="pb-3">{formData.quizTipe}</p>
-                <h4 className="mb-3 mt-0">Durasi</h4>
-                <p className="pb-3">{formData.timer}</p>
-                <h4 className="mb-3 mt-0">Tanggal Dimulai</h4>
-                <p className="pb-3">{formatDateIndonesian(formData.tanggalAwal)}</p>
-                <h4 className="mb-3 mt-0">Tanggal Berakhir</h4>
-                <p className="pb-3">{formatDateIndonesian(formData.tanggalAkhir)}</p>
-              </div>
-            </div>
-            <div className="row mt-3">
-              <div className="col-md-12">
-                <h4 className="mb-3 mt-0">Pertanyaan</h4>
-                {formContent.map((question, index) => (
-                  <div key={index} className="mb-4">
-                    <p style={{ fontSize: '0.75em', color: 'gray', marginBottom: '5px' }}>
-        {question.type === "Essay" ? "(Essai)" : question.type === "Praktikum" ? "(Praktikum)" : "(Pilihan Ganda)"}
-      </p>
-                    <p>{index + 1}. {stripHtmlTags(question.text)}</p>
-                    
-                    {question.type === "Pilgan" && (
-                      <ul style={{ listStyleType: 'none', padding: 0 }}>
-                        {question.options.map((option, optionIndex) => (
-                          <li key={optionIndex}>
-                            <input type="radio" disabled /> {option.label}
-                            <span style={{ fontSize: '0.75em', marginLeft: '10px', color: 'gray' }}>({option.point} poin)</span>
-                          </li>
-                        ))}
-                      </ul>
+       
+        <div className="card mt-4 mb-4" style={{ borderColor: "#67ACE9" }}>
+  <div className="card-header fw-medium text-white" style={{ backgroundColor: "#67ACE9" }}>
+    <h4 className="card-title">{formData.quizJudul}</h4>
+  </div>
+  <div className="card-body">
+    <div className="row mt-3">
+      <div className="col-md-12">
+        <h5 className="mb-3 mt-0">Deskripsi</h5>
+        <p className="pb-3">{formData.quizDeskripsi}</p>
+        <h5 className="mb-3 mt-0">Tipe Quiz</h5>
+        <p className="pb-3">{formData.quizTipe}</p>
+        <h5 className="mb-3 mt-0">Durasi</h5>
+        <p className="pb-3">{formData.timer}</p>
+        <h5 className="mb-3 mt-0">Tanggal Dimulai</h5>
+        <p className="pb-3">{formatDateIndonesian(formData.tanggalAwal)}</p>
+        <h5 className="mb-3 mt-0">Tanggal Berakhir</h5>
+        <p className="pb-3">{formatDateIndonesian(formData.tanggalAkhir)}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div className="card mt-4" style={{ borderColor: "#67ACE9" }}>
+  <div className="card-header fw-medium text-white" style={{ backgroundColor: "#67ACE9" }}>
+    <h4 className="card-title">Pertanyaan</h4>
+  </div>
+  <div className="card-body">
+    <div className="row mt-3">
+      <div className="col-md-12">
+        {formContent.map((question, index) => (
+          <div key={index} className="mb-4">
+            <span className="badge bg-primary mb-2">
+              {question.type === "Essay" ? "Essai" : question.type === "Praktikum" ? "Praktikum" : "Pilihan Ganda"}
+            </span>
+            {question.type === "Essay" || question.type === "Praktikum" ? (
+              question.point !== 0 && (
+                <span className="badge bg-success ms-2">
+                  {question.point} Poin
+                </span>
+              )
+            ) : null}
+            <p>{index + 1}. {stripHtmlTags(question.text)}</p>
+            
+            {question.type === "Pilgan" && (
+              <ul className="list-unstyled">
+                {question.options.map((option, optionIndex) => (
+                  <li key={optionIndex} style={{ marginBottom: '5px' }}>
+                    <input type="radio" disabled /> 
+                    <span style={{ marginLeft: '5px' }}>{option.label}</span>
+                    {option.point !== 0 && (
+                      <span className="badge bg-success ms-2" style={{ fontSize: '0.75em' }}>{option.point} Poin</span>
                     )}
-                    {(question.type === "Essay" || question.type === "Praktikum") && ( // Periksa apakah ada gambar
-                      <div>
-                        
-                      <img
-                        id="image"
-                        src={question.gambar}
-                        alt="gambar"
-                        className="img-fluid"
-                        style={{
-                          maxWidth: '300px', // Set maximum width for the image container
-                          maxHeight: '300px', // Set maximum height for the image container
-                          overflow: 'hidden', // Hide any overflow beyond the set dimensions
-                          marginLeft: '10px'
-                        }}
-                      />
-                      <span style={{ fontSize: '0.75em', marginLeft: '10px', color: 'gray' }}>({question.point} poin)</span>
-                      </div>
-                    )}
-                    
-                  </div>
-                  
+                  </li>
                 ))}
+              </ul>
+            )}
+            {(question.type === "Essay" || question.type === "Praktikum") && (
+              <div>
+                <img
+                  id="image"
+                  src={question.gambar}
+                  alt="gambar"
+                  className="img-fluid"
+                  style={{
+                    maxWidth: '300px',
+                    maxHeight: '300px',
+                    overflow: 'hidden',
+                    marginLeft: '10px'
+                  }}
+                />
+                
               </div>
-            </div>
+            )}
           </div>
-        </div>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
         <div className="float my-4 mx-1">
           <Button
             classType="outline-secondary me-2 px-4 py-2"
