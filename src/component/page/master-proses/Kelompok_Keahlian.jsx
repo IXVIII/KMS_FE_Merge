@@ -22,62 +22,93 @@ export default function SubKKIndex({ onChangePage }) {
         const username = "fadli.h";
         setIsError({ error: false, message: "" });
         setIsLoading(true);
-  
-        let kkData = await UseFetch(API_LINK + "Program/GetDataKKByPIC", { username });
+
+        let kkData = await UseFetch(API_LINK + "Program/GetDataKKByPIC", {
+          username,
+        });
         // console.log("KK Data:", kkData);
-  
+
         if (kkData === "ERROR") {
-          throw new Error("Terjadi kesalahan: Gagal mengambil data Kelompok Keahlian.");
+          throw new Error(
+            "Terjadi kesalahan: Gagal mengambil data Kelompok Keahlian."
+          );
         }
-  
+
         const kkWithPrograms = [];
-  
+
         for (const kk of kkData) {
-          const programData = await UseFetch(API_LINK + "Program/GetProgramByKK", { kk: kk.Key });
+          const programData = await UseFetch(
+            API_LINK + "Program/GetProgramByKK",
+            { kk: kk.Key }
+          );
           // console.log("Program Data for KK:", kk.Key, programData);
-  
+
           if (programData === "ERROR") {
             throw new Error("Terjadi kesalahan: Gagal mengambil data Program.");
           }
-  
-          const anggotaCountData = await UseFetch(API_LINK + "Program/CountAnggotaByKK", { p1: kk.Key });
+
+          const anggotaCountData = await UseFetch(
+            API_LINK + "Program/CountAnggotaByKK",
+            { p1: kk.Key }
+          );
           // console.log("Anggota Count Data for KK:", kk.Key, anggotaCountData);
-  
+
           if (anggotaCountData === "ERROR") {
-            throw new Error("Terjadi kesalahan: Gagal menghitung jumlah anggota.");
+            throw new Error(
+              "Terjadi kesalahan: Gagal menghitung jumlah anggota."
+            );
           }
-  
+
           const anggotaCount = anggotaCountData.length;
           // console.log("Member Count for KK:", kk.Key, anggotaCount);
-  
-          const programCountData = await UseFetch(API_LINK + "Program/CountProgramByKK", { p1: kk.Key });
+
+          const programCountData = await UseFetch(
+            API_LINK + "Program/CountProgramByKK",
+            { p1: kk.Key }
+          );
           // console.log("Program Count Data for KK:", kk.Key, programCountData);
-  
+
           if (programCountData === "ERROR") {
-            throw new Error("Terjadi kesalahan: Gagal menghitung jumlah anggota.");
+            throw new Error(
+              "Terjadi kesalahan: Gagal menghitung jumlah anggota."
+            );
           }
-  
+
           const programCount = programCountData.length;
           // console.log("Program Count for KK:", kk.Key, programCount);
-  
+
           const programsWithCategories = [];
-  
+
           for (const program of programData) {
-            const categoryData = await UseFetch(API_LINK + "Program/GetKategoriByProgram", { p1: program.Key });
-  
+            const categoryData = await UseFetch(
+              API_LINK + "Program/GetKategoriByProgram",
+              { p1: program.Key }
+            );
+
             const categoriesWithMaterialCounts = await Promise.all(
               categoryData.map(async (category) => {
-                const materialCountData = await UseFetch(API_LINK + "Program/CountMateriByKategori", { p1: category.Key });
+                const materialCountData = await UseFetch(
+                  API_LINK + "Program/CountMateriByKategori",
+                  { p1: category.Key }
+                );
                 return { ...category, materialCount: materialCountData.length };
               })
             );
-  
-            programsWithCategories.push({ ...program, categories: categoriesWithMaterialCounts });
+
+            programsWithCategories.push({
+              ...program,
+              categories: categoriesWithMaterialCounts,
+            });
           }
-  
-          kkWithPrograms.push({ ...kk, programs: programsWithCategories, AnggotaCount: anggotaCount, ProgramCount: programCount });
+
+          kkWithPrograms.push({
+            ...kk,
+            programs: programsWithCategories,
+            AnggotaCount: anggotaCount,
+            ProgramCount: programCount,
+          });
         }
-  
+
         // console.log("KK with Programs:", kkWithPrograms);
         setListKK(kkWithPrograms);
         setIsLoading(false);
@@ -85,7 +116,7 @@ export default function SubKKIndex({ onChangePage }) {
       } catch (error) {
         console.error("Error fetching KK and Programs data:", error);
         if (i < retries - 1) {
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         } else {
           setIsLoading(false);
           throw error;
@@ -220,16 +251,14 @@ export default function SubKKIndex({ onChangePage }) {
     }
   };
   */
-  
-  
-  
+
   const isDataReadyTemp = "";
   const materiIdTemp = "";
   const isOpenTemp = true;
-  
+
   useEffect(() => {
     let isMounted = true;
-  
+
     const fetchData = async () => {
       setIsError(false);
       setIsLoading(true);
@@ -249,14 +278,14 @@ export default function SubKKIndex({ onChangePage }) {
         }
       }
     };
-  
+
     fetchData();
-  
+
     return () => {
       isMounted = false;
     };
   }, []);
-  
+
   // useEffect(() => {
   //   getKKAndPrograms();
   // }, []);

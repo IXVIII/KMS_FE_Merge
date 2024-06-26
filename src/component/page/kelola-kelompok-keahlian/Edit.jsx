@@ -202,13 +202,6 @@ export default function KKEdit({ onChangePage, withID }) {
     }
   };
 
-  useEffect(() => {
-    if (document.getElementById("spanMenuRoute")) {
-      document.getElementById("spanMenuRoute").innerHTML =
-        "<strong> - Ubah Data</strong>";
-    }
-  }, []);
-
   if (isLoading) return <Loading />;
 
   return (

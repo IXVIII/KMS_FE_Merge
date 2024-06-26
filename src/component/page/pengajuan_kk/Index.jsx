@@ -191,9 +191,9 @@ export default function PengajuanIndex({ onChangePage }) {
             if (value["Lampiran"]) {
               const filePromise = fetch(
                 API_LINK +
-                `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
-                  value["Lampiran"]
-                )}`
+                  `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
+                    value["Lampiran"]
+                  )}`
               )
                 .then((response) => response.blob())
                 .then((blob) => {
@@ -268,9 +268,14 @@ export default function PengajuanIndex({ onChangePage }) {
                         ></span>
                         {dataAktif?.Prodi}
                       </h6>
-                      <p className="pt-3" style={{
-                        textAlign: "justify"
-                      }}>{dataAktif?.Deskripsi}</p>
+                      <p
+                        className="pt-3"
+                        style={{
+                          textAlign: "justify",
+                        }}
+                      >
+                        {dataAktif?.Deskripsi}
+                      </p>
                     </div>
                     <div className="col-lg-5 ps-4 border-start">
                       <h5 className="fw-semibold mt-1">Lampiran pendukung</h5>
@@ -285,7 +290,9 @@ export default function PengajuanIndex({ onChangePage }) {
                                 target="_blank"
                                 rel="noopener noreferrer"
                               >
-                                {listNamaFile[index]?.Lampiran}
+                                {/* {listNamaFile[index]?.Lampiran} */}
+                                Lampiran {index + 1}{" "}
+                                {dataAktif["Nama Kelompok Keahlian"]}
                               </a>
                             ) : (
                               "Tidak ada lampiran"
@@ -330,7 +337,7 @@ export default function PengajuanIndex({ onChangePage }) {
                   iconName="search"
                   classType="primary px-4"
                   title="Cari"
-                //   onClick={handleSearch}
+                  //   onClick={handleSearch}
                 />
                 <Filter>
                   <DropDown

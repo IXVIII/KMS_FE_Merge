@@ -10,7 +10,7 @@ import { API_LINK } from "../../util/Constants";
 import UseFetch from "../../util/UseFetch";
 
 export default function PICKKDetailPublish({ onChangePage, withID }) {
-    console.log("SDA : ",JSON.stringify(withID));
+  console.log("SDA : ", JSON.stringify(withID));
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -169,49 +169,51 @@ export default function PICKKDetailPublish({ onChangePage, withID }) {
                 listAnggota[0].Message ? (
                   <p>Tidak Ada Anggota Aktif</p>
                 ) : (
-                  listAnggota.map((ag, index) => (
-                    <div
-                      className="card-profile mb-3 d-flex justify-content-between shadow-sm"
-                      key={ag.Key}
-                    >
-                      <div className="d-flex w-100">
-                        <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
-                          {index + 1}
-                        </p>
-                        <div
-                          className="bg-primary"
-                          style={{ width: "1.5%" }}
-                        ></div>
-                        <div className="p-1 ps-2 d-flex">
-                          <img
-                            src="https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg"
-                            alt={ag["Nama Anggota"]}
-                            className="img-fluid rounded-circle"
-                            width="45"
-                          />
-                          <div className="ps-3">
-                            <p className="mb-0">{ag["Nama Anggota"]}</p>
-                            <p className="mb-0" style={{ fontSize: "13px" }}>
-                              {ag.Prodi}
-                            </p>
+                  <div>
+                    {listAnggota.map((ag, index) => (
+                      <div
+                        className="card-profile mb-3 d-flex justify-content-between shadow-sm"
+                        key={ag.Key}
+                      >
+                        <div className="d-flex w-100">
+                          <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
+                            {index + 1}
+                          </p>
+                          <div
+                            className="bg-primary"
+                            style={{ width: "1.5%" }}
+                          ></div>
+                          <div className="p-1 ps-2 d-flex">
+                            <img
+                              src="https://t4.ftcdn.net/jpg/02/15/84/43/360_F_215844325_ttX9YiIIyeaR7Ne6EaLLjMAmy4GvPC69.jpg"
+                              alt={ag["Nama Anggota"]}
+                              className="img-fluid rounded-circle"
+                              width="45"
+                            />
+                            <div className="ps-3">
+                              <p className="mb-0">{ag["Nama Anggota"]}</p>
+                              <p className="mb-0" style={{ fontSize: "13px" }}>
+                                {ag.Prodi}
+                              </p>
+                            </div>
                           </div>
                         </div>
                       </div>
+                    ))}
+                    <div className="text-end">
+                      <Button
+                        classType="light btn-sm text-primary text-decoration-underline px-3 mt-2"
+                        type="submit"
+                        label="Lihat Semua"
+                        data-bs-toggle="modal"
+                        data-bs-target="#modalAnggota"
+                      />
                     </div>
-                  ))
+                  </div>
                 )
               ) : (
                 <p>Tidak Ada Anggota Aktif</p>
               )}
-              <div className="text-end">
-                <Button
-                  classType="light btn-sm text-primary text-decoration-underline px-3 mt-2"
-                  type="submit"
-                  label="Lihat Semua"
-                  data-bs-toggle="modal"
-                  data-bs-target="#modalAnggota"
-                />
-              </div>
             </div>
           </div>
           <h5 className="text-primary pt-2">
@@ -257,7 +259,6 @@ export default function PICKKDetailPublish({ onChangePage, withID }) {
           onClick={() => onChangePage("index")}
         />
       </div>
-
       <div
         class="modal fade"
         id="modalAnggota"

@@ -282,6 +282,7 @@ function CardKelompokKeahlian({
           borderRadius: "10px",
           borderBottomRightRadius: "0",
           borderBottomLeftRadius: "0",
+          backgroundColor: "transparent",
         }}
       >
         <div className="card-body p-0 card-content">

@@ -269,6 +269,44 @@ export default function MasterDaftarPustakaIndex({ onChangePage, withID }) {
     getListPustaka();
   }, []);
 
+  useEffect(() => {
+    if (document.getElementById("legend-top")) {
+      document.getElementById("legend-top").innerHTML = `
+        <div class="d-flex">
+          <p class="mb-0 me-3">
+            <span
+              style="
+                padding: 0px 10px;
+                margin: 0px 10px;
+                background-color: #198754;
+              "
+            ></span>
+            Pustaka saya
+          </p>
+          <p class="mb-0 me-3">
+            <span
+              style="
+                padding: 0px 10px;
+                margin: 0px 10px;
+                background-color: #67ACE9;
+              "
+            ></span>
+            Aktif / Publik
+          </p>
+          <p class="mb-0 me-3">
+            <span
+              style="
+                padding: 0px 10px;
+                margin: 0px 10px;
+                background-color: #6c757d;
+              "
+            ></span>
+            Tidak Aktif
+          </p>
+        </div>`;
+    }
+  }, []);
+
   return (
     <>
       {isLoading ? (
@@ -322,6 +360,38 @@ export default function MasterDaftarPustakaIndex({ onChangePage, withID }) {
                 />
               </Filter>
             </div>
+            {/* <div className="mt-3 d-flex">
+              <p className="mb-0 me-3">
+                <span
+                  style={{
+                    padding: "0px 10px 0px 10px",
+                    margin: "0px 10px",
+                    backgroundColor: "#198754",
+                  }}
+                ></span>
+                Pustaka saya
+              </p>
+              <p className="mb-0 me-3">
+                <span
+                  style={{
+                    padding: "0px 10px 0px 10px",
+                    margin: "0px 10px",
+                    backgroundColor: "#67ACE9",
+                  }}
+                ></span>
+                Aktif / Publik
+              </p>
+              <p className="mb-0 me-3">
+                <span
+                  style={{
+                    padding: "0px 10px 0px 10px",
+                    margin: "0px 10px",
+                    backgroundColor: "#6c757d",
+                  }}
+                ></span>
+                Tidak Aktif
+              </p>
+            </div> */}
             {currentData.length === 0 || currentData[0].Message ? (
               <Alert type="warning mt-3" message="Tidak ada data!" />
             ) : (
