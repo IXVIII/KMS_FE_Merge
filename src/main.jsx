@@ -9,7 +9,5 @@ import "@flaticon/flaticon-uicons/css/regular/rounded.css";
 import "@flaticon/flaticon-uicons/css/bold/rounded.css";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
     <App />
-  </React.StrictMode>
 );

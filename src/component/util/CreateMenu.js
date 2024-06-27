@@ -1,22 +1,16 @@
 import { ROOT_LINK, API_LINK, APPLICATION_ID } from "./Constants";
-import UseFetch from "./UseFetch";
+import axios from 'axios';
 
-const CreateMenu = async (role) => {
-  let data;
-  
+const CreateMenu = (role) => {
   try {
-    while (true) {
-      data = await UseFetch(API_LINK + "Utilities/GetListMenu", {
-        username: "",
-        role: role,
-        application: APPLICATION_ID,
-      });
-      
-      if (data.status === 500)
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      else if (data.length === 0) 
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-      else {
+    return axios.post(API_LINK + "Utilities/GetListMenu", {
+      username: "",
+      role: role,
+      application: APPLICATION_ID,
+    })
+      .then((response) => {
+        const data = response.data;
+
         let lastHeadkey = "";
         const transformedMenu = [
           {
@@ -31,23 +25,8 @@ const CreateMenu = async (role) => {
             link: ROOT_LINK + "/",
             sub: [],
           },
-          {
-            head: "Materi",
-            headkey: "materi",
-            link: "#",
-            sub: [
-              {
-                title: "Materi",
-                link: ROOT_LINK + "/master_proses",
-              },
-              {
-                title: "Baca Materi",
-                link: ROOT_LINK + "/master_test",
-              },
-            ],
-          },
         ];
-  
+
         data.forEach((item) => {
           if (item.parent === null || item.link === "#") {
             lastHeadkey = item.nama.toLowerCase().replace(/\s/g, "_");
@@ -59,7 +38,7 @@ const CreateMenu = async (role) => {
             });
           } else {
             const parent = transformedMenu.find(
-              (item) => item.headkey === lastHeadkey
+              (menu) => menu.headkey === lastHeadkey
             );
             if (parent) {
               parent.sub.push({
@@ -69,11 +48,15 @@ const CreateMenu = async (role) => {
             }
           }
         });
-  
+
         return transformedMenu;
-      }
-    }
-  } catch {
+      })
+      .catch((error) => {
+        console.error("Fetch error:", error);
+        return [];
+      });
+  } catch (error) {
+    console.error("Fetch error:", error);
     return [];
   }
 };
