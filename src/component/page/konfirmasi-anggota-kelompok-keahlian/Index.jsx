@@ -175,19 +175,11 @@ export default function KonfrimasiAnggotaIndex({ onChangePage }) {
     }
   }, [currentData]);
 
-  return (
-    <>
-      {isLoading ? (
-        <Loading />
-      ) : (
-        <div className="d-flex flex-column">
-          {isError.error && (
-            <div className="flex-fill">
-              <Alert type="danger" message={isError.message} />
-            </div>
-          )}
-          <div className="flex-fill">
-            <div className="mb-3 d-flex">
+  useEffect(() => {
+    const legendTopElement = document.getElementById("legend-top");
+    if (legendTopElement) {
+      legendTopElement.innerHTML = `
+        <div className="mb-3 d-flex">
               <p className="mb-0 me-3">
                 <span
                   style={{
@@ -209,6 +201,22 @@ export default function KonfrimasiAnggotaIndex({ onChangePage }) {
                 Menunggu persetujuan
               </p>
             </div>
+      `;
+    }
+  }, []);
+
+  return (
+    <>
+      {isLoading ? (
+        <Loading />
+      ) : (
+        <div className="d-flex flex-column">
+          {isError.error && (
+            <div className="flex-fill">
+              <Alert type="danger" message={isError.message} />
+            </div>
+          )}
+          <div className="flex-fill">
             <div className="container">
               <div className="row mt-0 gx-4">
                 {currentData

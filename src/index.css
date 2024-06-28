@@ -84,3 +84,11 @@ dialog::backdrop {
   left: 13%;
   z-index: -1; 
 }
+
+h5.card-title-pustaka {
+  color: white;
+}
+
+h5.card-title-pustaka:hover {
+  text-decoration: underline;
+}

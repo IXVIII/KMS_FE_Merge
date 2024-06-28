@@ -10,7 +10,7 @@ export default function ContentTitle() {
             &nbsp;&nbsp;/&nbsp;&nbsp;<span id="spanMenu"></span>
             <span id="spanMenuRoute"></span>
           </div>
-          <div style={{ paddingRight: "15rem" }} id="legend-top"></div>
+          <div style={{ paddingRight: "13rem" }} id="legend-top"></div>
         </div>
       </div>
     </>

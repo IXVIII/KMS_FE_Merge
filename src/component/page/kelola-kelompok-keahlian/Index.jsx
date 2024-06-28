@@ -191,6 +191,36 @@ export default function KKIndex({ onChangePage }) {
     });
   }
 
+  useEffect(() => {
+    const legendTopElement = document.getElementById("legend-top");
+    if (legendTopElement) {
+      legendTopElement.innerHTML = `
+        <div class="d-flex fixed">
+          <p class="mb-0 me-3">
+            <span
+              style="
+                padding: 0px 10px;
+                margin: 0px 10px;
+                background-color: #67ACE9;
+              "
+            ></span>
+            Aktif / Sudah dipublikasi
+          </p>
+          <p class="mb-0 me-3">
+            <span
+              style="
+                padding: 0px 10px;
+                margin: 0px 10px;
+                background-color: #6c757d;
+              "
+            ></span>
+            Draft / Menunggu PIC Prodi
+          </p>
+        </div>
+      `;
+    }
+  }, []);
+
   return (
     <>
       {isLoading ? (
@@ -234,30 +264,6 @@ export default function KKIndex({ onChangePage }) {
               />
             </Filter>
           </div>
-          {/* Legend Start */}
-          {/* <div className="mt-3 d-flex fixed">
-            <p className="mb-0 me-3">
-              <span
-                style={{
-                  padding: "0px 10px 0px 10px",
-                  margin: "0px 10px",
-                  backgroundColor: "#67ACE9",
-                }}
-              ></span>
-              Aktif / Sudah dipublikasi
-            </p>
-            <p className="mb-0 me-3">
-              <span
-                style={{
-                  padding: "0px 10px 0px 10px",
-                  margin: "0px 10px",
-                  backgroundColor: "#6c757d",
-                }}
-              ></span>
-              Draft / Menunggu PIC Prodi
-            </p>
-          </div> */}
-          {/* Legend End */}
           <div className="container">
             {currentData[0].Message ? (
               <Alert
@@ -267,35 +273,11 @@ export default function KKIndex({ onChangePage }) {
             ) : (
               <div className="row mt-0 gx-4">
                 {!currentFilter.status ? (
-                  <div className="d-flex justify-content-between">
-                    <div className="my-3">
-                      <span className="badge fw-normal fs-6 text-dark-emphasis bg-primary-subtle">
-                        <Icon name="arrow-down" /> Data Aktif / Menunggu PIC
-                        dari Prodi
-                      </span>
-                    </div>
-                    <div className="mt-3 d-flex">
-                      <p className="mb-0 me-3">
-                        <span
-                          style={{
-                            padding: "0px 10px 0px 10px",
-                            margin: "0px 10px",
-                            backgroundColor: "#67ACE9",
-                          }}
-                        ></span>
-                        Aktif / Sudah dipublikasi
-                      </p>
-                      <p className="mb-0 me-3">
-                        <span
-                          style={{
-                            padding: "0px 10px 0px 10px",
-                            margin: "0px 10px",
-                            backgroundColor: "#6c757d",
-                          }}
-                        ></span>
-                        Draft / Menunggu PIC Prodi
-                      </p>
-                    </div>
+                  <div className="my-3">
+                    <span className="badge fw-normal fs-6 text-dark-emphasis bg-primary-subtle">
+                      <Icon name="arrow-down" /> Data Aktif / Menunggu PIC dari
+                      Prodi
+                    </span>
                   </div>
                 ) : (
                   ""

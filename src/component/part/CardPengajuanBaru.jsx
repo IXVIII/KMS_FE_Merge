@@ -61,7 +61,8 @@ function CardPengajuanBaru({ data, onChangePage, isShow }) {
   } else if (data.Status === "Menunggu Acc") {
     status = (
       <p>
-        Status: <span className="text-warning fw-bold">Menunggu Persetujuan</span>
+        Status:{" "}
+        <span className="text-warning fw-bold">Menunggu Persetujuan</span>
       </p>
     );
     aksi = (
@@ -119,8 +120,8 @@ function CardPengajuanBaru({ data, onChangePage, isShow }) {
                   data.Status === "Ditolak"
                     ? "#DC3545"
                     : data.Status === "Menunggu Acc"
-                      ? "#FFC107"
-                      : "#6C757D",
+                    ? "#FFC107"
+                    : "#6C757D",
               }}
             >
               {data["Nama Kelompok Keahlian"]}
@@ -141,7 +142,7 @@ function CardPengajuanBaru({ data, onChangePage, isShow }) {
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
-                  textAlign: "justify"
+                  textAlign: "justify",
                 }}
               >
                 {data.Deskripsi}
