@@ -66,7 +66,10 @@ export default function AnggotaDetail({ onChangePage, withID }) {
 
     try {
       while (true) {
-        let data = await UseFetch(API_LINK + "AnggotaKK/GetAnggotaKK", currentFilter);
+        let data = await UseFetch(
+          API_LINK + "AnggotaKK/GetAnggotaKK",
+          currentFilter
+        );
 
         if (data === "ERROR") {
           throw new Error("Terjadi kesalahan: Gagal mengambil daftar anggota.");
@@ -75,7 +78,7 @@ export default function AnggotaDetail({ onChangePage, withID }) {
           setIsLoadingAnggota(false);
           break;
         } else if (data.length === 0) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
         } else {
           setListAnggota(data);
           setIsLoadingAnggota(false);
@@ -91,7 +94,7 @@ export default function AnggotaDetail({ onChangePage, withID }) {
         message: e.message,
       }));
     }
-  }
+  };
 
   const getListProdi = async () => {
     setIsLoadingProdi(true);
@@ -103,7 +106,7 @@ export default function AnggotaDetail({ onChangePage, withID }) {
         if (data === "ERROR") {
           throw new Error("Terjadi kesalahan: Gagal mengambil daftar prodi.");
         } else if (data.length === 0) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
         } else {
           setListProdi(data);
           setIsLoadingProdi(false);
@@ -119,19 +122,19 @@ export default function AnggotaDetail({ onChangePage, withID }) {
         message: e.message,
       }));
     }
-  }
+  };
 
   const getListDosen = async () => {
     setIsLoadingDosen(true);
 
     try {
       while (true) {
-        let data = await UseFetch(API_LINK + "AnggotaKK/GetListDosen", { idkk: formDataRef.current.key });
+        let data = await UseFetch(API_LINK + "AnggotaKK/GetListDosen", {});
 
         if (data === "ERROR") {
           throw new Error("Terjadi kesalahan: Gagal mengambil daftar dosen.");
         } else if (data.length === 0) {
-          await new Promise(resolve => setTimeout(resolve, 2000));
+          await new Promise((resolve) => setTimeout(resolve, 2000));
         } else {
           setListDosen(data);
           setIsLoadingDosen(false);
@@ -147,7 +150,7 @@ export default function AnggotaDetail({ onChangePage, withID }) {
         message: e.message,
       }));
     }
-  }
+  };
 
   useEffect(() => {
     if (withID) {
@@ -166,19 +169,21 @@ export default function AnggotaDetail({ onChangePage, withID }) {
     }
 
     getListProdi();
+    getListDosen();
   }, [withID]);
 
   useEffect(() => {
     getListAnggota();
+    getListDosen();
   }, [currentFilter]);
 
   useEffect(() => {
     console.log(JSON.stringify(listAnggota));
   });
 
-  useEffect(() => {
-    getListDosen();
-  }, [formDataRef.current.key]);
+  // useEffect(() => {
+  //   getListDosen();
+  // }, [formDataRef.current.key]);
 
   useEffect(() => {
     setIsLoading(isLoadingProdi || isLoadingAnggota || isLoadingDosen);
@@ -186,13 +191,13 @@ export default function AnggotaDetail({ onChangePage, withID }) {
 
   const handleDelete = (id) => () => {
     setIsError(false);
-    
+
     SweetAlert(
       "Konfirmasi Hapus",
       "Anda yakin ingin <b>mengeluarkan</b> anggota ini dari Keahlian?",
       "warning",
       "Ya"
-      ).then((confirm) => {
+    ).then((confirm) => {
       if (confirm) {
         setIsLoading(true);
         UseFetch(API_LINK + "AnggotaKK/SetStatusAnggotaKK", {
@@ -217,13 +222,13 @@ export default function AnggotaDetail({ onChangePage, withID }) {
 
   const handleTambahAnggota = (id) => () => {
     setIsError(false);
-    
+
     SweetAlert(
       "Konfirmasi Tambah",
       "Anda yakin ingin menambahkan anggota ini dari Keahlian?",
       "info",
       "Ya"
-      ).then((confirm) => {
+    ).then((confirm) => {
       if (confirm) {
         setIsLoading(true);
         UseFetch(API_LINK + "AnggotaKK/TambahAnggotaByPIC", {
@@ -251,10 +256,8 @@ export default function AnggotaDetail({ onChangePage, withID }) {
 
   const handleProdiChange = (e) => {
     const selectedProdiText = e.target.options[e.target.selectedIndex].text;
-    console.log(selectedProdiText);
     setCurrentDosenFilter({
-      ...currentDosenFilter,
-      prodi: selectedProdiText,
+      prodi: selectedProdiText === "-- Semua --" ? "" : selectedProdiText,
     });
   };
 
@@ -322,7 +325,10 @@ export default function AnggotaDetail({ onChangePage, withID }) {
                           <p>Tidak Ada Anggota Aktif</p>
                         ) : (
                           listAnggota.map((ag, index) => (
-                            <div className="card-profile mb-3 d-flex justify-content-between shadow-sm" key={ag.Key}>
+                            <div
+                              className="card-profile mb-3 d-flex justify-content-between shadow-sm"
+                              key={ag.Key}
+                            >
                               <div className="d-flex w-100">
                                 <p className="mb-0 px-1 py-2 mt-2 me-2 fw-bold text-primary">
                                   {index + 1}
@@ -381,20 +387,8 @@ export default function AnggotaDetail({ onChangePage, withID }) {
                     </div>
                     <div className="card-body">
                       <div className="input-group mb-3">
-                        <Input
-                          // ref={searchQuery}
-                          forInput="pencarianProduk"
-                          placeholder="Cari"
-                        />
-                        <Button
-                          iconName="search"
-                          classType="primary px-4"
-                          title="Cari"
-                        // onClick={handleSearch}
-                        />
                         <Filter>
                           <DropDown
-                            // ref={searchFilterJenis}
                             forInput="ddProdi"
                             label="Program Studi"
                             type="semua"
@@ -421,7 +415,9 @@ export default function AnggotaDetail({ onChangePage, withID }) {
                                   width="45"
                                 />
                                 <div className="ps-3">
-                                  <p className="mb-0">{value["Nama Karyawan"]}</p>
+                                  <p className="mb-0">
+                                    {value["Nama Karyawan"]}
+                                  </p>
                                   <p
                                     className="mb-0"
                                     style={{ fontSize: "13px" }}

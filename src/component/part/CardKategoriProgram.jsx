@@ -40,15 +40,14 @@ const CardKategoriProgram = ({
               {". "}
               {data["Nama Kategori"]}
             </h6>
-            {/* <div>
+            <div>
               <Icon
                 name="file"
-                type="Bold"
-                cssClass="btn px-2 py-0"
-                title="Materi"
+                cssClass="text-primary me-1"
+                title="Materi sudah publikasi"
               />
-              <span>5</span>
-            </div> */}
+              <span className="text-primary">{data.MateriCount}</span>
+            </div>
           </div>
           <div className="d-flex mt-2">
             <div className="me-2 bg-primary ps-1"></div>
