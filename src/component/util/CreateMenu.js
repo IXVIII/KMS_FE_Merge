@@ -128,3 +128,5 @@ const CreateMenu = (role) => {
     return [];
   }
 };
+
+export default CreateMenu;
