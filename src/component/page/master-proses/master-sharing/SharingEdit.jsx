@@ -146,8 +146,8 @@ export default function MasterSharingAdd({ onChangePage }) {
         <div>
           <Stepper
             steps={[
-              { label: 'Materi', onClick: () => onChangePage("courseAdd") },
-              { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
+              { label: 'Materi', onClick: () => onChangePage("materiEdit") },
+              { label: 'Pretest', onClick: () => onChangePage("pretestEdit") },
               { label: 'Sharing Expert', onClick: () => onChangePage("sharingEdit") },
               { label: 'Forum', onClick: () => onChangePage("forumEdit") },
               { label: 'Post Test', onClick: () => onChangePage("posttestEdit") }

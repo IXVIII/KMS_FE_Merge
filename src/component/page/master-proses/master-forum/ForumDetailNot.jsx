@@ -12,6 +12,8 @@ import { API_LINK } from "../../../util/Constants";
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 import { Editor } from '@tinymce/tinymce-react';
+import Swal from 'sweetalert2';
+import axios from "axios";
 
 const userSchema = object({
   forumJudul: string().max(100, "maksimum 100 karakter").required("harus diisi"),
@@ -26,11 +28,11 @@ export default function MasterForumAddNot({ onChangePage }) {
   const [formData, setFormData] = useState({
     // materiId: AppContext_test.dataIDMateri,
     materiId:AppContext_test.DetailMateri?.Key || "",
-    karyawanId: "040",
+    karyawanId: AppContext_test.activeUser,
     forumJudul: AppContext_test.ForumForm?.forumJudul || "",
     forumIsi: AppContext_test.ForumForm?.forumIsi || "",
-    forumCreatedBy: "ika",
     forumStatus: "Aktif",
+    forumCreatedBy: AppContext_test.displayName,
   });
 
   const handleInputChange = async (e) => {
@@ -49,11 +51,11 @@ export default function MasterForumAddNot({ onChangePage }) {
   const resetForm = () => {
     setFormData({
       materiId:AppContext_test.DetailMateri?.Key || "",
-      karyawanId: "040",
+      karyawanId: AppContext_test.activeUser,
       forumJudul: "",
       forumIsi: "",
-      forumCreatedBy: "ika",
       forumStatus: "Aktif",
+      forumCreatedBy: AppContext_test.displayName,
     });
     setErrors({});
     setIsError({ error: false, message: "" });
@@ -81,17 +83,21 @@ export default function MasterForumAddNot({ onChangePage }) {
 
     try {
       console.log("Data yang dikirim ke backend:", formData);
-      const response = await UseFetch(API_LINK + "Forum/SaveDataForum", formData);
+      const response = await axios.post(API_LINK + "Forum/SaveDataForum", formData);
 
       if (response === "ERROR") {
         setIsError({ error: true, message: "Terjadi kesalahan: Gagal menyimpan data Sharing." });
       } else {
-        SweetAlert("Sukses", "Data Forum berhasil disimpan", "success")
-        .then(() => {
+        
+        Swal.fire({
+          title: 'Sukses',
+          text: 'Data Forum berhasil disimpan',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        }).then((result) => {
+          if (result.isConfirmed) {
           onChangePage("forumDetail", AppContext_test.DetailMateri);
-        })
-        .catch((error) => {
-          console.error("SweetAlert encountered an error:", error);
+          }
         });
       }
     } catch (error) {

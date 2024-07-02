@@ -33,9 +33,8 @@ function CardMateri({
     AppContext_test.materiId = book.Key;
     AppContext_master.materiId = book.Key;
     // console.log(AppContext_test.materiId)
+    AppContext_test.refreshPage += 1;
     onBacaMateri("pengenalan", true, book.Key, true);
-          console.log("hai", book)
-
   };
   const handleReviewJawaban = (book) => {
     AppContext_test.materiId = book.Key;

@@ -59,8 +59,8 @@ export default function MasterMateriDetail({ onChangePage }) {
                 <div>
                     <Stepper
                         steps={[
-                            { label: 'Materi', onClick: () => onChangePage("courseAdd") },
-                            { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
+                            { label: 'Materi', onClick: () => onChangePage("materiDetail") },
+                            { label: 'Pretest', onClick: () => onChangePage("pretestDetail") },
                             { label: 'Sharing Expert', onClick: () => onChangePage("sharingDetail") },
                             { label: 'Forum', onClick: () => onChangePage("forumDetail") },
                             { label: 'Post Test', onClick: () => onChangePage("posttestDetail") }

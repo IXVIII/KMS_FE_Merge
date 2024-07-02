@@ -23,8 +23,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [timer, setTimer] = useState('');
   const gambarInputRef = useRef(null);
-
-  console.log("dd", AppContext_master)
+  console.log(AppContext_master)
   const handleChange = (name, value) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -59,7 +58,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
     setSelectedOptions([...selectedOptions, ""]);
   };
   const [formData, setFormData] = useState({
-    materiId: AppContext_master.dataIDMateri,
+    materiId: AppContext_master.DetailMateri?.Key || "",
     quizJudul: '',
     quizDeskripsi: '',
     quizTipe: 'Pretest',
@@ -67,7 +66,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
     tanggalAkhir: '',
     timer: '',
     status: 'Aktif',
-    createdby: AppContext_test.displayName,
+    createdby: AppContext_test.DisplayName,
   });
 
   const [formQuestion, setFormQuestion] = useState({
@@ -77,7 +76,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
     gambar: null,
     questionDeskripsi: '',
     status: 'Aktif',
-    quecreatedby: AppContext_test.displayName,
+    quecreatedby: AppContext_test.DisplayName,
   });
 
   formData.timer = timer;
@@ -87,7 +86,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
     isiChoice: '',
     questionId: '',
     nilaiChoice: '',
-    quecreatedby: AppContext_test.displayName,
+    quecreatedby: AppContext_test.DisplayName,
   });
 
   const userSchema = object({
@@ -101,7 +100,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
     gambar: null,
     questionDeskripsi: '',
     status: 'Aktif',
-    quecreatedby: AppContext_test.displayName,
+    quecreatedby: AppContexAppContext_testt_master.DisplayName,
   };
 
   const handleQuestionTypeChange = (e, index) => {
@@ -137,7 +136,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
     }
   
     // Hitung total point dari semua pertanyaan dan opsi
-    
     const totalQuestionPoint = formContent.reduce((total, question) => {
       if (question.type !== 'Pilgan') {
         total = total + parseInt(question.point)
@@ -164,6 +162,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
   
     try {
       formData.timer = convertTimeToSeconds(timer)
+  console.log(formData)
       const response = await axios.post(API_LINK + 'Quiz/SaveDataQuiz', formData);
       if (response.data.length === 0) {
         Swal.fire({
@@ -186,12 +185,13 @@ export default function MasterPreTestAdd({ onChangePage }) {
           gambar: question.gambar,
           questionDeskripsi: '',
           status: 'Aktif',
-          quecreatedby: AppContext_test.displayName,
+          quecreatedby: AppContext_test.DisplayName,
         };
         if (question.type === 'Essay' || question.type === 'Praktikum') {
           if (question.selectedFile) {
             try {
               const uploadResult = await uploadFile(question.selectedFile);
+              console.log("Image Upload Response:", JSON.stringify(uploadResult.newFileName));
               formQuestion.gambar = uploadResult.newFileName;
             } catch (uploadError) {
               console.error('Gagal mengunggah gambar:', uploadError);
@@ -208,6 +208,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
   
         try {
           const questionResponse = await axios.post(API_LINK + 'Questions/SaveDataQuestion', formQuestion);
+          console.log('Pertanyaan berhasil disimpan:', questionResponse.data);
   
           if (questionResponse.data.length === 0) {
             Swal.fire({
@@ -224,13 +225,15 @@ export default function MasterPreTestAdd({ onChangePage }) {
           if (question.type === 'Essay' || question.type === 'Praktikum') {
             const answerData = {
               urutanChoice: '',
-              answerText: '', 
+              answerText: question.correctAnswer, // Pastikan menggunakan correctAnswer dari question
               questionId: questionId,
               nilaiChoice: question.point,
-              quecreatedby: AppContext_test.displayName,
+              quecreatedby: AppContext_test.DisplayName,
             };
+  
             try {
               const answerResponse = await axios.post(API_LINK + 'Choices/SaveDataChoice', answerData);
+              console.log('Jawaban Essay berhasil disimpan:', answerResponse.data);
             } catch (error) {
               console.error('Gagal menyimpan jawaban Essay:', error);
               Swal.fire({
@@ -247,11 +250,15 @@ export default function MasterPreTestAdd({ onChangePage }) {
                 answerText: option.label,
                 questionId: questionId,
                 nilaiChoice: option.point || 0,
-                quecreatedby: AppContext_test.displayName,
+                quecreatedby: AppContext_test.DisplayName,
               };
+  
+              console.log("hasil multiple choice")
+              console.log(answerData);
   
               try {
                 const answerResponse = await axios.post(API_LINK + 'Choices/SaveDataChoice', answerData);
+                console.log('Jawaban multiple choice berhasil disimpan:', answerResponse.data);
               } catch (error) {
                 console.error('Gagal menyimpan jawaban multiple choice:', error);
                 Swal.fire({
@@ -288,6 +295,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
           setSelectedFile(null);
           setTimer('');
           setIsButtonDisabled(true);
+          onChangePage("pretestDetail");
         }
       });
   
@@ -380,6 +388,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
   };
 
   setFormContent(updatedFormContent);
+  console.log(updatedFormContent)
 };
 
   const handleDuplicateQuestion = (index) => {
@@ -516,9 +525,18 @@ export default function MasterPreTestAdd({ onChangePage }) {
     }));
   };
 
+  const handleTimerChange = (e) => {
+    const { value } = e.target;
+    setTimer(value);
+    console.log(convertTimeToSeconds(timer))
+
+  };
+
   const handleOptionPointChange = (e, questionIndex, optionIndex) => {
     const { value } = e.target;
     
+    console.log("point changes")
+    console.log(value);
     // Clone the formContent state
     const updatedFormContent = [...formContent];
 
@@ -543,29 +561,29 @@ export default function MasterPreTestAdd({ onChangePage }) {
       [validationError.name]: validationError.error,
     }));
   };
-  const convertTimeToSeconds = () => {
-      return parseInt(hours) * 3600 + parseInt(minutes) * 60;
-  };
-  
-  const [hours, setHours] = useState('00');
-  const [minutes, setMinutes] = useState('00');
-  
-  const handleHoursChange = (e) => {
-      setHours(e.target.value);
-  };
+    const convertTimeToSeconds = () => {
+        return parseInt(hours) * 3600 + parseInt(minutes) * 60;
+    };
+    
+    const [hours, setHours] = useState('00');
+    const [minutes, setMinutes] = useState('00');
+    
+    const handleHoursChange = (e) => {
+        setHours(e.target.value);
+    };
 
-  const handleMinutesChange = (e) => {
-      setMinutes(e.target.value);
-  };
-  
-  const convertSecondsToTimeFormat = (seconds) => {
-      const formatHours = Math.floor(seconds / 3600).toString().padStart(2, '0');
-      const formatMinutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+    const handleMinutesChange = (e) => {
+        setMinutes(e.target.value);
+    };
+    
+    const convertSecondsToTimeFormat = (seconds) => {
+        const formatHours = Math.floor(seconds / 3600).toString().padStart(2, '0');
+        const formatMinutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
 
-      setHours(formatHours);
-      setMinutes(formatMinutes);
-      return `${formatHours}:${formatMinutes}`;
-  };
+        setHours(formatHours);
+        setMinutes(formatMinutes);
+        return `${formatHours}:${formatMinutes}`;
+    };
 
   if (isLoading) return <Loading />;
 
@@ -840,6 +858,54 @@ export default function MasterPreTestAdd({ onChangePage }) {
                       <label htmlFor="deskripsiMateri" className="form-label fw-bold">
                       Pertanyaan <span style={{color:"Red"}}> *</span>
                       </label>
+                        {/* <textarea
+                          id={`pertanyaan_${index}`}
+                          value={question.text}
+                          label="Pertanyaan"
+                          onChange={(e) => {
+                            const updatedFormContent = [...formContent];
+                            updatedFormContent[index].text = e.target.value;
+                            setFormContent(updatedFormContent);
+
+                            // Update formQuestion.soal
+                            setFormQuestion((prevFormQuestion) => ({
+                              ...prevFormQuestion,
+                              soal: e.target.value
+                            }));
+                          }}
+                          className="form-control" // Optional: Add any necessary CSS classes
+                          rows={4} // Optional: Adjust the number of rows for the textarea
+                        /> */}
+                        {/* <Editor
+                          id={`pertanyaan_${index}`}
+                          value={question.text}
+                          label="Pertanyaan"
+                          onChange={(e) => {
+                            const updatedFormContent = [...formContent];
+                            updatedFormContent[index].text = e.target.value;
+                            setFormContent(updatedFormContent);
+
+                            // Update formQuestion.soal
+                            setFormQuestion((prevFormQuestion) => ({
+                              ...prevFormQuestion,
+                              soal: e.target.value
+                            }));
+                          }}
+                          apiKey='la2hd1ehvumeir6fa5kxxltae8u2whzvx1jptw6dqm4dgf2g'
+                          init={{
+                            height: 300,
+                            menubar: false,
+                            plugins: [
+                              'advlist autolink lists link image charmap print preview anchor',
+                              'searchreplace visualblocks code fullscreen',
+                              'insertdatetime media table paste code help wordcount'
+                            ],
+                            toolbar:
+                              'undo redo | formatselect | bold italic backcolor | \
+                              alignleft aligncenter alignright alignjustify | \
+                              bullist numlist outdent indent | removeformat | help'
+                          }}
+                        /> */}
                         <Editor
                         id={`pertanyaan_${index}`}
                         value={question.text}
@@ -984,22 +1050,22 @@ export default function MasterPreTestAdd({ onChangePage }) {
           </div>
         </div>
         <div className="float my-4 mx-1">
-          <Button
+          {/* <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Kembali"
             onClick={() => onChangePage("materiAdd")}
-          />
+          /> */}
           <Button
             classType="primary ms-2 px-4 py-2"
             type="submit"
             label="Simpan"
             disabled={isButtonDisabled}
           />
-          <Button
+          {/* <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
             onClick={() => onChangePage("sharingAdd")}
-          />
+          /> */}
         </div>
       </form>
     </>

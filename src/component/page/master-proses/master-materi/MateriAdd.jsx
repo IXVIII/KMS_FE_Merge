@@ -12,11 +12,12 @@ import uploadFile from "../../../util/UploadFile";
 import Loading from "../../../part/Loading";
 import Alert from "../../../part/Alert";
 import { Stepper } from 'react-form-stepper';
-import AppContext_test from "../MasterContext";
+import AppContext_master from "../MasterContext";
+import AppContext_test from "../../master-test/TestContext";
 import axios from "axios";
 import { Editor } from '@tinymce/tinymce-react';
 
-export default function MasterCourseAdd({ onChangePage }) {
+export default function MastermateriAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
@@ -27,22 +28,22 @@ export default function MasterCourseAdd({ onChangePage }) {
   const gambarInputRef = useRef(null);
   const vidioInputRef = useRef(null);
 
-  const kategori = AppContext_test.KategoriIdByKK;
-  // console.log("kategiri :"+ AppContext_test.KategoriIdByKK)
-  // console.log("kategiri"+AppContext_test)
+  const kategori = AppContext_master.KategoriIdByKK;
+  // console.log("kategiri :"+ AppContext_master.KategoriIdByKK)
+  // console.log("kategiri"+AppContext_master)
 
   // Referensi ke form data menggunakan useRef
   const formDataRef = useRef({
-    kat_id: AppContext_test.KategoriIdByKK,
+    kat_id: AppContext_master.KategoriIdByKK,
     mat_judul: "",
     mat_file_pdf: "",
     mat_file_video: "",
     mat_pengenalan: "",
     mat_keterangan: "",
-    kry_id: "1",
+    kry_id: AppContext_test.activeUser,
     mat_kata_kunci: "",
     mat_gambar: "",
-    createBy: "Kristina Hutajulu",
+    createBy: AppContext_test.displayName,
   });
 
   // Validasi skema menggunakan Yup
@@ -151,16 +152,16 @@ export default function MasterCourseAdd({ onChangePage }) {
           }));
           return;
         }
-
+        console.log('dd', formDataRef.current)
         axios.post(API_LINK + "Materis/SaveDataMateri", formDataRef.current)
           .then(response => {
             const data = response.data;
             console.log("materiAdd ", data)
             if (data[0].hasil === "OK") {
-              AppContext_test.dataIDMateri = data[0].newID;
+              AppContext_master.dataIDMateri = data[0].newID;
               SweetAlert("Sukses", "Data Materi berhasil disimpan", "success");
               setIsFormDisabled(true);
-              AppContext_test.formSavedMateri = true; 
+              AppContext_master.formSavedMateri = true; 
             } else {
               setIsError(prevError => ({
                 ...prevError,
@@ -257,17 +258,17 @@ useEffect(() => {
 }, [kategori]);
 
 useEffect(() => {
-  if (AppContext_test.MateriForm && AppContext_test.MateriForm.current && Object.keys(AppContext_test.MateriForm.current).length > 0) {
-    formDataRef.current = { ...formDataRef.current, ...AppContext_test.MateriForm.current };
+  if (AppContext_master.MateriForm && AppContext_master.MateriForm.current && Object.keys(AppContext_master.MateriForm.current).length > 0) {
+    formDataRef.current = { ...formDataRef.current, ...AppContext_master.MateriForm.current };
   }
 
-  if (AppContext_test.formSavedMateri === false) {
+  if (AppContext_master.formSavedMateri === false) {
     setIsFormDisabled(false);
   }
-}, [AppContext_test.MateriForm, AppContext_test.formSavedMateri]);
+}, [AppContext_master.MateriForm, AppContext_master.formSavedMateri]);
 
 // Render form
-const dataSaved = AppContext_test.formSavedMateri; // Menyimpan nilai AppContext_test.formSavedMateri untuk menentukan apakah form harus di-disable atau tidak
+const dataSaved = AppContext_master.formSavedMateri; // Menyimpan nilai AppContext_master.formSavedMateri untuk menentukan apakah form harus di-disable atau tidak
 
 if (isLoading) return <Loading />;
 
@@ -284,7 +285,7 @@ if (isLoading) return <Loading />;
         <div>
           <Stepper
             steps={[
-              { label: 'Materi', onClick: () => onChangePage("courseAdd") },
+              { label: 'Materi', onClick: () => onChangePage("materiAdd") },
               { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
               { label: 'Sharing Expert', onClick: () => onChangePage("sharingAdd") },
               { label: 'Forum', onClick: () => onChangePage("forumAdd") },
@@ -470,7 +471,7 @@ if (isLoading) return <Loading />;
           <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("pretestAdd", AppContext_test.MateriForm = formDataRef)}
+            onClick={() => onChangePage("pretestAdd", AppContext_master.MateriForm = formDataRef)}
           />
         </div>
       </form>

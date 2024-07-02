@@ -378,11 +378,11 @@ const handleAdd = async (e) => {
         <div>
           <Stepper
             steps={[
-              { label: 'Materi', onClick: () => onChangePage("courseAdd") },
-              { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
-              { label: 'Sharing Expert', onClick: () => onChangePage("sharingAdd") },
-              { label: 'Forum', onClick: () => onChangePage("forumAdd") },
-              { label: 'Post Test', onClick: () => onChangePage("posttestAdd") }
+              { label: 'Materi', onClick: () => onChangePage("materiEdit") },
+              { label: 'Pretest', onClick: () => onChangePage("pretestEdit") },
+              { label: 'Sharing Expert', onClick: () => onChangePage("sharingEdit") },
+              { label: 'Forum', onClick: () => onChangePage("forumEdit") },
+              { label: 'Post Test', onClick: () => onChangePage("posttestEdit") }
             ]}
             activeStep={2}
             styleConfig={{

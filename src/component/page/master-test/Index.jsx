@@ -61,7 +61,6 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
     query: "",
     sort: "Judul",
     order: "asc",
-   // Default status
   });
   const searchQuery = useRef(null);
   const searchFilterSort = useRef(null);
@@ -125,7 +124,6 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
     const newStatus = value === "" ? "Semua" : value;
     setCurrentFilter((prevFilter) => ({
       ...prevFilter,
-      // status: newStatus,
     }));
   }
 
@@ -148,68 +146,6 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
     }
   }, []);
 
-  
-
-  // useEffect(() => {
-  //   let isMounted = true;
-
-  //   const fetchData = async () => {
-  //     setIsError(false);
-  //     setIsLoading(true);
-  //     try {
-  //       const data = await fetchDataWithRetry();
-  //       if (isMounted) {
-  //         if (data && Array.isArray(data)) {
-  //           if (data.length === 0) {
-  //             // Handle case when data array is empty
-  //           } else {
-  //             setCurrentData(data);
-  //           }
-  //         } else {
-  //           throw new Error("Data format is incorrect");
-  //         }
-  //       }
-  //     } catch (error) {
-  //       if (isMounted) {
-  //         setIsError(true);
-  //         console.error("Fetch error:", error);
-  //       }
-  //     } finally {
-  //       if (isMounted) {
-  //         setIsLoading(false);
-  //       }
-  //     }
-  //   };
-
-  //   const fetchDataWithRetry = async (retries = 3, delay = 1000) => {
-  //     for (let i = 0; i < retries; i++) {
-  //       try {
-  //         const response = await axios.post("http://localhost:8080/Quiz/GetDataResultQuiz", {
-  //           quizId: "1",
-  //           karyawanId: "1",
-  //           tipeQuiz: "Pretest"
-  //         });
-  //         if (response.data && Array.isArray(response.data)) {
-  //           return response.data;
-  //         }
-  //       } catch (error) {
-  //         console.error("Error fetching quiz data:", error);
-          // if (i < retries - 1) {
-          //   await new Promise(resolve => setTimeout(resolve, delay));
-          // } else {
-          //   throw error;
-          // }
-  //       }
-  //     }
-  //   };
-
-  //   fetchData();
-
-  //   return () => {
-  //     isMounted = false; 
-  //   };
-  // }, []);
-  
   useEffect(() => {
     const fetchData = async (retries = 3, delay = 1000) => {
       setIsError(false);
@@ -243,8 +179,8 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
                     return value;
                   })
                   .catch((error) => {
-                    console.error("Error fetching gambar:", error);
-                    return value;
+                    // console.error("Error fetching gambar:", error);
+                    // return value;
                   });
                 filePromises.push(gambarPromise);
               }

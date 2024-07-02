@@ -29,7 +29,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
       setIsLoading(true);
       for (const review of formDataReview) {
         const { idSoal, isCorrect, materiId, idKaryawan, idQuiz, idTransaksi } = review;
-        const response = await axios.post("http://localhost:8080/Quiz/SaveReviewQuiz", {
+        const response = await axios.post(API_LINK + "Quiz/SaveReviewQuiz", {
           p1: idTransaksi,
           p2: idSoal,
           p3: isCorrect.toString(),
@@ -37,6 +37,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
           p5: idKaryawan,
           p6: idQuiz,
         });
+        console.log("awokaok", review)
         SweetAlert(
           "Sukses",
           "Review jawaban telah berhasil disimpan!",
@@ -108,7 +109,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
       for (let i = 0; i < retries; i++) {
         try {
           setIsLoading(true)
-          const response = await axios.post("http://localhost:8080/Quiz/GetDataTransaksiReview", {
+          const response = await axios.post(API_LINK + "Quiz/GetDataTransaksiReview", {
             quizId: AppContext_test.materiId,
           });
           if (response.data.length !== 0) {
@@ -138,7 +139,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
   const fetchQuestions = async (questionType, retries = 10, delay = 5000) => {
     for (let i = 0; i < retries; i++) {
       try {
-        const response = await axios.post("http://localhost:8080/Quiz/GetDataQuestion", {
+        const response = await axios.post(API_LINK + "Quiz/GetDataQuestion", {
           quizId: AppContext_test.materiId,
           status: "Aktif",
           questionType: questionType,
@@ -165,7 +166,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     for (let i = 0; i < retries; i++) {
       try {
         setIsLoading(true);
-        const response = await axios.post("http://localhost:8080/Quiz/GetDataResultQuiz", {
+        const response = await axios.post(API_LINK + "Quiz/GetDataResultQuiz", {
           quizId: AppContext_test.materiId,
           idKaryawan: karyawanId,
           questionType: questionType,
@@ -293,13 +294,20 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
 
 
   const currentRespondent = currentData[currentRespondentIndex];
-  // console.log("cel ", currentData)
   const jawabanPenggunaStr = currentRespondent.trq_jawaban_pengguna;
+
   const jawabanPengguna = jawabanPenggunaStr
       .slice(1, -1)  
       .split('], [')  
       .map(item => item.replace(/[\[\]]/g, '').split(','));
-  const validJawabanPengguna = jawabanPengguna.filter(item => item.length === 3);
+  const processedJawaban = jawabanPengguna.map(item => {
+    if (item[0] === "essay") {
+        return [item[0], item[1], item.slice(2).join(' ')];
+    }
+    return item;
+});
+  const validJawabanPengguna = processedJawaban.filter(item => item.length === 3);
+
 
   // Map the filtered array to the desired format
   const formattedAnswers = validJawabanPengguna.map(item => ({
@@ -307,9 +315,10 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     namaFile: item[2]
   }));
 
-
   const downloadFile = async (namaFile) => {
     try {
+    namaFile = namaFile.trim();
+    // namaFile = " " + namaFile;
       const response = await axios.get(`${API_LINK}Utilities/Upload/DownloadFile`, {
             params: {
               namaFile 
@@ -388,7 +397,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
         </Card.Header>
         <Card.Body>
           {currentQuestions.map((question, questionIndex) => {
-            const matchedAnswer = formattedAnswers.find(answer => answer.idSoal === question.Key);
+            const matchedAnswer = formattedAnswers.find(answer => answer.idSoal === " " + question.Key);
             return (
               <Card key={question.Key} className="mb-4">
                 <Card.Header className="d-flex align-items-center">
@@ -416,7 +425,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
                         <Form.Control
                           as="textarea"
                           rows={3}
-                          value={matchedAnswer ? matchedAnswer.namaFile : ""}
+                          value={matchedAnswer?.namaFile ? matchedAnswer.namaFile : "Tidak ada jawaban"}
                           onChange={(e) => handleAnswerChange(questionIndex, e.target.value)}
                           disabled={true}
                         />
@@ -438,13 +447,13 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
                     <Button
                       variant="success"
                       className="me-2"
-                      onClick={() => handleReview(question.Key, true, currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
+                      onClick={() => handleReview(question.Key, "true", currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
                     >
                       Benar
                     </Button>
                     <Button
                       variant="danger"
-                      onClick={() => handleReview(question.Key, false, currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
+                      onClick={() => handleReview(question.Key, "false", currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
                     >
                       Salah
                     </Button>

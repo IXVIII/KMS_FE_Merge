@@ -1,7 +1,11 @@
 import { useState } from "react";
+import Cookies from "js-cookie";
+import AppContext_test from "../master-test/TestContext";
+import { decryptId } from "../../util/Encryptor";
 import MasterProsesIndex from "./Index";
 // PreTest
 import MasterPreTestAdd from "./master-pretest/PreTestAdd";
+import MasterPreTestAddNot from "./master-pretest/PreTestAddNot";
 import MasterPreTestEdit from "./master-pretest/PreTestEdit";
 import MasterPreTestDetail from "./master-pretest/PreTestDetail";
 // Materi
@@ -38,6 +42,10 @@ export default function MasterProses() {
   const [pageMode, setPageMode] = useState("kk");
   const [dataID, setDataID] = useState();
   const [dataID2, setDataID2] = useState();
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+  AppContext_test.activeUser = activeUser;
 
   function getPageMode() {
     switch (pageMode) {
@@ -51,6 +59,10 @@ export default function MasterProses() {
                 withID={dataID}/>;
       case "pretestAdd":
         return <MasterPreTestAdd 
+                onChangePage={handleSetPageMode} 
+                withID={dataID}/>;
+      case "pretestAddNot":
+        return <MasterPreTestAddNot 
                 onChangePage={handleSetPageMode} 
                 withID={dataID}/>;
       case "pretestEdit":

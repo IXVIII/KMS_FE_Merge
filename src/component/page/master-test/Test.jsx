@@ -19,6 +19,7 @@ import KMS_Uploader from "../../part/KMS_Uploader";
 import axios from "axios";
 import Swal from 'sweetalert2';
 import AppContext_test from "./TestContext";
+import { RFC_2822 } from "moment/moment";
 
 const ButtonContainer = styled.div`
   position: fixed;
@@ -34,16 +35,16 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
   const [isLoading, setIsLoading] = useState(false);
   const [currentData, setCurrentData] = useState([]);
   const [questionNumbers, setQuestionNumbers] = useState(0);
-  const [IdQuiz, setIdQuiz] = useState();
   const [nilai, setNilai] = useState(0);
   const [timeRemaining, setTimeRemaining] = useState(false);
   const formDataRef = useRef({
-    karyawanId:"1",
+    karyawanId:AppContext_test.activeUser,
     quizId: AppContext_test.quizId,
     nilai: "", 
     status: "Not Reviewed",
     answers: [],
-    createdBy: "Fahriel",
+    createdBy: AppContext_test.displayName,
+    jumlahBenar: "",
   });
   const [formDataRef2, setFormData2] = useState([]);
   
@@ -51,15 +52,14 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
   }, [quizType, materiId]);
   const formUpdate = useRef({
     idMateri:AppContext_test.materiId,
-    karyawanId: "1",
+    karyawanId: AppContext_test.activeUser,
     totalProgress: "0", 
     statusMateri_PDF: "",
     statusMateri_Video: "",
     statusSharingExpert_PDF: "",
     statusSharingExpert_Video: "",
-    createdBy: "Fahriel",
+    createdBy: AppContext_test.activeUser,
   });
-
   function convertEmptyToNull(obj) {
     const newObj = {};
     for (const [key, value] of Object.entries(obj)) {
@@ -113,15 +113,33 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
   function handleSubmitAction() {
     if (quizType == "Pretest"){
       onChangePage("pretest", true, materiId)
+      AppContext_test.refreshPage = "pretest";
     } else if (quizType == "Posttest"){
       onChangePage("posttest", true, materiId)
+      AppContext_test.refreshPage = "posttest";
     }
   }
+
+  const handleTextareaChange = (event, index, itemId) => {
+    const value = event.target.value;
+    handleValueAnswer("", "", "", "essay", index, value, itemId);
+
+    console.log(event, index, itemId)
+  };
 
 
   const handleFileChange = async (ref, extAllowed, fileUpload, currentIndex, id_question) => {
     handleValueAnswer("", "", "", "", currentIndex, fileUpload, id_question);
   };
+
+  useEffect(() => {
+    const checkStatus = () => {
+      const hasEssayOrPraktikum = currentData.some(item => item.type === "Essay" || item.type === "Praktikum");
+      formDataRef.current.status = hasEssayOrPraktikum ? "Not Reviewed" : "Reviewed";
+    };
+
+    checkStatus();
+  }, [currentData]);
 
   const handleAdd = async (e) => {
     const validationErrors = await validateAllInputs(
@@ -129,28 +147,30 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
       userSchema,
       setErrors
     );
-
+    let countBenar = 0;
     const totalNilai = answers.reduce((accumulator, currentValue) => {
-      return accumulator + currentValue.nilaiSelected;
+      const nilaiSelected = parseFloat(currentValue.nilaiSelected) || 0;
+      if (nilaiSelected != 0){
+        countBenar += 1;
+      }
+      return accumulator + nilaiSelected;
     }, 0);
     formDataRef.current.nilai = totalNilai;
     formDataRef.current.answers = submittedAnswers;
-
+    formDataRef.current.jumlahBenar = countBenar;
     try {
-      const response1 = await axios.post(
-        "http://localhost:8080/Quiz/SaveTransaksiQuiz",
+      const response1 = await UseFetch(
+        API_LINK + "Quiz/SaveTransaksiQuiz",
         formDataRef.current
       );
-      console.log(response1)
-      if (response1.data) {
-        const response2 = await axios.post(
-          "http://localhost:8080/Materis/SaveProgresMateri",
-          formUpdate.current
-        );
+      const response2 = await UseFetch(
+        API_LINK + "Materis/SaveProgresMateri",
+        formUpdate.current
+      );
+      const response = await UseFetch( API_LINK + "Materis/UpdatePoinProgresMateri", {
+        materiId: AppContext_test.materiId,
+      });
 
-      } else {
-        console.error("API pertama tidak mengembalikan respons 'OK'");
-      }
     } catch (error) {
       console.error("Error:", error);
     }
@@ -205,23 +225,37 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
     const existingAnswerIndex = updatedAnswers.findIndex(
       (ans) => ans.idSoal === idSoal 
     );
+    console.log("ds", updatedAnswers)
     if (file != undefined || file != null){
       const uploadPromises = [];
+      const existingAnswerNonPilgan = updatedAnswers.findIndex(
+        (ans) => ans.id_question === id_question 
+      );
       uploadPromises.push(
         UploadFile(file.target).then((data) => {
-          if (existingAnswerIndex !== -1) {
-            updatedAnswers[existingAnswerIndex] = {urutan,idSoal,answer,nilaiSelected};
-            submitAnswer[existingAnswerIndex] = {urutan};
+          if (nilaiSelected != "essay") {
+            if (existingAnswerNonPilgan !== -1) {
+              updatedAnswers[existingAnswerNonPilgan] = {urutan,id_question,answer,nilaiSelected};
+              submitAnswer[existingAnswerNonPilgan] = [urutan,id_question,data.newFileName];
+            }else{
+              updatedAnswers.push({urutan,id_question,answer,nilaiSelected});
+              submitAnswer.push ([urutan,id_question,data.newFileName]) ;
+            }
           } else {
-            updatedAnswers.push({urutan,idSoal,answer,nilaiSelected});
-            submitAnswer.push ([urutan,id_question,data.newFileName]) ;
+            if (existingAnswerNonPilgan !== -1) {
+              updatedAnswers[existingAnswerNonPilgan] = {nilaiSelected,id_question,answer,nilaiSelected};
+              submitAnswer[existingAnswerNonPilgan] = [nilaiSelected,id_question,file];
+            }else{
+              updatedAnswers.push({nilaiSelected,id_question,answer,nilaiSelected});
+              submitAnswer.push ([nilaiSelected,id_question,file]) ;
+            }
           }
         })
       )
     }else{
       if (existingAnswerIndex !== -1) {
         updatedAnswers[existingAnswerIndex] = {urutan,idSoal,answer,nilaiSelected};
-        submitAnswer[existingAnswerIndex] = {urutan};
+        submitAnswer[existingAnswerIndex] = [urutan,idSoal];
       } else {
         updatedAnswers.push({urutan,idSoal,answer,nilaiSelected});
         submitAnswer.push ([urutan,idSoal]) ;
@@ -231,6 +265,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
 
     setAnswers(updatedAnswers);
     setSubmittedAnswers(submitAnswer);
+    console.log(submitAnswer)
     AppContext_test.indexTest = index;
   };
   
@@ -254,19 +289,19 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
   }, [questionNumbers]);
 
 
+  const [gambar, setGambar] = useState();
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const response = await axios.post("http://localhost:8080/Quiz/GetDataQuestion", {
+        const response = await axios.post(API_LINK + "Quiz/GetDataQuestion", {
           idMateri: AppContext_test.materiId,
           status: 'Aktif',
           quizType: quizType,
         });
-        console.log('ds',AppContext_test)
-        const checkIsDone = await axios.post("http://localhost:8080/Quiz/GetDataResultQuiz", {
+        const checkIsDone = await axios.post(API_LINK + "Quiz/GetDataResultQuiz", {
           materiId: AppContext_test.materiId,
-          karyawanId: "1",
+          karyawanId: AppContext_test.activeUser,
         });
         if (checkIsDone.data && Array.isArray(checkIsDone.data)) {
           if (checkIsDone.data.length == 0) {
@@ -275,59 +310,60 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
         }
 
         if (response.data && Array.isArray(response.data)) {
-          
-          AppContext_test.quizId = response.data[0].ForeignKey;
-          const questionMap = new Map();
-          const transformedData = response.data.map((item) => {
-            const { Soal, TipeSoal, Jawaban, UrutanJawaban, NilaiJawaban, ForeignKey, Key} = item;
-            if (!questionMap.has(Soal)) {
-              questionMap.set(Soal, true);
-              if (TipeSoal === "Essay") {
-                return {
-                  type: "Essay",
-                  question: Soal,
-                  correctAnswer: Jawaban,
-                  answerStatus: "none",
-                  id: Key,
-                };
-              } else if (TipeSoal === "Praktikum"){
-                return {
-                  type: "Praktikum",
-                  question: Soal,
-                  correctAnswer: Jawaban,
-                  answerStatus: "none",
-                  id: Key,
-                };
-              } else {
-                const options = response.data
+        AppContext_test.quizId = response.data[0].ForeignKey;
+        const questionMap = new Map();
+        const filePromises = [];
+
+        const transformedData = response.data.map((item) => {
+          const { Soal, TipeSoal, Jawaban, UrutanJawaban, NilaiJawaban, ForeignKey, Key, Gambar } = item;
+          if (!questionMap.has(Soal)) {
+            questionMap.set(Soal, true);
+            const question = {
+              id: Key,
+              type: TipeSoal,
+              question: Soal,
+              correctAnswer: Jawaban,
+              answerStatus: "none",
+              gambar: Gambar ? "" : null,
+            };
+
+            if (Gambar) {
+              const gambarPromise = fetch(API_LINK + `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(Gambar)}`)
+                .then((response) => response.blob())
+                .then((blob) => {
+                  const url = URL.createObjectURL(blob);
+                  question.gambar = url;
+                })
+                .catch((error) => {
+                  console.error("Error fetching gambar:", error);
+                });
+              filePromises.push(gambarPromise);
+            }
+
+            if (TipeSoal === "Pilgan") {
+              question.options = response.data
                 .filter(choice => choice.Key === item.Key)
                 .map(choice => ({
-                  value: choice.Jawaban, 
+                  value: choice.Jawaban,
                   urutan: choice.UrutanJawaban,
                   nomorSoal: choice.Key,
-                  nilai: choice.NilaiJawaban
+                  nilai: choice.NilaiJawaban,
                 }));
-                
-                return {
-                  type: "Pilgan",
-                  question: Soal,
-                  options: options,
-                  correctAnswer: options.find(option => option === Jawaban && NilaiJawaban !== "0"), 
-                  urutan: UrutanJawaban,
-                  answerStatus: "none",
-                  id: Key,
-                };
-              }
+              question.correctAnswer = question.options.find(option => option.value === Jawaban && option.nilai !== "0");
             }
-            return null;
-          }).filter(item => item !== null);
-          setQuestionNumbers(transformedData.length);
-          
-        console.log(checkIsDone)
-          setCurrentData(transformedData);
-        } else {
-          throw new Error("Data format is incorrect");
-        }
+
+            return question;
+          }
+          return null;
+        }).filter(item => item !== null);
+
+        await Promise.all(filePromises);
+
+        setCurrentData(transformedData);
+        setQuestionNumbers(transformedData.length);
+      } else {
+        throw new Error("Data format is incorrect");
+      }
       } catch (error) {
         setIsError(true);
         console.error("Fetch error:", error);
@@ -343,6 +379,14 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
     formDataRef.current.quizId = AppContext_test.quizId
   }, [AppContext_test.quizId]);
 
+  const getSubmittedAnswer = (itemId) => {
+    // Cari nilai yang sesuai dalam submittedAnswers
+    const answer = submittedAnswers.find(
+      (answer) => answer[1] === itemId
+    );
+    // Jika ditemukan, kembalikan nilai yang sesuai, jika tidak kembalikan string kosong
+    return answer ? answer[2] : "";
+  };
 
   useEffect(() => {
     document.documentElement.style.setProperty('--responsiveContainer-margin-left', '0vw');
@@ -371,7 +415,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
             const key = `${item.question}_${index}`;
             if (index + 1 !== selectedQuestion) return null;
             const currentIndex = index + 1;
-
+            console.log(item)
             return (
               <div key={key} className="mb-3" style={{ display: 'block', minWidth: '300px', marginRight: '20px' }}>
                 {/* Soal */}
@@ -379,6 +423,22 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
                   <h4 style={{ wordWrap: 'break-word', overflowWrap: 'break-word', textAlign:'justify' }}>
                     <div dangerouslySetInnerHTML={{ __html: item.question }} /> 
                   </h4>
+                {(item.type === "Essay" || item.type === "Praktikum") && item.gambar && (
+                  <div>
+                    <img
+                      id="image"
+                      src={item.gambar}
+                      alt="gambar"
+                      className="img-fluid"
+                      style={{
+                        maxWidth: '300px',
+                        maxHeight: '300px',
+                        overflow: 'hidden',
+                        marginLeft: '10px'
+                      }}
+                    />
+                  </div>
+                )}
                 </div>
 
                 {/* Jawaban */}
@@ -388,9 +448,17 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
                     label="Jawaban (.zip)"
                     formatFile=".zip"
                     onChange={(event) => handleFileChange(fileInputRef, "zip", event, index + 1, item.id)}
+                    style={{ width: '145vh' }}
                   />
                 ) : item.type === "Essay" ? (
-                  <KMS_Uploader />
+                  <Input
+                    name="essay_answer"
+                    type="textarea"
+                    label="Jawaban Anda:"
+                    value={getSubmittedAnswer(item.id)}
+                    onChange={(event) => handleTextareaChange(event, index + 1, item.id)}
+                    style={{ width: '145vh' }}
+                  />
                 ) : (
                   <div className="d-flex flex-column">
                     {item.options.map((option, index) => {
