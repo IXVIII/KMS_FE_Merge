@@ -43,11 +43,11 @@ const CardKategoriProgram = ({ onChangePage, kategori }) => {
       <div className="card-kategori-program-container"  style={{ width: "50%" }}> 
         <div className="card-kategori-program">
           <div className="card mt-3">
-            <div className="card-body">
+            <div className="card-body" onClick={() => onChangePage("index", AppContext_test.KategoriIdByKK = kategori.Key, AppContext_master.KategoriIdByKK = kategori.Key)}>
               <div className="d-flex justify-content-between">
                 <h6
                   className="card-title"
-                  onClick={() => onChangePage("index", AppContext_test.KategoriIdByKK = kategori.Key, AppContext_master.KategoriIdByKK = kategori.Key)}
+                  
                 >
                   {kategori["Nama Kategori Program"]}
                 </h6>

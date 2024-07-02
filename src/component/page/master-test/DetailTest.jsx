@@ -74,9 +74,9 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
   }, []);
 
   const getSubmittedAnswer = (itemId) => {
-    console.log("bji",  answerUser)
     for (let i = 0; i < answerUser.length; i++) {
         if (answerUser[i].idSoal == " " + itemId) {
+          console.log(answerUser[i].namaFile)
             return answerUser[i] ? answerUser[i].namaFile : "";
         }
     }
@@ -99,7 +99,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
           tipeQuiz: quizType,
           idQuiz: AppContext_test.reviewQuizId,
         });
-        console.log("dsds", AppContext_test)
         const jawabanPenggunaStr = answerResponse.data[0].JawabanPengguna;
 
         const jawabanPengguna = jawabanPenggunaStr
@@ -129,7 +128,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
       });
         const validJawabanPengguna = processedJawaban.filter(item => item.length === 3);
 
-      console.log("cc", validJawabanPengguna)
         // Map the filtered array to the desired format
         const formattedAnswers = validJawabanPengguna.map(item => ({
           idSoal: item[1],
@@ -167,7 +165,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
             jawabanPengguna.soal.push(parseInt(soal, 10));
             jawabanPengguna.file.push(parseInt(file, 10));
           }
-            console.log(jawabanPengguna)
 
 
           const transformedData = questionResponse.data.map((item) => {
@@ -218,7 +215,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
           setTotalQuestion(transformedData.length)
           setQuestionNumbers(transformedData.length);
           setCurrentData(transformedData);
-          console.log(currentData)
           updateAnswerStatus(transformedData, jawabanPengguna);
         } else {
           throw new Error("Data format is incorrect");
@@ -252,7 +248,31 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
       });
       setAnswerStatus(statusArray);
     };  
+  
+    const downloadFile = async (namaFile) => {
+    try {
+    namaFile = namaFile.trim();
+    // namaFile = " " + namaFile;
+      const response = await axios.get(`${API_LINK}Utilities/Upload/DownloadFile`, {
+            params: {
+              namaFile 
+            },
+            responseType: 'arraybuffer' 
+          }); 
 
+          const blob = new Blob([response.data], { type: response.headers['content-type'] });
+          const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = namaFile;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    } catch (error) {
+      console.error('There was a problem with the fetch operation:', error);
+    }
+  };
+  
   const processOptions = (nomorSoal, jawabanPengguna_soal) => {
     let fix_jawabanPengguna_soal;
     let i = 0;
@@ -264,7 +284,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
     return i ;
   };
 
-  
+  AppContext_test.durasiTest = 10000;
   return (
     <>
       <div className="d-flex">
@@ -280,6 +300,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
         <div className="flex-fill p-3 d-flex flex-column"  style={{marginLeft:"21vw"}}>
           <div className="mb-3 d-flex flex-wrap" style={{ overflowX: 'auto' }}> 
             {currentData.map((item, index) => {
+              // const matchedAnswer = formattedAnswers.find(answer => answer.idSoal === " " + item.Key);
               if (index + 1 !== selectedQuestion) return null;
               return (
                 <div key={index} className="mb-3" style={{ display: 'block', verticalAlign: 'top', minWidth: '300px', marginRight: '20px' }}>
@@ -291,14 +312,13 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
                   </div>
 
                   {/* Jawaban */}
-                  {item.type === "Praktikum" ? (
-                  <FileUpload
-                    forInput="jawaban_file"
-                    label="Jawaban (.zip)"
-                    formatFile=".zip"
-                    onChange={(event) => handleFileChange(fileInputRef, "zip", event, index + 1, item.id)}
-                  />
-                ) : item.type === "Essay" ? (
+                {item.type === "Praktikum" ? (
+                    <button className="btn btn-primary" 
+                      onClick={() => downloadFile(getSubmittedAnswer(item.id) ? getSubmittedAnswer(item.id) : "Tidak ada file")}>
+                      <i className="fi fi-rr-file-download me-2"></i>
+                      {getSubmittedAnswer(item.id) ? getSubmittedAnswer(item.id) : "Tidak ada jawaban" }
+                    </button>
+                ) : item.type === "Essay" ? ( 
                   <Input
                     name="essay_answer"
                     type="textarea"
