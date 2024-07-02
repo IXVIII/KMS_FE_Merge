@@ -33,8 +33,10 @@ const inisialisasiData = [
 
 export default function MasterDaftarPustakaIndex({ onChangePage, withID }) {
   let activeUser = "";
+  let activerole = "";
   const cookie = Cookies.get("activeUser");
   if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+  if (cookie) activerole = JSON.parse(decryptId(cookie)).role;
 
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -167,27 +169,6 @@ export default function MasterDaftarPustakaIndex({ onChangePage, withID }) {
               filePromises.push(gambarPromise);
             }
 
-            if (value["File"]) {
-              const filePromise = fetch(
-                API_LINK +
-                  `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
-                    value["File"]
-                  )}`
-              )
-                .then((response) => response.blob())
-                .then((blob) => {
-                  const url = URL.createObjectURL(blob);
-                  value.fls = value.File;
-                  value.File = url;
-                  return value;
-                })
-                .catch((error) => {
-                  console.error("Error fetching file:", error);
-                  return value;
-                });
-              filePromises.push(filePromise);
-            }
-
             return Promise.all(filePromises).then((results) => {
               const updatedValue = results.reduce(
                 (acc, curr) => ({ ...acc, ...curr }),
@@ -205,6 +186,7 @@ export default function MasterDaftarPustakaIndex({ onChangePage, withID }) {
               console.error("Error updating currentData:", error);
             });
         }
+        console.log(currentData);
         setIsLoading(false);
         break;
       }
@@ -316,12 +298,16 @@ export default function MasterDaftarPustakaIndex({ onChangePage, withID }) {
           {/* Tombol Tambah */}
           <div className="flex-fill">
             <div className="input-group">
-              <Button
-                iconName="add"
-                classType="success"
-                label={"Tambah"}
-                onClick={() => onChangePage("add")}
-              />
+              {activerole === "ROL03" || activerole === "ROL05" ? (
+                <Button
+                  iconName="add"
+                  classType="success"
+                  label={"Tambah"}
+                  onClick={() => onChangePage("add")}
+                />
+              ) : (
+                <span></span>
+              )}
               <Input
                 ref={searchQuery}
                 forInput="pencarianAlatMesin"

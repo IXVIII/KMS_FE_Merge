@@ -11,6 +11,7 @@ import { decryptId } from "../../util/Encryptor";
 import Label from "../../part/Label";
 import CardPengajuanBaru from "../../part/CardPengajuanBaru";
 import Loading from "../../part/Loading";
+import Alert from "../../part/Alert";
 
 const inisialisasiKK = [
   {
@@ -119,11 +120,24 @@ export default function PengajuanIndex({ onChangePage }) {
           await new Promise((resolve) => setTimeout(resolve, 2000));
         } else {
           const formattedData = data.map((value) => {
-            if (value.Status === "Ditolak" || value.Status === "Dibatalkan")
+            if (value.Status === "Ditolak" || value.Status === "Dibatalkan") {
               return { ...value, Status: "Kosong" };
+            }
             return value;
           });
-          setListKK(formattedData);
+
+          const waitingCount = formattedData.filter(
+            (value) => value.Status === "Menunggu Acc"
+          ).length;
+
+          const finalData = formattedData.map((value) => {
+            if (waitingCount === 2 && value.Status !== "Menunggu Acc") {
+              return { ...value, Status: "None" };
+            }
+            return value;
+          });
+
+          setListKK(finalData);
           setIsLoading(false);
           break;
         }
@@ -153,14 +167,12 @@ export default function PengajuanIndex({ onChangePage }) {
 
   useEffect(() => {
     if (dataAktif) {
-      console.log("vvv");
       const formattedData = listKK.map((value) => {
         if (value.Status === "Kosong") return { ...value, Status: "None" };
         return value;
       });
       setListKK(formattedData);
     }
-    console.log("cccc");
   }, [dataAktif]);
 
   const getLampiran = async () => {
@@ -242,6 +254,23 @@ export default function PengajuanIndex({ onChangePage }) {
     console.log(dataAktif);
     if (dataAktif) getLampiran();
   }, [dataAktif]);
+
+  useEffect(() => {
+    if (document.getElementById("legend-top")) {
+      document.getElementById("legend-top").innerHTML = `
+        <div class="d-flex">
+          <p class="mb-0 me-3">
+            <span
+              style="
+                padding: 0px 10px;
+                margin: 0px 10px;
+                background-color: #FFC107;
+              "
+            ></span>Menunggu Persetujuan Prodi
+          </p>
+        </div>`;
+    }
+  }, []);
 
   return (
     <>
@@ -367,6 +396,13 @@ export default function PengajuanIndex({ onChangePage }) {
                 </Filter>
               </div>
               <div className="container">
+                {listKK.filter((value) => value.Status === "Menunggu Acc")
+                  .length == 2 && (
+                  <Alert
+                    type="info mt-3"
+                    message="Anda hanya bisa mendaftar pada 2 Kelompok Keahlian. Tunggu konfirmasi dari prodi.."
+                  />
+                )}
                 <div className="row mt-3 gx-4">
                   {listKK
                     ?.filter((value) => {
