@@ -97,16 +97,11 @@ export default function MasterTestIndex({ onChangePage }) {
       .then(() => setIsLoading(false));
   }
 
-  function onStartTest() {
-    window.location.href = ROOT_LINK + "/master_test/soal-test";
-  }
-
   useEffect(() => {
     setIsError(false);
     UseFetch(API_LINK + "MasterTest/GetDataTest", currentFilter)
       .then((data) => {
         if (data === "ERROR")
-          //Harusnya true
           setIsError(false);
         else if (data.length === 0) setCurrentData(inisialisasiData);
         else {

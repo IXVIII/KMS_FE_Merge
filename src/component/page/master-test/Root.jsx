@@ -23,6 +23,7 @@ export default function MasterTest() {
   const [quizId, setQuizId] = useState("");
   const [quizType, setQuizType] = useState("");
   const [isOpen, setIsOpen] = useState();
+  const [refreshKey, setRefreshKey] = useState(0);
 
   function handlePreTestClick_close() {
     setMarginRight("0vh");
@@ -43,6 +44,7 @@ export default function MasterTest() {
   }, [pageMode]);
 
   function getPageMode() {
+    const key = `${pageMode}-${refreshKey}`;
     switch (pageMode) {
       case "index":
         return (
@@ -102,9 +104,9 @@ export default function MasterTest() {
           />
         );
       case "materipdf":
-        return <MasterTestMateriPDF onChangePage={handleSetPageMode} />;
+        return <MasterTestMateriPDF onChangePage={handleSetPageMode} key={key}/>;
       case "materivideo":
-        return <MasterTestMateriVideo onChangePage={handleSetPageMode} />;
+        return <MasterTestMateriVideo onChangePage={handleSetPageMode} key={key}/>;
     }
   }
 
@@ -130,6 +132,8 @@ export default function MasterTest() {
       isOpen={isOpen}
       onChangePage={handleSetPageMode}
       materiId={materiId}
+      refreshKey={refreshKey}
+      setRefreshKey={setRefreshKey}
     />
     {getPageMode()}
   </div>

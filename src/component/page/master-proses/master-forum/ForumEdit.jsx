@@ -90,11 +90,11 @@ export default function MasterForumEdit({ onChangePage }) {
 
     try {
       console.log("FormData being sent:", formData);
-      const response = await axios.post(API_LINK + "Forum/EditDataForum", {
+      const response = await UseFetch(API_LINK + "Forum/EditDataForum", {
         p1: Materi.Key,
         p2: formData.forumJudul,
         p3: formData.forumIsi,
-        p4: 'ika',
+        p4: AppContext_test.displayName,
       });
 
       if (response.status === 200) {

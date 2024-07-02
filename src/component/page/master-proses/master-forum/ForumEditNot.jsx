@@ -12,6 +12,7 @@ import { API_LINK } from "../../../util/Constants";
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 import { Editor } from '@tinymce/tinymce-react';
+import Swal from 'sweetalert2';
 
 const userSchema = object({
   forumJudul: string().max(100, "maksimum 100 karakter").required("harus diisi"),
@@ -26,11 +27,11 @@ export default function MasterForumEditNot({ onChangePage }) {
   const [formData, setFormData] = useState({
     // materiId: AppContext_test.dataIDMateri,
     materiId:AppContext_test.DetailMateriEdit?.Key || "",
-    karyawanId: "040",
+    karyawanId: AppContext_test.activeUser,
     forumJudul: "",
     forumIsi: "",
-    forumCreatedBy: "ika",
     forumStatus: "Aktif",
+    forumCreatedBy: AppContext_test.displayName,
   });
 
   const handleInputChange = async (e) => {
@@ -49,11 +50,11 @@ export default function MasterForumEditNot({ onChangePage }) {
   const resetForm = () => {
     setFormData({
       materiId:AppContext_test.DetailMateri?.Key || "",
-      karyawanId: "040",
+      karyawanId: AppContext_test.activeUser,
       forumJudul: "",
       forumIsi: "",
-      forumCreatedBy: "ika",
       forumStatus: "Aktif",
+      forumCreatedBy: AppContext_test.displayName,
     });
     setErrors({});
     setIsError({ error: false, message: "" });
@@ -86,12 +87,15 @@ export default function MasterForumEditNot({ onChangePage }) {
       if (response === "ERROR") {
         setIsError({ error: true, message: "Terjadi kesalahan: Gagal menyimpan data Sharing." });
       } else {
-        SweetAlert("Sukses", "Data Forum berhasil disimpan", "success")
-        .then(() => {
+        Swal.fire({
+          title: 'Sukses',
+          text: 'Data Forum berhasil disimpan',
+          icon: 'success',
+          confirmButtonText: 'OK',
+        }).then((result) => {
+          if (result.isConfirmed) {
           onChangePage("forumEdit");
-        })
-        .catch((error) => {
-          console.error("SweetAlert encountered an error:", error);
+          }
         });
       }
     } catch (error) {

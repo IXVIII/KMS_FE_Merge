@@ -12,7 +12,8 @@ import FileUpload from "../../../part/FileUpload";
 import uploadFile from "../../../util/UploadImageQuiz";
 import Swal from 'sweetalert2';
 import { Editor } from '@tinymce/tinymce-react';
-import AppContext_test from "../MasterContext";
+import AppContext_master from "../MasterContext";
+import AppContext_test from "../../master-test/TestContext";
 
 export default function MasterPostTestAdd({ onChangePage }) {
   const [formContent, setFormContent] = useState([]);
@@ -25,6 +26,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
   const gambarInputRef = useRef(null);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
+  console.log("dd", AppContext_master)
   const handleChange = (name, value) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -60,7 +62,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
   };
 
   const [formData, setFormData] = useState({
-    materiId: AppContext_test.dataIDMateri,
+    materiId: AppContext_master.dataIDMateri,
     quizJudul: '',
     quizDeskripsi: '',
     quizTipe: 'Posttest',
@@ -68,7 +70,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
     tanggalAkhir: '',
     timer: '',
     status: 'Aktif',
-    createdby: 'Admin',
+    createdby: AppContext_test.displayName,
   });
 
   const [formQuestion, setFormQuestion] = useState({
@@ -78,7 +80,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
     gambar: null,
     questionDeskripsi: '',
     status: 'Aktif',
-    quecreatedby: 'Admin',
+    quecreatedby: AppContext_test.displayName,
   });
 
   formData.timer = timer;
@@ -88,7 +90,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
     isiChoice: '',
     questionId: '',
     nilaiChoice: '',
-    quecreatedby: 'Admin',
+    quecreatedby: AppContext_test.displayName,
   });
 
   const userSchema = object({
@@ -102,7 +104,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
     gambar: null,
     questionDeskripsi: '',
     status: 'Aktif',
-    quecreatedby: 'Admin',
+    quecreatedby: AppContext_test.displayName,
   };
 
   const handleQuestionTypeChange = (e, index) => {
@@ -135,18 +137,22 @@ export default function MasterPostTestAdd({ onChangePage }) {
       }
     }
   
-    // Hitung total point dari semua pertanyaan dan opsi
-    const totalQuestionPoint = formContent.reduce((total, question) => total + parseInt(question.point), 0);
+    
+    const totalQuestionPoint = formContent.reduce((total, question) => {
+      if (question.type !== 'Pilgan') {
+        total = total + parseInt(question.point)
+      }
+        return total;
+    }, 0);
+
     const totalOptionPoint = formContent.reduce((total, question) => {
       if (question.type === 'Pilgan') {
         return total + question.options.reduce((optionTotal, option) => optionTotal + parseInt(option.point || 0), 0);
       }
       return total;
     }, 0);
-    
-    // Total point dari semua pertanyaan dan opsi harus berjumlah 100, tidak kurang dan tidak lebih
+
     if (totalQuestionPoint + totalOptionPoint !== 100) {
-    // if (totalQuestionPoint !== 100) {
       Swal.fire({
         title: 'Gagal!',
         text: 'Total skor harus berjumlah 100',
@@ -182,7 +188,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
           gambar: question.gambar,
           questionDeskripsi: '',
           status: 'Aktif',
-          quecreatedby: 'Admin',
+          quecreatedby: AppContext_test.displayName,
         };
         if (question.type === 'Essay' || question.type === 'Praktikum') {
           if (question.selectedFile) {
@@ -228,7 +234,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
               answerText: question.correctAnswer, // Pastikan menggunakan correctAnswer dari question
               questionId: questionId,
               nilaiChoice: question.point,
-              quecreatedby: 'Admin',
+              quecreatedby: AppContext_test.displayName,
             };
   
             try {
@@ -250,7 +256,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
                 answerText: option.label,
                 questionId: questionId,
                 nilaiChoice: option.point || 0,
-                quecreatedby: 'Admin',
+                quecreatedby: AppContext_test.displayName,
               };
   
               console.log("hasil multiple choice")
@@ -518,31 +524,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
     link.click();
   };
 
-  const convertTimeToSeconds = (time) => {
-    // Pastikan nilai time dalam bentuk string dengan format "HH:MM"
-    const timeString = typeof time === 'string' ? time.trim() : time.toLocaleTimeString();
-
-    // Pisahkan string waktu menjadi jam dan menit
-    const timeParts = timeString.split(':');
-
-    // Periksa apakah ada 2 bagian (jam dan menit) setelah pemisahan
-    if (timeParts.length !== 2) {
-      console.error('Invalid time format:', timeString);
-      return NaN;
-    }
-
-    // Ambil jam dan menit dari hasil pemisahan
-    const [hours, minutes] = timeParts.map(Number);
-
-    // Periksa apakah jam dan menit valid (tidak menghasilkan NaN)
-    if (isNaN(hours) || isNaN(minutes)) {
-      console.error('Invalid time format:', timeString);
-      return NaN;
-    }
-
-    // Kembalikan total detik dari waktu yang diberikan
-    return hours * 3600 + minutes * 60;
-  };
+  
 
   const updateFormQuestion = (name, value) => {
     setFormQuestion((prevFormQuestion) => ({
@@ -587,6 +569,29 @@ export default function MasterPostTestAdd({ onChangePage }) {
       [validationError.name]: validationError.error,
     }));
   };
+  const convertTimeToSeconds = () => {
+      return parseInt(hours) * 3600 + parseInt(minutes) * 60;
+  };
+  
+  const [hours, setHours] = useState('00');
+  const [minutes, setMinutes] = useState('00');
+  
+  const handleHoursChange = (e) => {
+      setHours(e.target.value);
+  };
+
+  const handleMinutesChange = (e) => {
+      setMinutes(e.target.value);
+  };
+  
+  const convertSecondsToTimeFormat = (seconds) => {
+      const formatHours = Math.floor(seconds / 3600).toString().padStart(2, '0');
+      const formatMinutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+
+      setHours(formatHours);
+      setMinutes(formatMinutes);
+      return `${formatHours}:${formatMinutes}`;
+  };
 
   if (isLoading) return <Loading />;
 
@@ -629,7 +634,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
         <div>
           <Stepper
             steps={[
-              { label: 'Materi', onClick: () => onChangePage("courseAdd") },
+              { label: 'Materi', onClick: () => onChangePage("materiAdd") },
               { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
               { label: 'Sharing Expert', onClick: () => onChangePage("sharingAdd") },
               { label: 'Forum', onClick: () => onChangePage("forumAdd") },
@@ -678,18 +683,45 @@ export default function MasterPostTestAdd({ onChangePage }) {
               </div>
             </div>
             <div className="row mb-4">
-              <div className="col-lg-4">
-                <Input
-                  type="time"
-                  name="timer"
-                  label="Durasi (dalam menit)"
-                  forInput="timerInput"
-                  value={timer}
-                  onChange={handleTimerChange}
-                  isRequired={true}
-                // stepSize="60"
-                />
-              </div>
+                <div className="col-lg-4">
+                    <label htmlFor="waktuInput" className="form-label">
+                        <span style={{ fontWeight: 'bold' }}>Durasi:</span>
+                        <span style={{ color: 'red' }}> *</span>
+                    </label>
+
+                    <div className="d-flex align-items-center">
+                        <div className="d-flex align-items-center me-3">
+                            <select 
+                                className="form-select me-2" 
+                                name="hours" 
+                                value={hours} 
+                                onChange={handleHoursChange}
+                            >
+                                {[...Array(24)].map((_, i) => (
+                                    <option key={i} value={i.toString().padStart(2, '0')}>
+                                        {i.toString().padStart(2, '0')}
+                                    </option>
+                                ))}
+                            </select>
+                            <span>Jam</span>
+                        </div>
+                        <div className="d-flex align-items-center">
+                            <select 
+                                className="form-select me-2" 
+                                name="minutes" 
+                                value={minutes} 
+                                onChange={handleMinutesChange}
+                            >
+                                {[...Array(60)].map((_, i) => (
+                                    <option key={i} value={i.toString().padStart(2, '0')}>
+                                        {i.toString().padStart(2, '0')}
+                                    </option>
+                                ))}
+                            </select>
+                            <span>Menit</span>
+                        </div>
+                    </div>
+                </div>
               <div className="col-lg-4">
                 <Input
                   label="Tanggal Dimulai:"

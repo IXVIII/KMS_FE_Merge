@@ -15,29 +15,14 @@ import KMS_Rightbar from "../../part/KMS_RightBar";
 import axios from "axios";
 import AppContext_master from "../master-proses/MasterContext";
 import AppContext_test from "./TestContext";
-const inisialisasiData = [
-  {
-    Key: null,
-    No: null,
-    "Kode Test": null,
-    "Nama Test": null,
-    "Alamat Test": null,
-    Status: null,
-    Count: 0,
-  },
-];
+
 export default function MasterTestIndex({  onChangePage, CheckDataReady, materiId  }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState();
-  const [currentFilter, setCurrentFilter] = useState({
-    page: 1,
-    query: "",
-    sort: "[Kode Test] asc",
-    status: "Aktif",
-  });
   const [marginRight, setMarginRight] = useState("5vh");
 
+  AppContext_test.refreshPage = "pengenalan";
   useEffect(() => {
     document.documentElement.style.setProperty('--responsiveContainer-margin-left', '0vw');
     const sidebarMenuElement = document.querySelector('.sidebarMenu');
@@ -45,6 +30,28 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
       sidebarMenuElement.classList.add('sidebarMenu-hidden');
     }
   }, []);
+
+  async function updateProgres() {
+    let success = false;
+    let retryCount = 0;
+    const maxRetries = 5; 
+
+    while (!success && retryCount < maxRetries) {
+      try {
+        AppContext_test.refreshPage += 1;
+        await axios.post(API_LINK + "Materis/UpdatePoinProgresMateri", {
+          materiId: AppContext_test.materiId,
+        });
+        success = true; 
+      } catch (error) {
+        console.error("Failed to save progress:", error);
+        retryCount += 1;
+        if (retryCount >= maxRetries) {
+          console.error("Max retries reached. Stopping attempts to save progress.");
+        }
+      }
+    }
+  };
 
   function handleStartPostTest() {
     onChangePage("pengerjaantest", "Posttest", materiId);
@@ -92,7 +99,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
     const getMateri = async (retries = 10, delay = 5000) => {
       for (let i = 0; i < retries; i++) {
         try {
-          const response = await axios.post("http://localhost:8080/Materis/GetDataMateriById", {
+          const response = await axios.post(API_LINK + "Materis/GetDataMateriById", {
             materiId: AppContext_test.materiId,
           });
           if (response.data.length != 0) {
@@ -117,6 +124,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
   }, [materiId]);
 
   useEffect(() => {
+    updateProgres();
   }, [currentData]);
 
 

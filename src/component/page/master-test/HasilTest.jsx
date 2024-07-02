@@ -27,6 +27,7 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
   const [marginRight, setMarginRight] = useState("5vh");
   const [receivedMateriId, setReceivedMateriId] = useState();
 
+  AppContext_test.refreshPage = "hasiltest";
   function lihatHasil() {
     onChangePage("detailtest", AppContext_test.quizType, materiId);
   }
@@ -52,6 +53,7 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
           if (data && Array.isArray(data)) {
             if (data.length === 0) {
             } else {
+              console.log("dsds", data)
               setCurrentData(data);
             }
           } else {
@@ -73,14 +75,14 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
     const fetchDataWithRetry = async (retries = 10, delay = 5000) => {
       for (let i = 0; i < retries; i++) {
         try {
-          const response = await axios.post("http://localhost:8080/Quiz/GetDataResultQuiz", {
+          const response = await axios.post(API_LINK + "Quiz/GetDataResultQuiz", {
             quizId: AppContext_test.materiId,
-            karyawanId: "1",
+            karyawanId: AppContext_test.activeUser,
             tipeQuiz: AppContext_test.quizType
           });
-            console.log("why" , AppContext_test)
 
           if (response.data.length != 0) {
+            AppContext_test.reviewQuizId = response.data[0].Key
             return response.data;
           }
         } catch (error) {
@@ -111,6 +113,7 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
       sidebarMenuElement.classList.add('sidebarMenu-hidden');
     }
   }, []);
+
   return (
     <>
       {isLoading ? (

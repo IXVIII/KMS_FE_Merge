@@ -6,9 +6,15 @@ import UseFetch from "../util/UseFetch";
 import KMS_ProgressBar from "../part/KMS_ProgressBar";
 import axios from "axios";
 import Loading from "../part/Loading";
+import Cookies from "js-cookie";
 import AppContext_test from "../page/master-test/TestContext";
+import { decryptId } from "../util/Encryptor";
 
-export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestClick_open, onChangePage, isOpen, materiId }) {
+export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestClick_open, onChangePage, isOpen, materiId, refreshKey, setRefreshKey }) {
+  let activeUser = "";
+  const cookie = Cookies.get("activeUser");
+  if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+  AppContext_test.activeUser = activeUser;
   const [dropdowns, setDropdowns] = useState({});
   const [sidebarVisible, setSidebarVisible] = useState(true);
   const [widthDynamic, setwidthDynamic] = useState("");
@@ -19,10 +25,11 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState([]);
   const [currentDataMateri, setCurrentDataMateri] = useState([]);
+  const [currentFilter, setCurrentFilter] = useState([]);
   const [idMateri, setIdMateri] = useState("");
   useEffect(() => {
-  }, [AppContext_test.materiId]);
-
+    console.log("b",AppContext_test)
+  }, [AppContext_test]);
   useEffect(() => {
     setShowMainContent_SideBar(isOpen);
   }, [isOpen]);
@@ -30,161 +37,61 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
   const isDataReadyTemp = "";
   const materiIdTemp = "";
   const isOpenTemp = true;
+  
+  //
   useEffect(() => {
-    let isMounted = false;
-
-    const fetchData_rightBar = async () => {
+    const fetchData = async () => {
       setIsLoading(true);
       try {
-        const dataMateri = await fetchDataMateri_rightBar();
-        if (isMounted) {
-          if (dataMateri) {
-            setCurrentDataMateri(dataMateri);
-          } else {
-            console.error("Response data is undefined or null");
-          }
+        // Panggil semua fungsi fetch data di sini
+        const materiData = await fetchDataMateri();
+        const progresData = await fetchProgresMateri();
+
+        if (materiData && progresData) {
+          setCurrentDataMateri(materiData);
+          setCurrentData(progresData);
+        } else {
+          console.error('Response data is undefined or null');
         }
       } catch (error) {
-        if (isMounted) {
-          setIsError(true);
-          console.error("Fetch error:", error);
-        }
+        setIsError(true);
+        console.error('Fetch error:', error);
       } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+        setIsLoading(false);
       }
     };
 
-    const fetchDataMateri_rightBar = async (retries = 10, delay = 5000) => {
-      for (let i = 0; i < retries; i++) {
-        try {
-          const response = await axios.post("http://localhost:8080/Materis/GetDataMateriById", {
-            materiId: AppContext_test.materiId,
-          });
-          if (response.data != 0) {
-            isMounted = true;
-            return response.data;
-          }
-        } catch (error) {
-          // console.error("Error fetching quiz data:", error);
-          // console.log("halo", AppContext_test.materiId)
-          if (i < retries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
-          } else {
-            throw error;
-          }
-        }
+    fetchData();
+  }, [AppContext_test.materiId, AppContext_test.refreshPage, refreshKey]);
+  
+  const fetchDataMateri = async () => {
+    try {
+      const response = await axios.post(API_LINK + 'Materis/GetDataMateriById', {
+        materiId: AppContext_test.materiId,
+      });
+      if (response.data) {
+        return response.data;
       }
-    };
+    } catch (error) {
+      console.error('Error fetching quiz data:', error);
+      return null;
+    }
+  };
 
-    fetchData_rightBar();
-
-    return () => {
-      isMounted = false; 
-    };
-  }, [AppContext_test.materiId]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchData_rightBar = async () => {
-      setIsLoading(true);
-      try {
-        const dataMateri = await updateProgres();
-      } catch (error) {
-        if (isMounted) {
-          setIsError(true);
-          console.error("Fetch error:", error);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
+  const fetchProgresMateri = async () => {
+    try {
+      const response = await axios.post(API_LINK + 'Materis/GetProgresMateri', {
+        materiId: AppContext_test.materiId,
+        karyawanId: AppContext_test.activeUser,
+      });
+      if (response.data) {
+        return response.data;
       }
-    };
-
-    const updateProgres = async (retries = 10, delay = 5000) => {
-      for (let i = 0; i < retries; i++) {
-        try {
-          const response = await axios.post("http://localhost:8080/Materis/UpdatePoinProgresMateri", {
-            materiId: AppContext_test.materiId,
-          });
-
-          if (response.data != 0) {
-            return response.data;
-          }
-        } catch (error) {
-          console.error("Error fetching quiz data:", error);
-          if (i < retries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
-          } else {
-            throw error;
-          }
-        }
-      }
-    };
-
-    fetchData_rightBar();
-
-    return () => {
-      isMounted = false; 
-    };
-  }, [AppContext_test.materiId, AppContext_test.refreshPage]);
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchData_rightBar = async () => {
-      setIsLoading(true);
-      try {
-        const data = await fetchDataWithRetry_rightBar();
-        if (isMounted) {
-          if (data) {
-                setCurrentData(data);
-                // console.log(currentData)
-          } else {
-            // console.error("Response data is undefined or null");
-          }
-        }
-      } catch (error) {
-        if (isMounted) {
-          setIsError(true);
-          console.error("Fetch error:", error);
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
-    const fetchDataWithRetry_rightBar = async (retries = 10, delay = 5000) => {
-      for (let i = 0; i < retries; i++) {
-        try {
-          const response = await axios.post("http://localhost:8080/Materis/GetProgresMateri", {
-            materiId: AppContext_test.materiId,
-            karyawanId: '1',
-          });
-          if (response.data != 0) {
-            return response.data;
-          }
-        } catch (error) {
-          console.error("Error fetching progres data:", error);
-          if (i < retries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
-          } else {
-            throw error;
-          }
-        }
-      }
-    };
-    fetchData_rightBar();
-
-    return () => {
-      isMounted = false; 
-    };
-  }, [AppContext_test.materiId, AppContext_test.refreshPage]);
+    } catch (error) {
+      console.error('Error fetching progres data:', error);
+      return null;
+    }
+  };
 
   const toggleDropdown = (name) => {
     setDropdowns((prev) => ({ ...prev, [name]: !prev[name] }));
@@ -266,12 +173,14 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
   };
 
   const handleItemClick = (page, url, updateProgres) => {
+    setRefreshKey(prevKey => prevKey + 1); 
     onChangePage(page);
     AppContext_test.urlMateri = url;
     AppContext_test.refreshPage = page;
     AppContext_test.progresMateri = updateProgres;
   };
-
+  useEffect(() => {
+    }, [refreshKey]);
   const [dropdownData, setDropdownData] = useState([]);
   const [showPengenalan, setShowPengenalan] = useState(false);
   const [showPreTest, setShowPreTest] = useState(false);
@@ -279,13 +188,15 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
   const [showPostTest, setShowPostTest] = useState(false);
 
   useEffect(() => {
+    if (currentDataMateri[0]?.File_video != ""){
+    } 
     if (currentDataMateri && currentDataMateri.length > 0) {
       const updatedDropdownData = [
-        ...(currentDataMateri[0]?.File_pdf != null || currentDataMateri[0]?.File_video != null ? [{
+        ...(currentDataMateri[0]?.File_pdf != null || currentDataMateri[0]?.File_pdf != "" || currentDataMateri[0]?.File_video != null || currentDataMateri[0]?.File_video != "" ? [{
           name: 'Materi',
           items: [
-            ...(currentDataMateri[0]?.File_pdf != null ? [{ label: 'Materi PDF', onClick: () => handleItemClick("materipdf", currentDataMateri[0]?.File_pdf, "materi_pdf") }] : []),
-            ...(currentDataMateri[0]?.File_video != null ? [{ label: 'Materi Video', onClick: () => handleItemClick("materivideo", currentDataMateri[0]?.File_video, "materi_video") }] : [])
+            ...(currentDataMateri[0]?.File_pdf != "" ? [{ label: 'Materi PDF', onClick: () => handleItemClick("materipdf", currentDataMateri[0]?.File_pdf, "materi_pdf") }] : []),
+            ...(currentDataMateri[0]?.File_video != "" ? [{ label: 'Materi Video', onClick: () => handleItemClick("materivideo", currentDataMateri[0]?.File_video, "materi_video") }] : [])
           ],
           countDone: 5
         }] : []),
@@ -298,7 +209,7 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
           countDone: 2
         }] : [])
       ];
-
+      console.log("aa", currentDataMateri)
       setDropdownData(updatedDropdownData);
       setShowPengenalan(currentDataMateri[0]?.Pengenalan != null);
       setShowPreTest(currentDataMateri[0]?.PreTest != null);
@@ -333,7 +244,7 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
       onChangePage(
         "index"
       );
-      AppContext_test.refreshPage = true;
+      AppContext_test.refreshPage += 1;
     }
 
   function onClick_forum() {

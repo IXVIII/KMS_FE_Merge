@@ -24,4 +24,4 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "@flaticon/flaticon-uicons/css/regular/rounded.css";
 import "@flaticon/flaticon-uicons/css/bold/rounded.css";
 
-ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
