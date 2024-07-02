@@ -16,6 +16,7 @@ import Sidebar from '../../backbone/SideBar';
 import styled from 'styled-components';
 import KMS_Uploader from "../../part/KMS_Uploader";
 import axios from "axios";
+import AppContext_test from "./TestContext";
 
 const ButtonContainer = styled.div`
     position: fixed;
@@ -34,6 +35,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
   const [questionNumbers, setQuestionNumbers] = useState(0);
   const [totalQuestion, setTotalQuestion] = useState();
   const [answerStatus, setAnswerStatus] = useState([]);
+  const [answerUser, setAnswerUser] = useState([]);
   const selectPreviousQuestion = () => {
     if (selectedQuestion > 1) {
       setSelectedQuestion(selectedQuestion - 1);
@@ -70,24 +72,34 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
       sidebarMenuElement.classList.add('sidebarMenu-hidden');
     }
   }, []);
+
+  const getSubmittedAnswer = (itemId) => {
+    console.log("bji",  answerUser)
+    for (let i = 0; i < answerUser.length; i++) {
+        if (answerUser[i].idSoal == " " + itemId) {
+            return answerUser[i] ? answerUser[i].namaFile : "";
+        }
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
         // Fetch questions data
-        const questionResponse = await axios.post("http://localhost:8080/Quiz/GetDataQuestion", {
+        const questionResponse = await axios.post(API_LINK + "Quiz/GetDataQuestion", {
           id: materiId,
           status: 'Aktif',
           quizType: quizType,
         });
         // Fetch user answers data
-        const answerResponse = await axios.post("http://localhost:8080/Quiz/GetDataResultQuiz", {
+        const answerResponse = await axios.post(API_LINK + "Quiz/GetDataResultQuiz", {
           id: materiId,
-          userId: '1', 
+          userId: AppContext_test.activeUser, 
           tipeQuiz: quizType,
-          idQuiz: quizId,
+          idQuiz: AppContext_test.reviewQuizId,
         });
-
+        console.log("dsds", AppContext_test)
         const jawabanPenggunaStr = answerResponse.data[0].JawabanPengguna;
 
         const jawabanPengguna = jawabanPenggunaStr
@@ -98,7 +110,33 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
               transaksi.length === 2
             );
 
+        const essayOnly = jawabanPengguna.filter(transaksi =>
+              transaksi.length === 3
+            );
 
+        // const currentRespondent = currentData[currentRespondentIndex];
+        const jawabanPenggunaEssayStr = answerResponse.data[0].JawabanPengguna;
+
+        const jawabanPenggunaEssay = jawabanPenggunaEssayStr
+            .slice(1, -1)  
+            .split('], [')  
+            .map(item => item.replace(/[\[\]]/g, '').split(','));
+        const processedJawaban = jawabanPengguna.map(item => {
+          if (item[0] === "essay") {
+              return [item[0], item[1], item.slice(2).join(' ')];
+          }
+          return item;
+      });
+        const validJawabanPengguna = processedJawaban.filter(item => item.length === 3);
+
+      console.log("cc", validJawabanPengguna)
+        // Map the filtered array to the desired format
+        const formattedAnswers = validJawabanPengguna.map(item => ({
+          idSoal: item[1],
+          namaFile: item[2]
+        }));
+
+        setAnswerUser(formattedAnswers)
 
         if (questionResponse.data && Array.isArray(questionResponse.data) &&
             filteredTransaksi && Array.isArray(filteredTransaksi)) {
@@ -142,6 +180,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
                   question: Soal,
                   correctAnswer: Jawaban,
                   answerStatus: "none",
+                  id: Key,
                 };
               } else if (TipeSoal === "Praktikum") {
                 return {
@@ -149,6 +188,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
                   question: Soal,
                   correctAnswer: Jawaban,
                   answerStatus: "none",
+                  id: Key,
                 };
               } else {
                 const options = questionResponse.data
@@ -158,6 +198,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
                     urutan: choice.UrutanJawaban,
                     nomorSoal: choice.Key,
                     nilai: choice.NilaiJawaban,
+                  id: Key,
                   }));
                 return {
                   type: "pilgan",
@@ -168,6 +209,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
                   nilaiJawaban: NilaiJawaban,
                   jawabanPengguna_value: jawabanPengguna.value,
                   jawabanPengguna_soal: jawabanPengguna.soal,
+                  id: Key,
                 };
               }
             }
@@ -233,19 +275,20 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
           setSelectedQuestion={setSelectedQuestion}
           answerStatus={answerStatus} 
           checkMainContent="detail_test"
-          quizId={materiId}
+          quizId={AppContext_test.reviewQuizId}
         />
         <div className="flex-fill p-3 d-flex flex-column"  style={{marginLeft:"21vw"}}>
           <div className="mb-3 d-flex flex-wrap" style={{ overflowX: 'auto' }}> 
             {currentData.map((item, index) => {
               if (index + 1 !== selectedQuestion) return null;
-             
               return (
                 <div key={index} className="mb-3" style={{ display: 'block', verticalAlign: 'top', minWidth: '300px', marginRight: '20px' }}>
                   {/* Soal */}
                   <div className="mb-3">
-                  <h4 style={{ wordWrap: 'break-word', overflowWrap: 'break-word', textAlign:'justify' }}>{item.question}</h4>
-                </div>
+                    <h4 style={{ wordWrap: 'break-word', overflowWrap: 'break-word', textAlign:'justify' }}>
+                      <div dangerouslySetInnerHTML={{ __html: item.question }} /> 
+                    </h4>
+                  </div>
 
                   {/* Jawaban */}
                   {item.type === "Praktikum" ? (
@@ -256,7 +299,14 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
                     onChange={(event) => handleFileChange(fileInputRef, "zip", event, index + 1, item.id)}
                   />
                 ) : item.type === "Essay" ? (
-                  <KMS_Uploader />
+                  <Input
+                    name="essay_answer"
+                    type="textarea"
+                    label="Jawaban Anda:"
+                    value={getSubmittedAnswer(item.id)}
+                    onChange={(event) => handleTextareaChange(event, index + 1, item.id)}
+                    disabled={true}
+                  />
                 ) : (
                     <div className="d-flex flex-column">
                       {item.options.map((option, index) => {

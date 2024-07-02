@@ -42,7 +42,7 @@ export default function MasterCourseEdit({onChangePage}) {
     mat_file_video: Materi.File_video,
     mat_pengenalan: Materi.Pengenalan,
     mat_keterangan: Materi.Keterangan,
-    kry_id: "",
+    kry_id: AppContext_test.activeUser,
     mat_kata_kunci:Materi["Kata Kunci"],
     mat_gambar: "",
   });
@@ -211,8 +211,8 @@ useEffect(() => {
         <div>
         <Stepper
            steps={[
-            { label: 'Materi', onClick: () => onChangePage("courseAdd") },
-            { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
+            { label: 'Materi', onClick: () => onChangePage("materiEdit") },
+            { label: 'Pretest', onClick: () => onChangePage("pretestEdit") },
             { label: 'Sharing Expert', onClick: () => onChangePage("sharingEdit") },
             { label: 'Forum', onClick: () => onChangePage("forumEdit") },
             { label: 'Post Test', onClick: () => onChangePage("posttestEdit") }

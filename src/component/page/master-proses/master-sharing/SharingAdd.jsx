@@ -31,8 +31,6 @@ export default function MasterSharingAdd({ onChangePage}) {
     mat_sharing_expert_video: string(),
   });
 
-  console.log("forum di sharing",AppContext_test.ForumForm)
-
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
     const validationError = await validateInput(name, value, userSchema);
@@ -138,7 +136,7 @@ export default function MasterSharingAdd({ onChangePage}) {
         <div>
           <Stepper
             steps={[
-              { label: 'Materi', onClick: () => onChangePage("courseAdd") },
+              { label: 'Materi', onClick: () => onChangePage("materiAdd") },
               { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
               { label: 'Sharing Expert', onClick: () => onChangePage("sharingAdd") },
               { label: 'Forum', onClick: () => onChangePage("forumAdd") },

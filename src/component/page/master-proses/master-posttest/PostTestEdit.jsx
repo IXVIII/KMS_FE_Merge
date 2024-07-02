@@ -12,6 +12,7 @@ import FileUpload from "../../../part/FileUpload";
 import uploadFile from "../../../util/UploadImageQuiz";
 import { Editor } from '@tinymce/tinymce-react';
 import Swal from 'sweetalert2';
+import AppContext_master from "../../master-test/TestContext";
 import AppContext_test from "../../master-test/TestContext";
 import Alert from "../../../part/Alert";
 
@@ -435,32 +436,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
         link.click();
     };
 
-    const convertTimeToSeconds = (time) => {
-        console.log("ini time" + time)
-        // Pastikan nilai time dalam bentuk string dengan format "HH:MM"
-        const timeString = typeof time === 'string' ? time.trim() : time.toLocaleTimeString();
-
-        // Pisahkan string waktu menjadi jam dan menit
-        const timeParts = timeString.split(':');
-
-        // Periksa apakah ada 2 bagian (jam dan menit) setelah pemisahan
-        if (timeParts.length !== 2) {
-            console.error('Invalid time format:', timeString);
-            return NaN;
-        }
-
-        // Ambil jam dan menit dari hasil pemisahan
-        const [hours, minutes] = timeParts.map(Number);
-
-        // Periksa apakah jam dan menit valid (tidak menghasilkan NaN)
-        if (isNaN(hours) || isNaN(minutes)) {
-            console.error('Invalid time format:', timeString);
-            return NaN;
-        }
-
-        // Kembalikan total detik dari waktu yang diberikan
-        return hours * 3600 + minutes * 60;
-    };
+    
 
     const handleTimerChange = (e) => {
         const { value } = e.target;
@@ -483,20 +459,15 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
             [validationError.name]: validationError.error,
         }));
     };
-    const Materi = AppContext_test.DetailMateriEdit;
+    const Materi = AppContext_master.DetailMateriEdit;
     const hasTest  = Materi.Posttest !== null && Materi.Posttest !== "";
 
-    const convertSecondsToTimeFormat = (seconds) => {
-        const hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
-        const minutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-        return `${hours}:${minutes}`;
-    };
     const getDataQuiz = async () => {
         setIsLoading(true);
         try {
             while (true) {
                 const data = await axios.post(API_LINK + 'Quiz/GetQuizByID', {
-                    id: AppContext_test.DetailMateriEdit?.Key, tipe: "Posttest"
+                    id: AppContext_master.DetailMateriEdit?.Key, tipe: "Posttest"
                 });
                 if (data === "ERROR") {
                     throw new Error("Terjadi kesalahan: Gagal mengambil data quiz.");
@@ -509,6 +480,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                         tanggalAkhir: data.data[0]?.tanggalAkhir ? new Date(data.data[0].tanggalAkhir).toISOString().split('T')[0] : '',
                     };
                     setTimer(data.data[0].timer ? convertSecondsToTimeFormat(data.data[0].timer) : '')
+                    console.log("dsdsds", convertSecondsToTimeFormat(data.data[0].timer))
                     setFormData(convertedData);
                     setIsLoading(false);
                     break;
@@ -523,6 +495,31 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                 message: e.message,
             }));
         }
+    };
+
+   
+    const convertTimeToSeconds = () => {
+        return parseInt(hours) * 3600 + parseInt(minutes) * 60;
+    };
+    
+    const [hours, setHours] = useState('00');
+    const [minutes, setMinutes] = useState('00');
+    
+    const handleHoursChange = (e) => {
+        setHours(e.target.value);
+    };
+
+    const handleMinutesChange = (e) => {
+        setMinutes(e.target.value);
+    };
+    
+    const convertSecondsToTimeFormat = (seconds) => {
+        const formatHours = Math.floor(seconds / 3600).toString().padStart(2, '0');
+        const formatMinutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+
+        setHours(formatHours);
+        setMinutes(formatMinutes);
+        return `${formatHours}:${formatMinutes}`;
     };
 
     const getDataQuestion = async () => {
@@ -605,7 +602,6 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
             }));
         }
     };   
-
     
     useEffect(() => {
         getDataQuiz();
@@ -656,11 +652,11 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                 <div>
                     <Stepper
                     steps={[
-                    { label: 'Materi', onClick: () => onChangePage("courseAdd") },
-                    { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
-                    { label: 'Sharing Expert', onClick: () => onChangePage("sharingAdd") },
-                    { label: 'Forum', onClick: () => onChangePage("forumAdd") },
-                    { label: 'Post Test', onClick: () => onChangePage("posttestAdd") }
+                    { label: 'Materi', onClick: () => onChangePage("materiEdit") },
+                    { label: 'Pretest', onClick: () => onChangePage("pretestEdit") },
+                    { label: 'Sharing Expert', onClick: () => onChangePage("sharingEdit") },
+                    { label: 'Forum', onClick: () => onChangePage("forumEdit") },
+                    { label: 'Post Test', onClick: () => onChangePage("posttestEdit") }
                     ]}
                     activeStep={4}
                         styleConfig={{
@@ -707,15 +703,43 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                                 </div>
                                 <div className="row mb-4">
                                     <div className="col-lg-4">
-                                        <Input
-                                            type="time"
-                                            name="timer"
-                                            label="Durasi (dalam menit)"
-                                            forInput="timerInput"
-                                            value={timer}
-                                            onChange={handleTimerChange}
-                                            isRequired={true}
-                                        />
+                                        <label htmlFor="waktuInput" className="form-label">
+                                            <span style={{ fontWeight: 'bold' }}>Durasi:</span>
+                                            <span style={{ color: 'red' }}> *</span>
+                                        </label>
+
+                                        <div className="d-flex align-items-center">
+                                            <div className="d-flex align-items-center me-3">
+                                                <select 
+                                                    className="form-select me-2" 
+                                                    name="hours" 
+                                                    value={hours} 
+                                                    onChange={handleHoursChange}
+                                                >
+                                                    {[...Array(24)].map((_, i) => (
+                                                        <option key={i} value={i.toString().padStart(2, '0')}>
+                                                            {i.toString().padStart(2, '0')}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <span>Jam</span>
+                                            </div>
+                                            <div className="d-flex align-items-center">
+                                                <select 
+                                                    className="form-select me-2" 
+                                                    name="minutes" 
+                                                    value={minutes} 
+                                                    onChange={handleMinutesChange}
+                                                >
+                                                    {[...Array(60)].map((_, i) => (
+                                                        <option key={i} value={i.toString().padStart(2, '0')}>
+                                                            {i.toString().padStart(2, '0')}
+                                                        </option>
+                                                    ))}
+                                                </select>
+                                                <span>Menit</span>
+                                            </div>
+                                        </div>
                                     </div>
                                     <div className="col-lg-4">
                                         <Input

@@ -17,7 +17,7 @@ export default function Table({
   let colCount = 0;
 
   function generateActionButton(columnName, value, key, id, status) {
-    if (columnName === "StatusTest") {
+    if (columnName === "Keterangan") {
       let displayValue = value;
   
       switch (value) {
@@ -45,9 +45,9 @@ export default function Table({
           textColor = "#FB7185";
           break;
         default:
-          backgroundColor = "#FFF1F2";
-          borderColor = "#FB7185";
-          textColor = "#FB7185";
+          backgroundColor = "#FFFAE5"; // Warna kuning pucat
+          borderColor = "#FBBF24";     // Warna kuning terang
+          textColor = "#F59E0B"; 
       }
   
       return (

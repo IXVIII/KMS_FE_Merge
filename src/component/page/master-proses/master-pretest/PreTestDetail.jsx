@@ -5,6 +5,7 @@ import { Stepper } from 'react-form-stepper';
 import axios from 'axios';
 import { API_LINK } from "../../../util/Constants";
 import AppContext_test from "../MasterContext";
+import Alert from "../../../part/Alert";
 
 export default function MasterPreTestDetail({ onChangePage, withID }) {
   const [formContent, setFormContent] = useState([]);
@@ -27,7 +28,9 @@ export default function MasterPreTestDetail({ onChangePage, withID }) {
     createdby: 'Admin',
   });
 
-  formData.timer = timer;
+  useEffect(() => {
+    formData.timer = timer;
+  }, [timer]);
 
   const convertSecondsToTimeFormat = (seconds) => {
     const hours = Math.floor(seconds / 3600).toString().padStart(2, '0');
@@ -172,24 +175,24 @@ export default function MasterPreTestDetail({ onChangePage, withID }) {
   useEffect(() => {
     getDataQuiz();
   }, [withID]);
-  
+
   useEffect(() => {
     if (formData.quizId) getDataQuestion();
   }, [formData.quizId]);
-  
+
   if (isLoading) return <Loading />;
-  
+
   return (
     <>
       <form id="myForm">
         <div>
           <Stepper
             steps={[
-                { label: 'Materi', onClick: () => onChangePage("courseAdd") },
-                { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
-                { label: 'Sharing Expert', onClick: () => onChangePage("sharingDetail") },
-                { label: 'Forum', onClick: () => onChangePage("forumDetail") },
-                { label: 'Post Test', onClick: () => onChangePage("posttestDetail") }
+              { label: 'Materi', onClick: () => onChangePage("materiDetail") },
+              { label: 'Pretest', onClick: () => onChangePage("pretestDetail") },
+              { label: 'Sharing Expert', onClick: () => onChangePage("sharingDetail") },
+              { label: 'Forum', onClick: () => onChangePage("forumDetail") },
+              { label: 'Post Test', onClick: () => onChangePage("posttestDetail") }
             ]}
             activeStep={1}
             styleConfig={{
@@ -215,91 +218,102 @@ export default function MasterPreTestDetail({ onChangePage, withID }) {
             }}
           />
         </div>
-       
-        <div className="card mt-4 mb-4" style={{ borderColor: "#67ACE9" }}>
-  <div className="card-header fw-medium text-white" style={{ backgroundColor: "#67ACE9" }}>
-    <h4 className="card-title">{formData.quizJudul}</h4>
-  </div>
-  <div className="card-body">
-    <div className="row mt-3">
-      <div className="col-md-12">
-        <h5 className="mb-3 mt-0">Deskripsi</h5>
-        <p className="pb-3">{formData.quizDeskripsi}</p>
-        <h5 className="mb-3 mt-0">Tipe Quiz</h5>
-        <p className="pb-3">{formData.quizTipe}</p>
-        <h5 className="mb-3 mt-0">Durasi</h5>
-        <p className="pb-3">{formData.timer}</p>
-        <h5 className="mb-3 mt-0">Tanggal Dimulai</h5>
-        <p className="pb-3">{formatDateIndonesian(formData.tanggalAwal)}</p>
-        <h5 className="mb-3 mt-0">Tanggal Berakhir</h5>
-        <p className="pb-3">{formatDateIndonesian(formData.tanggalAkhir)}</p>
-      </div>
-    </div>
-  </div>
-</div>
 
-<div className="card mt-4" style={{ borderColor: "#67ACE9" }}>
-  <div className="card-header fw-medium text-white" style={{ backgroundColor: "#67ACE9" }}>
-    <h4 className="card-title">Pertanyaan</h4>
-  </div>
-  <div className="card-body">
-    <div className="row mt-3">
-      <div className="col-md-12">
-        {formContent.map((question, index) => (
-          <div key={index} className="mb-4">
-            <span className="badge bg-primary mb-2">
-              {question.type === "Essay" ? "Essai" : question.type === "Praktikum" ? "Praktikum" : "Pilihan Ganda"}
-            </span>
-            {question.type === "Essay" || question.type === "Praktikum" ? (
-              question.point !== 0 && (
-                <span className="badge bg-success ms-2">
-                  {question.point} Poin
-                </span>
-              )
-            ) : null}
-            <p>{index + 1}. {stripHtmlTags(question.text)}</p>
-            
-            {question.type === "Pilgan" && (
-              <ul className="list-unstyled">
-                {question.options.map((option, optionIndex) => (
-                  <li key={optionIndex} style={{ marginBottom: '5px' }}>
-                    <input type="radio" disabled /> 
-                    <span style={{ marginLeft: '5px' }}>{option.label}</span>
-                    {option.point !== 0 && (
-                      <span className="badge bg-success ms-2" style={{ fontSize: '0.75em' }}>{option.point} Poin</span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            )}
-            {(question.type === "Essay" || question.type === "Praktikum") && (
-              <div>
-                <img
-                  id="image"
-                  src={question.gambar}
-                  alt="gambar"
-                  className="img-fluid"
-                  style={{
-                    maxWidth: '300px',
-                    maxHeight: '300px',
-                    overflow: 'hidden',
-                    marginLeft: '10px'
-                  }}
-                />
-                
+        <div className="card mt-4" style={{ borderColor: "#67ACE9" }}>
+          <div className="card-header fw-medium text-white" style={{ backgroundColor: "#67ACE9" }}>
+            <h4 className="card-title">Data Pretest</h4>
+          </div>
+          <div className="card-body">
+            {formData.quizId ? (
+              <>
+                <div className="row mt-3">
+                  <div className="col-md-6">
+                    <h5 className="mb-3 mt-0">Judul Quiz</h5>
+                    <p>{formData.quizJudul}</p>
+                    <h5 className="mb-3 mt-0">Deskripsi Quiz</h5>
+                    <p>{formData.quizDeskripsi}</p>
+                    <h5 className="mb-3 mt-0">Durasi</h5>
+                    <p>{formData.timer}</p>
+                  </div>
+                  <div className="col-md-6">
+                    <h5 className="mb-3 mt-0">Tanggal Mulai</h5>
+                    <p className="pb-3">{formatDateIndonesian(formData.tanggalAwal)}</p>
+                    <h5 className="mb-3 mt-0">Tanggal Berakhir</h5>
+                    <p className="pb-3">{formatDateIndonesian(formData.tanggalAkhir)}</p>
+                  </div>
+                </div>
+                <div className="card mt-4" style={{ borderColor: "#67ACE9" }}>
+                  <div className="card-header fw-medium text-white" style={{ backgroundColor: "#67ACE9" }}>
+                    <h4 className="card-title">Pertanyaan</h4>
+                  </div>
+                  <div className="card-body">
+                    <div className="row mt-3">
+                      <div className="col-md-12">
+                        {formContent.map((question, index) => (
+                          <div key={index} className="mb-4">
+                            <span className="badge bg-primary mb-2">
+                              {question.type === "Essay" ? "Essai" : question.type === "Praktikum" ? "Praktikum" : "Pilihan Ganda"}
+                            </span>
+                            {question.type === "Essay" || question.type === "Praktikum" ? (
+                              question.point !== 0 && (
+                                <span className="badge bg-success ms-2">
+                                  {question.point} Poin
+                                </span>
+                              )
+                            ) : null}
+                            <p>{index + 1}. {stripHtmlTags(question.text)}</p>
+                            {question.type === "Pilgan" && (
+                              <ul className="list-unstyled">
+                                {question.options.map((option, optionIndex) => (
+                                  <li key={optionIndex} style={{ marginBottom: '5px' }}>
+                                    <input type="radio" disabled />
+                                    <span style={{ marginLeft: '5px' }}>{option.label}</span>
+                                    {option.point !== 0 && (
+                                      <span className="badge bg-success ms-2" style={{ fontSize: '0.75em' }}>{option.point} Poin</span>
+                                    )}
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                            {(question.type === "Essay" || question.type === "Praktikum") && question.gambar && (
+                              <div>
+                                <img
+                                  id="image"
+                                  src={question.gambar}
+                                  alt="gambar"
+                                  className="img-fluid"
+                                  style={{
+                                    maxWidth: '300px',
+                                    maxHeight: '300px',
+                                    overflow: 'hidden',
+                                    marginLeft: '10px'
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="card-body">
+                <Alert type="warning" message={(
+                  <span>
+                    Data Pretest belum ditambahkan. <a onClick={() => onChangePage("pretestAddNot")} className="text-primary">Tambah Data</a>
+                  </span>
+                )} />
               </div>
             )}
           </div>
-        ))}
-      </div>
-    </div>
-  </div>
-</div>
+        </div>
         <div className="float my-4 mx-1">
           <Button
             classType="outline-secondary me-2 px-4 py-2"
             label="Kembali"
-            onClick={() => onChangePage("index")}
+            onClick={() => onChangePage("materiDetail")}
           />
           <Button
             classType="dark ms-3 px-4 py-2"

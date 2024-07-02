@@ -4,13 +4,13 @@ import { ROOT_LINK } from "../util/Constants";
 import AppContext_test from "../page/master-test/TestContext";
 
 export default function KMS_Sidebar({ onChangePage, questionNumbers, selectedQuestion, setSelectedQuestion, answerStatus, checkMainContent, quizId, timeRemaining, setTimeRemaining }) {
-  const [remainingTime, setRemainingTime] = useState(5000);
+  const [remainingTime, setRemainingTime] = useState(AppContext_test.durasiTest);
   useEffect(() => {
   const timer = setInterval(() => {
     setRemainingTime(prevTime => {
       if (prevTime <= 1) {
         clearInterval(timer);
-        setTimeRemaining(true);
+        setTimeRemaining(true); 
       }
       return prevTime - 1;
     });
@@ -40,7 +40,7 @@ export default function KMS_Sidebar({ onChangePage, questionNumbers, selectedQue
         className="card mb-3 p-3 mx-auto"
         style={{ backgroundColor: "rgba(255, 255, 255, 0.8)", width: "fit-content" }}
       >
-        <p className="m-0">Time Remaining: {formatTime(remainingTime)}</p>
+        <p className="m-0">Waktu Tersisa: {formatTime(remainingTime)}</p>
       </div>
       )}
 

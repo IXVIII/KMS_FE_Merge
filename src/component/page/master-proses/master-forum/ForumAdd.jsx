@@ -25,11 +25,11 @@ export default function MasterForumAdd({ onChangePage }) {
   const [isFormDisabled, setIsFormDisabled] = useState(false);
   const [formData, setFormData] = useState({
     materiId: AppContext_test.dataIDMateri,
-    karyawanId: "040",
+    karyawanId: AppContext_test.activeUser,
     forumJudul: AppContext_test.ForumForm?.forumJudul || "",
     forumIsi: AppContext_test.ForumForm?.forumIsi || "",
-    forumCreatedBy: "ika",
     forumStatus: "Aktif",
+    forumCreatedBy: AppContext_test.displayName,
   });
 
   const handleInputChange = async (e) => {
@@ -48,11 +48,11 @@ export default function MasterForumAdd({ onChangePage }) {
   const resetForm = () => {
     setFormData({
       materiId: AppContext_test.dataIDMateri,
-      karyawanId: "040",
+      karyawanId: AppContext_test.activeUser,
       forumJudul: "",
       forumIsi: "",
-      forumCreatedBy: "ika",
       forumStatus: "Aktif",
+      forumCreatedBy:AppContext_test.displayName,
     });
     setErrors({});
     setIsError({ error: false, message: "" });

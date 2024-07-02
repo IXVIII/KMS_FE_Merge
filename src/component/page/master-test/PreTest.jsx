@@ -19,6 +19,7 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [marginRight, setMarginRight] = useState("0vh");
+  const [currentData, setCurrentData] = useState();
   const [receivedMateriId, setReceivedMateriId] = useState();
   AppContext_test.refreshPage = true;
   function onStartTest() {
@@ -41,6 +42,8 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
       setIsLoading(true);
       try {
         const data = await fetchDataWithRetry_pretest();
+        const dataQuiz = await getQuiz_pretest();
+        setCurrentData(dataQuiz);
         if (isMounted) {
           if (data) {
             if (Array.isArray(data)) {
@@ -76,9 +79,30 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
     const fetchDataWithRetry_pretest = async (retries = 10, delay = 5000) => {
       for (let i = 0; i < retries; i++) {
         try {
-          const response = await axios.post("http://localhost:8080/Quiz/GetDataResultQuiz", {
+          const response = await axios.post(API_LINK + "Quiz/GetDataResultQuiz", {
             quizId: AppContext_test.materiId,
-            karyawanId: "1",
+            karyawanId: AppContext_test.activeUser,
+            tipeQuiz: "Pretest",
+          });
+          if (response.data.length != 0) {
+            return response.data;
+          }
+        } catch (error) {
+          console.error("Error fetching quiz data:", error);
+          if (i < retries - 1) {
+            await new Promise(resolve => setTimeout(resolve, delay));
+          } else {
+            throw error;
+          }
+        }
+      }
+    };
+
+    const getQuiz_pretest = async (retries = 10, delay = 5000) => {
+      for (let i = 0; i < retries; i++) {
+        try {
+          const response = await axios.post(API_LINK + "Quiz/GetDataQuiz", {
+            quizId: AppContext_test.materiId,
             tipeQuiz: "Pretest",
           });
           if (response.data.length != 0) {
@@ -109,6 +133,17 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
     backgroundColor: "lightgray",
     marginRight: "20px",
   };
+  const formatDate = (timestamp) => {
+    const date = new Date(timestamp);
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('id-ID', options);
+  };
+
+  const convertToMinutes = (duration) => {
+      AppContext_test.durasiTest = duration;
+      return Math.floor(duration / 60); 
+  };
+
 
   return (
     <>
@@ -129,7 +164,7 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
           ) : (
             <>
               <div style={{ marginRight: marginRight }}>
-                <div
+               <div
                   className="d-flex align-items-center mb-5"
                   >
                   <div
@@ -147,24 +182,15 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
                       }}
                     />
                   </div>
-                  <h6 className="mb-0">Fahriel Dwifaldi - 03 Agustus 2022</h6>
+                
+                  <h6 className="mb-0">{currentData[0].CreatedBy} - {formatDate(currentData[0].CreatedDate)}</h6>
                 </div>
-                <div className="text-center" style={{ marginBottom: "100px" }}>
-                  <h2 className="font-weight-bold mb-4 primary">
-                    Pre Test - Pemrograman 1
-                  </h2>
-                  <p
-                    className="mb-5"
-                    style={{
-                      maxWidth: "600px",
-                      margin: "0 auto",
-                      marginBottom: "60px",
-                    }}
-                  >
-                    Tes ini terdiri dari 10 soal, nilai kelulusan minimal untuk mendapatkan sertifikat adalah 80%, 
-                    dan Anda hanya memiliki waktu 30 menit untuk mengerjakan semua soal, dimulai saat Anda mengklik tombol
-                    "Mulai Pre Test" di bawah ini.
-                  </p>
+              <div className="text-center" style={{marginBottom: '100px'}}>
+                <h2 className="font-weight-bold mb-4 primary">Post Test - {currentData[0].JudulQuiz}</h2>
+                <p className="mb-5" style={{ maxWidth: '600px', margin: '0 auto', marginBottom: '60px' }}>
+                Tes ini terdiri dari {currentData[0].JumlahSoal} soal Anda hanya memiliki waktu {convertToMinutes(currentData[0].Durasi)} menit untuk mengerjakan semua soal, dimulai saat Anda mengklik tombol
+                    "Mulai Post Test" di bawah ini.
+                </p>
                   <Button
                     classType="primary ms-2 px-4 py-2"
                     label="Mulai Pre-Test"

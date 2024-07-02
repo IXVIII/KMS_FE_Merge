@@ -14,29 +14,13 @@ import profilePicture from "../../../assets/tes.jpg";
 import KMS_Rightbar from "../../part/KMS_RightBar";
 import axios from "axios";
 import AppContext_test from "./TestContext";
-const inisialisasiData = [
-  {
-    Key: null,
-    No: null,
-    "Kode Test": null,
-    "Nama Test": null,
-    "Alamat Test": null,
-    Status: null,
-    Count: 0,
-  },
-];
 export default function MasterTestIndex({  onChangePage, CheckDataReady, materiId  }) {
   const [isError, setIsError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [currentData, setCurrentData] = useState();
-  const [currentFilter, setCurrentFilter] = useState({
-    page: 1,
-    query: "",
-    sort: "[Kode Test] asc",
-    status: "Aktif",
-  });
   const [marginRight, setMarginRight] = useState("5vh");
 
+  AppContext_test.refreshPage = "posttest";
   useEffect(() => {
     document.documentElement.style.setProperty('--responsiveContainer-margin-left', '0vw');
     const sidebarMenuElement = document.querySelector('.sidebarMenu');
@@ -69,6 +53,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
       try {
         const data = await fetchDataWithRetry_posttest();
         const dataQuiz = await getQuiz_posttest();
+        console.log("bjir", dataQuiz)
         setCurrentData(dataQuiz);
         if (isMounted) {
           if (data != "") {
@@ -78,8 +63,8 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
                   Key: item.Key,
                   No: index + 1,
                   TanggalUjian: formatDate(item.DatePengerjaan),
-                  Persentase: item.Nilai,
-                  StatusTest: item.Status == "Reviewed" ? item.Nilai >= 70 ? "Lulus" : "Tidak Lulus" : "Sedang direview oleh Tenaga Pendidik",
+                  Nilai: item.Status == "Reviewed" ? item.Nilai : "",
+                  Keterangan: item.Status == "Reviewed" ? item.JumlahBenar + " / " + dataQuiz[0].JumlahSoal : "Sedang direview oleh Tenaga Pendidik",
                   Aksi: item.Status == "Reviewed" ? ['Detail'] : [''],
                   Alignment: ['center', 'center', 'center', 'center', 'center'],
                 })));
@@ -116,9 +101,9 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
     const fetchDataWithRetry_posttest = async (retries = 10, delay = 5000) => {
       for (let i = 0; i < retries; i++) {
         try {
-          const response = await axios.post("http://localhost:8080/Quiz/GetDataResultQuiz", {
+          const response = await axios.post(API_LINK + "Quiz/GetDataResultQuiz", {
             quizId: AppContext_test.materiId,
-            karyawanId: "1",
+            karyawanId: AppContext_test.activeUser,
             tipeQuiz: "Posttest",
           });
           if (response.data.length != 0) {
@@ -140,7 +125,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
     const getQuiz_posttest = async (retries = 10, delay = 5000) => {
       for (let i = 0; i < retries; i++) {
         try {
-          const response = await axios.post("http://localhost:8080/Quiz/GetDataQuiz", {
+          const response = await axios.post(API_LINK + "Quiz/GetDataQuiz", {
             quizId: AppContext_test.materiId,
             tipeQuiz: "Posttest",
           });
@@ -183,7 +168,8 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
   };
 
   const convertToMinutes = (duration) => {
-      return Math.floor(duration / 60); 
+      AppContext_test.durasiTest = duration;
+      return Math.floor(duration / 3600); 
   };
 
   return (
@@ -231,8 +217,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
               <div className="text-center" style={{marginBottom: '100px'}}>
                 <h2 className="font-weight-bold mb-4 primary">Post Test - {currentData[0].JudulQuiz}</h2>
                 <p className="mb-5" style={{ maxWidth: '600px', margin: '0 auto', marginBottom: '60px' }}>
-                Tes ini terdiri dari {currentData[0].JumlahSoal} soal, nilai kelulusan minimal adalah 80% 
-                    dan Anda hanya memiliki waktu {convertToMinutes(currentData[0].Durasi)} menit untuk mengerjakan semua soal, dimulai saat Anda mengklik tombol
+                Tes ini terdiri dari {currentData[0].JumlahSoal} soal dan Anda hanya memiliki waktu {convertToMinutes(currentData[0].Durasi)} menit untuk mengerjakan semua soal, dimulai saat Anda mengklik tombol
                     "Mulai Post Test" di bawah ini.
                 </p>
                 <Button

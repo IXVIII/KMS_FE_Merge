@@ -5,6 +5,7 @@ import axios from "axios";
 import Input from "../../part/Input";
 import { object, string } from "yup";
 import AppContext_test from "./TestContext";
+import { PAGE_SIZE, API_LINK, ROOT_LINK } from "../../util/Constants";
 export default function Forum({ onChangePage, isOpen }) {
   const [isError, setIsError] = useState(false);
   const [errors, setErrors] = useState({});
@@ -17,21 +18,21 @@ export default function Forum({ onChangePage, isOpen }) {
   const [tempItem, setTempItem] = useState([]);
   const formDataRef = useRef({
     forumId:currentData[0]?.Key,
-    karyawanId: "1", 
+    karyawanId: AppContext_test.activeUser, 
     isiDetailForum: "",
     statusDetailForum: "Aktif",
-    createdBy: "I Made Dananjaya Adyatma",
+    createdBy: AppContext_test.displayName,
     detailId: currentData[0]?.Key,
   });
   const handleReply = (item) => {
     console.log('bjir', item)
     formDataRef.current = {
       forumId: item.Key,
-      karyawanId: "1",
+      karyawanId: AppContext_test.activeUser,
       isiDetailForum: "",
       statusDetailForum: "Aktif",
-      createdBy: "Fahriel Dwifaldi",
-      detailId: item.ChildDetailId,
+      createdBy: AppContext_test.displayName,
+      detailId: item.DetailId,
     };
     setReplyMessage(`Membalas: ${item.IsiDetailForum}`); 
     setShowReplyInput(true); 
@@ -43,11 +44,11 @@ export default function Forum({ onChangePage, isOpen }) {
   const handleCancelReply = () => {
     setReplyMessage(""); 
     formDataRef.current = {
-      forumId: currentData[0]?.Key,
-      karyawanId: "1",
+      forumId:currentData[0]?.Key,
+      karyawanId: AppContext_test.activeUser, 
       isiDetailForum: "",
       statusDetailForum: "Aktif",
-      createdBy: "Fahriel Dwifaldi",
+      createdBy: AppContext_test.displayName,
       detailId: currentData[0]?.Key,
     };
     setShowReplyInput(false); 
@@ -85,7 +86,7 @@ export default function Forum({ onChangePage, isOpen }) {
     // console.log("Data yang dikirim ke backend:", formDataRef.current);
     try {
       const response = await axios.post(
-        "http://localhost:8080/Forum/SaveTransaksiForum",
+        API_LINK + "Forum/SaveTransaksiForum",
         formDataRef.current
       );
       console.log("woi", formDataRef.current)
@@ -93,6 +94,7 @@ export default function Forum({ onChangePage, isOpen }) {
       setCurrentData(updatedForumData); 
       formDataRef.current.isiDetailForum = "";
       handleCancelReply()
+      console.log(formDataRef.current)
       } catch (error) {
         console.error("Error sending reply:", error);
       } finally {
@@ -105,8 +107,8 @@ export default function Forum({ onChangePage, isOpen }) {
       formDataRef.current.forumId = currentData[0]?.Key;
       formDataRef.current.detailId = currentData[0]?.Key;
     }
+    console.log(currentData)
   }, [currentData]);
-
   useEffect(() => {
     let isMounted = true;
 
@@ -152,7 +154,7 @@ export default function Forum({ onChangePage, isOpen }) {
   const fetchDataWithRetry = async (retries = 10, delay = 1000) => {
       for (let i = 0; i < retries; i++) {
         try {
-          const response = await axios.post("http://localhost:8080/Forum/GetDataForum", {
+          const response = await axios.post(API_LINK + "Forum/GetDataForum", {
             materiId: AppContext_test.materiId,
           });
           if (response.data.length != 0) {
@@ -198,7 +200,7 @@ export default function Forum({ onChangePage, isOpen }) {
                 className="rounded-circle overflow-hidden d-flex justify-content-center align-items-center"
                 style={{ ...circleStyle, ...profileStyle }}
               >
-                <img
+                {/* <img
                   alt="Profile Picture"
                   className="align-self-start"
                   style={{
@@ -208,26 +210,13 @@ export default function Forum({ onChangePage, isOpen }) {
                     right: "25px",
                     bottom: "40px",
                   }}
-                />
+                /> */}
               </div>
               <div>
-                <h6 className="mb-0" style={{ fontSize: "14px" }}>
-                  {/* {item.ChildDetailId === null ? item.JudulForum : `Membalas: ${(() => {
-                    const foundItem = currentData.find(
-                      (dataItem) => dataItem.DetailId === item.ChildDetailId
-                    );
-                    if (foundItem) {
-                      return foundItem.IsiDetailForum;
-                    } else {
-                      return item.JudulForum;
-                    }
-                  })()}`} */}
+                <h6 className="mb-0" style={{ fontSize: "14px", style:"bold"}}>
                 </h6>
                 
                   {item.CreatedByDetailForum} - {formatDate(item.CreatedDateDetailForum)}
-                {/* <h6 className="mb-0" style={nameStyle}>
-                  {item.CreatedByDetailForum} - {formatDate(item.CreatedDateDetailForum)}
-                </h6> */}
               </div>
             </div>
             <p
@@ -263,7 +252,7 @@ export default function Forum({ onChangePage, isOpen }) {
                           className="rounded-circle overflow-hidden d-flex justify-content-center align-items-center"
                           style={{ ...circleStyle, ...profileStyle }}
                         >
-                          <img
+                          {/* <img
                             alt="Profile Picture"
                             className="align-self-start"
                             style={{
@@ -273,7 +262,7 @@ export default function Forum({ onChangePage, isOpen }) {
                               right: "25px",
                               bottom: "40px",
                             }}
-                          />
+                          /> */}
                         </div>
                         <div>
                           <h6 className="mb-1" style={{ fontSize: "14px" }}>
@@ -285,18 +274,19 @@ export default function Forum({ onChangePage, isOpen }) {
                           </h6> */}
                         </div>
                       </div>
-                      <p
-                        className="mb-2"
+                      <div
+                        className="mb-0"
                         style={{
                           maxWidth: "1500px",
+                          marginBottom: "0px",
                           fontSize: "14px",
                           textAlign: "left",
                           marginLeft: "10px",
-                          flex: 1
                         }}
                       >
-                        <div dangerouslySetInnerHTML={{ __html: reply.IsiDetailForum }} />
-                      </p>
+                        <div dangerouslySetInnerHTML={{ __html: item.IsiForum }} />
+                      </div>
+
                       <i
                         className="btn btn-outline-primary btn-sm" 
                         onClick={() => handleReply(reply)}
@@ -359,8 +349,8 @@ const handleHideReplies = (detailId) => {
               className="rounded-circle overflow-hidden d-flex justify-content-center align-items-center"
               style={{ ...circleStyle, ...profileStyle }}
             >
-              <img
-                // src={profilePicture}
+              {/* <img
+                src=""
                 alt="Profile Picture"
                 className="align-self-start"
                 style={{
@@ -370,10 +360,10 @@ const handleHideReplies = (detailId) => {
                   right: "25px",
                   bottom: "40px",
                 }}
-              />
+              /> */}
             </div>
             <div>
-              <h6 className="mb-0" style={{ fontSize: "14px" }}>
+              <h6 className="mb-0" style={{ fontSize: "24px" }}>
                 
                 <div dangerouslySetInnerHTML={{ __html: item.JudulForum }} />
               </h6>
@@ -382,7 +372,7 @@ const handleHideReplies = (detailId) => {
               </h6>
             </div>
           </div>
-          <p
+          <div
             className="mb-0"
             style={{
               maxWidth: "1500px",
@@ -392,8 +382,8 @@ const handleHideReplies = (detailId) => {
               marginLeft: "10px",
             }}
           >
-            <div dangerouslySetInnerHTML={{ __html: item.IsiForum }} /> 
-          </p>
+            <div dangerouslySetInnerHTML={{ __html: item.IsiForum }} />
+          </div>
         </div>
       </div>
     ));

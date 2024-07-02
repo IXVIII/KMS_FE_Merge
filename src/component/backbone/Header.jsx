@@ -1,7 +1,10 @@
 import logo from "../../assets/IMG_Logo.png";
 import Icon from "../part/Icon";
+import AppContext_test from "../page/master-test/TestContext";
 
 export default function Header({ displayName, roleName }) {
+  AppContext_test.displayName = displayName;
+  
   return (
     <div className="d-flex justify-content-between fixed-top border-bottom bg-white">
       <img

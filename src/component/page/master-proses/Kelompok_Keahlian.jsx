@@ -10,6 +10,7 @@ import Loading from "../../part/Loading";
 import Icon from "../../part/Icon";
 import CardKK from "../../part/CardKelompokKeahlian2";
 import { API_LINK } from "../../util/Constants";
+import AppContext_test from "../master-test/TestContext";
 
 export default function SubKKIndex({ onChangePage }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -19,14 +20,19 @@ export default function SubKKIndex({ onChangePage }) {
   const getKKAndPrograms = async (retries = 3, delay = 1000) => {
     for (let i = 0; i < retries; i++) {
       try {
-        const username = "fadli.h";
+        let kryId = await UseFetch(API_LINK + "Utilities/GetUserLogin", {
+          p1: AppContext_test.activeUser,
+        });
+        AppContext_test.karyawanId = kryId[0].kry_id;
+        // const username = AppContext_test.activeUser;
+        const username = "fadli.h"
         setIsError({ error: false, message: "" });
         setIsLoading(true);
 
-        let kkData = await UseFetch(API_LINK + "Program/GetDataKKByPIC", {
-          username,
+        let kkData = await UseFetch(API_LINK + "Program/GetDataKKByAKK", {
+          p1: AppContext_test.activeUser,
         });
-        // console.log("KK Data:", kkData);
+        console.log("KK Data:", kkData);
 
         if (kkData === "ERROR") {
           throw new Error(
@@ -41,7 +47,7 @@ export default function SubKKIndex({ onChangePage }) {
             API_LINK + "Program/GetProgramByKK",
             { kk: kk.Key }
           );
-          // console.log("Program Data for KK:", kk.Key, programData);
+          console.log("Program Data for KK:", kk.Key, programData);
 
           if (programData === "ERROR") {
             throw new Error("Terjadi kesalahan: Gagal mengambil data Program.");
