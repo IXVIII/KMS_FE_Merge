@@ -289,6 +289,16 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                                   {". "}
                                   {kat["Nama Kategori"]}
                                 </h6>
+                                <div>
+                                  <Icon
+                                    name="file"
+                                    cssClass="text-primary me-1"
+                                    title="Materi sudah publikasi"
+                                  />
+                                  <span className="text-primary">
+                                    {kat.MateriCount}
+                                  </span>
+                                </div>
                               </div>
                               <div className="d-flex mt-2">
                                 <div className="me-2 bg-primary ps-1"></div>

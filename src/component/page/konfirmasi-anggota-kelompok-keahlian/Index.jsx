@@ -23,18 +23,20 @@ export default function KonfrimasiAnggotaIndex({ onChangePage }) {
     setIsLoading(true);
 
     try {
-      let data = await UseFetch(API_LINK + "KKs/GetDataKKbyProdi");
+      while (true) {
+        let data = await UseFetch(API_LINK + "KKs/GetDataKKbyProdi");
 
-      if (data === "ERROR") {
-        throw new Error(
-          "Terjadi kesalahan: Gagal mengambil daftar Kelompok Keahlian."
-        );
-      } else if (data.length === 0) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        await getListKK(); // Retry if no data
-      } else {
-        setCurrentData(data);
-        setIsLoading(false);
+        if (data === "ERROR") {
+          throw new Error(
+            "Terjadi kesalahan: Gagal mengambil daftar Kelompok Keahlian."
+          );
+        } else if (data.length === 0) {
+          await new Promise((resolve) => setTimeout(resolve, 2000));
+        } else {
+          setCurrentData(data);
+          setIsLoading(false);
+          break;
+        }
       }
     } catch (e) {
       setIsLoading(false);
@@ -43,137 +45,31 @@ export default function KonfrimasiAnggotaIndex({ onChangePage }) {
     }
   };
 
-  const getListAnggotaOld = async (idKK, index) => {
-    setIsError({ error: false, message: "" });
-    setIsLoading(true);
-
-    try {
-      let data = await await axios.post(API_LINK + "AnggotaKK/GetAnggotaKK", {
-        page: 1,
-        query: "",
-        sort: "[Nama Anggota] ASC",
-        status: "",
-        kke_id: idKK,
-      });
-
-      if (data.data[0] === "ERROR") {
-        throw new Error("Terjadi kesalahan: Gagal mengambil daftar anggota.");
-      } else if (data.data.length < 1) {
-        await new Promise((resolve) => setTimeout(resolve, 2000));
-        await getListAnggota(idKK, index);
-      } else {
-        setListAnggota((prevListAnggota) => {
-          const newListAnggota = [...prevListAnggota];
-          newListAnggota[index] =
-            data.data[0] === "data kosong" ? [] : data.data;
-          return newListAnggota;
-        });
-        console.log("terpanggil " + idKK + "di index " + index);
-        if (currentData.length === index + 1) {
-          console.log("berenti");
-          setIsLoading(false);
-        }
-      }
-
-      // while (true) {
-      //   let data = await UseFetch(API_LINK + "AnggotaKK/GetAnggotaKK", {
-      //     page: 1,
-      //     query: "",
-      //     sort: "[Nama Anggota] ASC",
-      //     status: "",
-      //     kke_id: idKK,
-      //   });
-
-      //   if (data === "ERROR") {
-      //     throw new Error("Terjadi kesalahan: Gagal mengambil daftar anggota.");
-      //   } else if (data.length === 0) {
-      //     await new Promise((resolve) => setTimeout(resolve, 2000));
-      //   } else {
-      //     setListAnggota((prevListAnggota) => {
-      //       const newListAnggota = [...prevListAnggota];
-      //       newListAnggota[index] = data[0] === "data kosong" ? [] : data;
-      //       return newListAnggota;
-      //     });
-      //     console.log(data);
-      //     break;
-      //   }
-      // }
-    } catch (e) {
-      setIsLoading(false);
-      console.log(e.message);
-      setIsError((prevError) => ({
-        ...prevError,
-        error: true,
-        message: e.message,
-      }));
-    }
-  };
-
-  const getListAnggota = (idKK, index) => {
-    return new Promise(async (resolve, reject) => {
-      setIsError({ error: false, message: "" });
-
-      try {
-        let data = await axios.post(API_LINK + "AnggotaKK/GetAnggotaKK", {
-          page: 1,
-          query: "",
-          sort: "[Nama Anggota] ASC",
-          status: "",
-          kke_id: idKK,
-        });
-
-        if (data.data === "ERROR") {
-          throw new Error("Terjadi kesalahan: Gagal mengambil daftar anggota.");
-        } else if (data.data.length < 1 || data.status === 500) {
-          await new Promise((resolve) => setTimeout(resolve, 2000));
-          await getListAnggota(idKK, index);
-        } else {
-          setListAnggota((prevListAnggota) => {
-            const newListAnggota = [...prevListAnggota];
-            newListAnggota[index] =
-              data.data[0] === "data kosong" ? [] : data.data;
-            return newListAnggota;
-          });
-          console.log("terpanggil " + idKK + "di index " + index);
-        }
-
-        resolve();
-      } catch (e) {
-        console.log(e.message);
-        setIsError((prevError) => ({
-          ...prevError,
-          error: true,
-          message: e.message,
-        }));
-        reject(e);
-      }
-    });
-  };
-
   useEffect(() => {
     getListKK();
   }, []);
 
   useEffect(() => {
-    if (currentData.length > 0) {
-      setIsLoading(true);
-      const promises = currentData.map((val, index) =>
-        getListAnggota(val.Key, index)
-      );
-      Promise.all(promises)
-        .then(() => {
-          setIsLoading(false);
-        })
-        .catch((e) => {
-          console.log(e.message);
-          setIsError({
-            error: true,
-            message: e.message,
-          });
-          setIsLoading(false);
-        });
+    const legendTopElement = document.getElementById("legend-top");
+    if (legendTopElement) {
+      legendTopElement.innerHTML = `
+        <div class="d-flex">
+          <p class="mb-0 me-3">
+            <span
+              style="padding: 0px 10px 0px 10px; margin: 0px 10px; background-color: #67ACE9;"
+            ></span>
+            Tidak ada pengajuan anggota
+          </p>
+          <p class="mb-0 me-3">
+            <span
+              style="padding: 0px 10px 0px 10px; margin: 0px 10px; background-color: #FFC107;"
+            ></span>
+            Menunggu persetujuan
+          </p>
+        </div>
+      `;
     }
-  }, [currentData]);
+  }, []);
 
   return (
     <>
@@ -187,39 +83,16 @@ export default function KonfrimasiAnggotaIndex({ onChangePage }) {
             </div>
           )}
           <div className="flex-fill">
-            <div className="mb-3 d-flex">
-              <p className="mb-0 me-3">
-                <span
-                  style={{
-                    padding: "0px 10px 0px 10px",
-                    margin: "0px 10px",
-                    backgroundColor: "#67ACE9",
-                  }}
-                ></span>
-                Tidak ada pengajuan anggota
-              </p>
-              <p className="mb-0 me-3">
-                <span
-                  style={{
-                    padding: "0px 10px 0px 10px",
-                    margin: "0px 10px",
-                    backgroundColor: "#FFC107",
-                  }}
-                ></span>
-                Menunggu persetujuan
-              </p>
-            </div>
             <div className="container">
               <div className="row mt-0 gx-4">
                 {currentData
                   .filter((value) => {
                     return value.Status === "Aktif";
                   })
-                  .map((value, index) => (
+                  .map((value) => (
                     <CardKonfirmasi
                       key={value.Key}
                       data={value}
-                      anggotas={listAnggota[index] || []}
                       onChangePage={onChangePage}
                     />
                   ))}

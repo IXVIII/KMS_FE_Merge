@@ -3,7 +3,7 @@ import { useState } from "react";
 import Icon from "./Icon";
 import Button from "./Button";
 
-function CardKonfirmasi({ data, anggotas, onChangePage, isShow }) {
+function CardKonfirmasi({ data, onChangePage, isShow }) {
   const [showAllText, setShowAllText] = useState(isShow);
 
   const handleToggleText = () => {
@@ -24,12 +24,7 @@ function CardKonfirmasi({ data, anggotas, onChangePage, isShow }) {
             <h5
               className="card-title text-white px-3 pt-2 pb-3 mb-0"
               style={{
-                backgroundColor:
-                  anggotas.filter((value) => {
-                    return value.Status === "Menunggu Acc";
-                  }).length > 0
-                    ? "#ffcc00"
-                    : "#67ACE9",
+                backgroundColor: data.MenungguCount > 0 ? "#ffcc00" : "#67ACE9",
               }}
             >
               {data["Nama Kelompok Keahlian"]}
@@ -47,12 +42,7 @@ function CardKonfirmasi({ data, anggotas, onChangePage, isShow }) {
                     href=""
                     className="fw-semibold text-dark text-decoration-none"
                   >
-                    {
-                      anggotas.filter((value) => {
-                        return value.Status === "Aktif";
-                      }).length
-                    }{" "}
-                    Anggota Aktif
+                    {data.AnggotaAktifCount} Anggota Aktif
                   </a>
                 </span>
               </div>
@@ -68,12 +58,7 @@ function CardKonfirmasi({ data, anggotas, onChangePage, isShow }) {
                     href=""
                     className="fw-semibold text-dark text-decoration-none"
                   >
-                    {
-                      anggotas.filter((value) => {
-                        return value.Status === "Menunggu Acc";
-                      }).length
-                    }{" "}
-                    Menunggu Persetujuan
+                    {data.MenungguCount} Menunggu Persetujuan
                   </a>
                 </span>
               </div>
@@ -84,7 +69,7 @@ function CardKonfirmasi({ data, anggotas, onChangePage, isShow }) {
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
                   overflow: "hidden",
-                  textAlign: "justify"
+                  textAlign: "justify",
                 }}
               >
                 {data.Deskripsi}

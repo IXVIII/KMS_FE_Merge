@@ -117,12 +117,6 @@ export default function AnggotaKKIndex({ onChangePage }) {
         <div className="d-flex flex-column bg-logo-astra">
           <div className="flex-fill">
             <div className="input-group">
-              <Button
-                iconName="add"
-                classType="success"
-                label="Tambah"
-                onClick={() => onChangePage("add")}
-              />
               <Input
                 ref={searchQuery}
                 forInput="pencarianProduk"

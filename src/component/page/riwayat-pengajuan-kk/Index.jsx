@@ -147,6 +147,28 @@ export default function RiwayatIndex({ onChangePage }) {
     getRiwayat();
   }, [currentFilter]);
 
+  useEffect(() => {
+    const legendTopElement = document.getElementById("legend-top");
+    if (legendTopElement) {
+      legendTopElement.innerHTML = `
+        <div class="d-flex">
+          <p class="mb-0 me-3">
+            <span
+              style="padding: 0px 10px 0px 10px; margin: 0px 10px; background-color: #DC3545;"
+            ></span>
+            Ditolak oleh Prodi
+          </p>
+          <p class="mb-0 me-3">
+            <span
+              style="padding: 0px 10px 0px 10px; margin: 0px 10px; background-color: #6c757d;"
+            ></span>
+            Dibatalkan (non-aktif)
+          </p>
+        </div>
+      `;
+    }
+  }, []);
+
   return (
     <>
       <div className="d-flex flex-column">
@@ -189,28 +211,6 @@ export default function RiwayatIndex({ onChangePage }) {
                 defaultValue="Aktif"
               />
             </Filter>
-          </div>
-          <div className="mt-3 d-flex">
-            <p className="mb-0 me-3">
-              <span
-                style={{
-                  padding: "0px 10px 0px 10px",
-                  margin: "0px 10px",
-                  backgroundColor: "#DC3545",
-                }}
-              ></span>
-              Ditolak oleh Prodi
-            </p>
-            <p className="mb-0 me-3">
-              <span
-                style={{
-                  padding: "0px 10px 0px 10px",
-                  margin: "0px 10px",
-                  backgroundColor: "#6c757d",
-                }}
-              ></span>
-              Dibatalkan (Kelompok Keahlian non-aktif)
-            </p>
           </div>
           <div className="container">
             <div className="row mt-3 gx-4">

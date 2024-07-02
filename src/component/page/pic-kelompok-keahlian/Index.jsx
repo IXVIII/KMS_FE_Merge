@@ -83,6 +83,36 @@ export default function PICIndex({ onChangePage }) {
     SweetAlert("Error", "Maaf, anda tidak memiliki akses!", "warning");
   }
 
+  useEffect(() => {
+    const legendTopElement = document.getElementById("legend-top");
+    if (legendTopElement) {
+      legendTopElement.innerHTML = `
+        <div class="d-flex">
+          <p class="mb-0 me-3">
+            <span
+              style="
+                padding: 0px 10px;
+                margin: 0px 10px;
+                background-color: #6c757d;
+              "
+            ></span>
+            Menunggu PIC Prodi
+          </p>
+          <p class="mb-0 me-3">
+            <span
+              style="
+                padding: 0px 10px;
+                margin: 0px 10px;
+                background-color: #67ACE9;
+              "
+            ></span>
+            Aktif / Sudah dipublikasi
+          </p>
+        </div>
+      `;
+    }
+  }, []);
+
   return (
     <>
       {isLoading ? (
@@ -97,28 +127,6 @@ export default function PICIndex({ onChangePage }) {
                     <span className="badge fw-normal fs-6 text-dark-emphasis bg-secondary-subtle">
                       <Icon name="arrow-down" /> Menunggu PIC dari Prodi
                     </span>
-                  </div>
-                  <div className="mt-3 d-flex">
-                    <p className="mb-0 me-3">
-                      <span
-                        style={{
-                          padding: "0px 10px 0px 10px",
-                          margin: "0px 10px",
-                          backgroundColor: "#6c757d",
-                        }}
-                      ></span>
-                      Menunggu PIC Prodi
-                    </p>
-                    <p className="mb-0 me-3">
-                      <span
-                        style={{
-                          padding: "0px 10px 0px 10px",
-                          margin: "0px 10px",
-                          backgroundColor: "#67ACE9",
-                        }}
-                      ></span>
-                      Aktif / Sudah dipublikasi
-                    </p>
                   </div>
                 </div>
                 {currentData
