@@ -30,7 +30,11 @@ export default function KMS_Sidebar({ onChangePage, questionNumbers, selectedQue
   };
 
   function exitReview() {
-    onChangePage("pretest", true, quizId);
+    if (AppContext_test.quizType == "Pretest"){
+      onChangePage("pretest", true, quizId);
+    }else{
+      onChangePage("posttest", true, quizId);
+    }
   }
 
   return (

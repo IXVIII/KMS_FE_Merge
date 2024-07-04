@@ -20,7 +20,6 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
   const [currentData, setCurrentData] = useState();
   const [marginRight, setMarginRight] = useState("5vh");
 
-  AppContext_test.refreshPage = "posttest";
   useEffect(() => {
     document.documentElement.style.setProperty('--responsiveContainer-margin-left', '0vw');
     const sidebarMenuElement = document.querySelector('.sidebarMenu');
@@ -53,7 +52,6 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
       try {
         const data = await fetchDataWithRetry_posttest();
         const dataQuiz = await getQuiz_posttest();
-        console.log("bjir", dataQuiz)
         setCurrentData(dataQuiz);
         if (isMounted) {
           if (data != "") {

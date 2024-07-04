@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { object, string } from "yup";
 import { API_LINK } from "../../../util/Constants";
 import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
@@ -11,12 +11,13 @@ import Alert from "../../../part/Alert";
 import { Stepper } from 'react-form-stepper';
 import AppContext_test from "../MasterContext";
 import uploadFile from "../../../util/UploadFile";
-
+import AppContext_master from "../MasterContext";
 export default function MasterSharingAdd({ onChangePage}) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
 
+  const [resetStepper, setResetStepper] = useState(0);
   const fileInputRef = useRef(null);
   const vidioInputRef = useRef(null);
   const formDataRef = useRef({
@@ -40,7 +41,9 @@ export default function MasterSharingAdd({ onChangePage}) {
       [validationError.name]: validationError.error,
     }));
   };
-
+  useEffect(() => {
+    setResetStepper((prev) => !prev + 1);
+  });
   const handleFileChange = async (ref, extAllowed) => {
     const file = ref.current.files[0];
     const fileName = file.name;
@@ -111,6 +114,8 @@ export default function MasterSharingAdd({ onChangePage}) {
             if (data === "ERROR") {
               setIsError({ error: true, message: "Terjadi kesalahan: Gagal menyimpan data Sharing." });
             } else {
+              
+              setResetStepper((prev) => !prev + 1);
               SweetAlert("Sukses", "Data Sharing Expert berhasil disimpan", "success");
               // onChangePage("index", kategori);
             }
@@ -135,6 +140,7 @@ export default function MasterSharingAdd({ onChangePage}) {
       <form onSubmit={handleAdd}>
         <div>
           <Stepper
+            key={resetStepper}
             steps={[
               { label: 'Materi', onClick: () => onChangePage("materiAdd") },
               { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
@@ -143,27 +149,8 @@ export default function MasterSharingAdd({ onChangePage}) {
               { label: 'Post Test', onClick: () => onChangePage("posttestAdd") }
             ]}
             activeStep={2}
-            styleConfig={{
-              activeBgColor: '#67ACE9',
-              activeTextColor: '#FFFFFF',
-              completedBgColor: '#67ACE9',
-              completedTextColor: '#FFFFFF',
-              inactiveBgColor: '#E0E0E0',
-              inactiveTextColor: '#000000',
-              size: '2em',
-              circleFontSize: '1rem',
-              labelFontSize: '0.875rem',
-              borderRadius: '50%',
-              fontWeight: 500
-            }}
-            connectorStyleConfig={{
-              completedColor: '#67ACE9',
-              activeColor: '#67ACE9',
-              disabledColor: '#BDBDBD',
-              size: 1,
-              stepSize: '2em',
-              style: 'solid'
-            }}
+            styleConfig={AppContext_master.styleConfig}
+            connectorStyleConfig={AppContext_master.connectorStyleConfig}
           />
         </div>
 

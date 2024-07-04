@@ -11,6 +11,7 @@ import AppContext_test from "../page/master-test/TestContext";
 import { decryptId } from "../util/Encryptor";
 
 export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestClick_open, onChangePage, isOpen, materiId, refreshKey, setRefreshKey }) {
+  
   let activeUser = "";
   const cookie = Cookies.get("activeUser");
   if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
@@ -28,7 +29,6 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
   const [currentFilter, setCurrentFilter] = useState([]);
   const [idMateri, setIdMateri] = useState("");
   useEffect(() => {
-    console.log("b",AppContext_test)
   }, [AppContext_test]);
   useEffect(() => {
     setShowMainContent_SideBar(isOpen);
@@ -37,61 +37,121 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
   const isDataReadyTemp = "";
   const materiIdTemp = "";
   const isOpenTemp = true;
-  
   //
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      try {
-        // Panggil semua fungsi fetch data di sini
-        const materiData = await fetchDataMateri();
-        const progresData = await fetchProgresMateri();
+      let materiData = null;
+      let progresData = null;
+      let maxRetries = 10; // Batas maksimal percobaan
+      let retryCount = 0;
 
-        if (materiData && progresData) {
-          setCurrentDataMateri(materiData);
-          setCurrentData(progresData);
-        } else {
-          console.error('Response data is undefined or null');
+      if (AppContext_test.materiId != null){
+        while ((!materiData || !progresData) && retryCount < maxRetries) {
+          try {
+            const [ progresResponse] = await Promise.all([fetchProgresMateri()]);
+            if (progresResponse) {
+              progresData = progresResponse;
+            }
+
+            if (progresData) {
+              setCurrentData(progresData);
+            } else {
+              console.error('Response data is undefined or null');
+            }
+          } catch (error) {
+            setIsError(true);
+            console.error('Fetch error:', error);
+          }
+          
+          retryCount++;
+          if (!progresData) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
         }
-      } catch (error) {
-        setIsError(true);
-        console.error('Fetch error:', error);
-      } finally {
+
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [AppContext_test.materiId, AppContext_test.refreshPage, refreshKey]);
+  }, [AppContext_test.materiId, AppContext_test.refreshPage]);
+  //
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      let materiData = null;
+      let maxRetries = 10; 
+      let retryCount = 0;
+
+      if (AppContext_test.materiId != null){
+        while ((!materiData) && retryCount < maxRetries) {
+          try {
+            const [materiResponse] = await Promise.all([fetchDataMateri()]);
+            if (materiResponse) {
+              materiData = materiResponse;
+            }
+            if (materiData) {
+              setCurrentDataMateri(materiData);
+            } else {
+              console.error('Response data is undefined or null');
+            }
+          } catch (error) {
+            setIsError(true);
+            console.error('Fetch error:', error);
+          }
+          
+          retryCount++;
+          if (!materiData) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+      setIsLoading(false);
+      }
+
+    };
+
+    fetchData();
+  }, [AppContext_test.materiId]);
+
   
   const fetchDataMateri = async () => {
-    try {
-      const response = await axios.post(API_LINK + 'Materis/GetDataMateriById', {
-        materiId: AppContext_test.materiId,
-      });
-      if (response.data) {
-        return response.data;
+    let success = false;
+    while (!success){
+      try {
+        const response = await axios.post(API_LINK + 'Materis/GetDataMateriById', {
+          materiId: AppContext_test.materiId,
+        });
+        if (response.data != 0) {
+          success = true;
+          return response.data;
+        }
+      } catch (error) {
+        console.error('Error fetching quiz data:', error);
+        return null;
       }
-    } catch (error) {
-      console.error('Error fetching quiz data:', error);
-      return null;
-    }
-  };
+    };
+  }
 
   const fetchProgresMateri = async () => {
-    try {
-      const response = await axios.post(API_LINK + 'Materis/GetProgresMateri', {
-        materiId: AppContext_test.materiId,
-        karyawanId: AppContext_test.activeUser,
-      });
-      if (response.data) {
-        return response.data;
+    let success = false;
+    while (!success){
+      try {
+        const response = await axios.post(API_LINK + 'Materis/GetProgresMateri', {
+          materiId: AppContext_test.materiId,
+          karyawanId: AppContext_test.activeUser,
+        });
+        if (response.data) {
+          success = true;
+          return response.data;
+        }else{
+        }
+      } catch (error) {
+        console.error('Error fetching progres data:', error);
+        return null;
       }
-    } catch (error) {
-      console.error('Error fetching progres data:', error);
-      return null;
+      };
     }
-  };
 
   const toggleDropdown = (name) => {
     setDropdowns((prev) => ({ ...prev, [name]: !prev[name] }));
@@ -209,7 +269,6 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
           countDone: 2
         }] : [])
       ];
-      console.log("aa", currentDataMateri)
       setDropdownData(updatedDropdownData);
       setShowPengenalan(currentDataMateri[0]?.Pengenalan != null);
       setShowPreTest(currentDataMateri[0]?.PreTest != null);
@@ -315,7 +374,7 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
             Daftar Pembelajaran
           </span>
         </div>
-        {isLoading ? (
+        {isLoading  ? (
           <Loading />
         ) : (
           <>
@@ -330,9 +389,9 @@ export default function KMS_Rightbar({ handlePreTestClick_close, handlePreTestCl
             <div className="border-top border-bottom" style={progressStyle}>
               {currentData.map((item) => (
                 <div key={item.Key}>
-                  <KMS_ProgressBar progress={item.TotalProgres} />
+                  <KMS_ProgressBar progress={item.TotalProgres ?? 0} />
                   <span style={{ fontSize: '14px', marginLeft: '8px' }}>
-                    {item.TotalProgres}% Selesai
+                    {item.TotalProgres ?? 0}% Selesai
                   </span>
                 </div>
               ))}

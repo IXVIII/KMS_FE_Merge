@@ -18,7 +18,7 @@ export default function KMS_VideoViewer({ videoFileName }) {
         try {
           const response = await axios.get(`${API_LINK}Utilities/Upload/PreviewFile`, {
             params: {
-              namaFile: AppContext_test.urlMateri = withID.fls 
+              namaFile: AppContext_test.urlMateri 
             },
             responseType: 'arraybuffer' 
           }); 

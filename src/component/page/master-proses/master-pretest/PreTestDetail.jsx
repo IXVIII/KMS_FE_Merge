@@ -27,7 +27,7 @@ export default function MasterPreTestDetail({ onChangePage, withID }) {
     status: 'Aktif',
     createdby: 'Admin',
   });
-
+  const [resetStepper, setResetStepper] = useState(0);
   useEffect(() => {
     formData.timer = timer;
   }, [timer]);
@@ -60,7 +60,6 @@ export default function MasterPreTestDetail({ onChangePage, withID }) {
         const data = await axios.post(API_LINK + 'Quiz/GetQuizByID', {
           id: AppContext_test.DetailMateri?.Key, tipe: "Pretest"
         });
-
         if (data === "ERROR") {
           throw new Error("Terjadi kesalahan: Gagal mengambil data quiz.");
         } else if (data.length === 0) {

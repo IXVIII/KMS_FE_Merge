@@ -37,10 +37,33 @@ const inisialisasiData = [
   },
 ];
 
+const dataFilterSort = [
+  { Value: "[Nama Kelompok Keahlian] asc", Text: "Nama Kelompok Keahlian [↑]" },
+  {
+    Value: "[Nama Kelompok Keahlian] desc",
+    Text: "Nama Kelompok Keahlian  [↓]",
+  },
+];
+
 export default function PengajuanIndex({ onChangePage }) {
   let activeUser = "";
   const cookie = Cookies.get("activeUser");
   if (cookie) activeUser = JSON.parse(decryptId(cookie)).username;
+
+  const searchQuery = useRef();
+  const searchFilterSort = useRef();
+
+  function handleSearch() {
+    setIsLoading(true);
+    setCurrentFilter((prevFilter) => {
+      return {
+        ...prevFilter,
+        page: 1,
+        query: searchQuery.current.value,
+        sort: searchFilterSort.current.value,
+      };
+    });
+  }
 
   const [show, setShow] = useState(false);
   const [isError, setIsError] = useState(false);
@@ -358,7 +381,7 @@ export default function PengajuanIndex({ onChangePage }) {
             <div className="flex-fill">
               <div className="input-group">
                 <Input
-                  // ref={searchQuery}
+                  ref={searchQuery}
                   forInput="pencarianProduk"
                   placeholder="Cari"
                 />
@@ -366,35 +389,19 @@ export default function PengajuanIndex({ onChangePage }) {
                   iconName="search"
                   classType="primary px-4"
                   title="Cari"
-                  //   onClick={handleSearch}
+                  onClick={handleSearch}
                 />
                 <Filter>
                   <DropDown
-                    // ref={searchFilterSort}
+                    ref={searchFilterSort}
                     forInput="ddUrut"
                     label="Urut Berdasarkan"
                     type="none"
-                    // arrData={dataFilterSort}
-                    defaultValue="[Kode Produk] asc"
-                  />
-                  <DropDown
-                    // ref={searchFilterJenis}
-                    forInput="ddJenis"
-                    label="Jenis Produk"
-                    type="semua"
-                    // arrData={dataFilterJenis}
-                    defaultValue=""
-                  />
-                  <DropDown
-                    // ref={searchFilterStatus}
-                    forInput="ddStatus"
-                    label="Status"
-                    type="none"
-                    // arrData={dataFilterStatus}
-                    defaultValue="Aktif"
+                    arrData={dataFilterSort}
+                    defaultValue="[Nama Kelompok Keahlian] asc"
                   />
                 </Filter>
-              </div>
+              </div>
               <div className="container">
                 {listKK.filter((value) => value.Status === "Menunggu Acc")
                   .length == 2 && (

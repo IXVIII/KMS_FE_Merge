@@ -21,7 +21,6 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
   const [marginRight, setMarginRight] = useState("0vh");
   const [currentData, setCurrentData] = useState();
   const [receivedMateriId, setReceivedMateriId] = useState();
-  AppContext_test.refreshPage = true;
   function onStartTest() {
     onChangePage("pengerjaantest", "Pretest", materiId);
   }
@@ -38,45 +37,50 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
     let isMounted = true;
 
     const fetchData_pretest = async (retries = 10, delay = 1000) => {
-    for (let i = 0; i < retries; i++) {
-      setIsLoading(true);
-      try {
-        const data = await fetchDataWithRetry_pretest();
-        const dataQuiz = await getQuiz_pretest();
-        setCurrentData(dataQuiz);
-        if (isMounted) {
-          if (data) {
-            if (Array.isArray(data)) {
-              if (data.length != 0) {
-                onChangePage("hasiltest", "Pretest", data[0].IdQuiz);
-                AppContext_test.quizType = "Pretest";
+      for (let i = 0; i < retries; i++) {
+        setIsLoading(true);
+        try {
+          const [data, dataQuiz] = await Promise.all([
+            fetchDataWithRetry_pretest(),
+            getQuiz_pretest()
+          ]);
+
+          console.log("ds", data)
+          if (isMounted) {
+            setCurrentData(dataQuiz);
+
+            if (data) {
+              if (Array.isArray(data)) {
+                if (data.length !== 0) {
+                  onChangePage("hasiltest", "Pretest", data[0].IdQuiz);
+                  AppContext_test.quizType = "Pretest";
+                  break;
+                }
+              } else {
+                console.error("Data is not an array:", data);
               }
             } else {
-              console.error("Data is not an array:", data);
             }
-          } else {
-            // console.error("Response data is undefined or null");
           }
-        }
-      } catch (error) {
-        if (isMounted) {
-          setIsError(true);
-          console.error("Fetch error:", error);
-          if (i < retries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
-          } else {
-            return;
+        } catch (error) {
+          if (isMounted) {
+            setIsError(true);
+            console.error("Fetch error:", error);
+            if (i < retries - 1) {
+              await new Promise((resolve) => setTimeout(resolve, delay));
+            } else {
+              return; // Exit function if max retries reached
+            }
           }
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
+        } finally {
+          if (isMounted) {
+            setIsLoading(false);
+          }
         }
       }
-    }
     };
-  
-    const fetchDataWithRetry_pretest = async (retries = 10, delay = 5000) => {
+
+    const fetchDataWithRetry_pretest = async (retries = 15, delay = 500) => {
       for (let i = 0; i < retries; i++) {
         try {
           const response = await axios.post(API_LINK + "Quiz/GetDataResultQuiz", {
@@ -84,36 +88,36 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
             karyawanId: AppContext_test.activeUser,
             tipeQuiz: "Pretest",
           });
-          if (response.data.length != 0) {
+          if (response.data.length !== 0) {
             return response.data;
           }
         } catch (error) {
-          console.error("Error fetching quiz data:", error);
+          // console.error("Error fetching quiz data:", error);
           if (i < retries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await new Promise((resolve) => setTimeout(resolve, delay));
           } else {
-            throw error;
+            throw error; // Throw error if max retries reached
           }
         }
       }
     };
 
-    const getQuiz_pretest = async (retries = 10, delay = 5000) => {
+    const getQuiz_pretest = async (retries = 10, delay = 500) => {
       for (let i = 0; i < retries; i++) {
         try {
           const response = await axios.post(API_LINK + "Quiz/GetDataQuiz", {
             quizId: AppContext_test.materiId,
             tipeQuiz: "Pretest",
           });
-          if (response.data.length != 0) {
+          if (response.data.length !== 0) {
             return response.data;
           }
         } catch (error) {
           console.error("Error fetching quiz data:", error);
           if (i < retries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await new Promise((resolve) => setTimeout(resolve, delay));
           } else {
-            throw error;
+            throw error; // Throw error if max retries reached
           }
         }
       }
@@ -122,9 +126,10 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
     fetchData_pretest();
 
     return () => {
-      isMounted = false; 
+      isMounted = false;
     };
   }, [AppContext_test.materiId]);
+
 
 
   const circleStyle = {
@@ -143,7 +148,6 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
       AppContext_test.durasiTest = duration;
       return Math.floor(duration / 60); 
   };
-
 
   return (
     <>
@@ -186,7 +190,7 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
                   <h6 className="mb-0">{currentData[0].CreatedBy} - {formatDate(currentData[0].CreatedDate)}</h6>
                 </div>
               <div className="text-center" style={{marginBottom: '100px'}}>
-                <h2 className="font-weight-bold mb-4 primary">Post Test - {currentData[0].JudulQuiz}</h2>
+                <h2 className="font-weight-bold mb-4 primary">Pre Test - {currentData[0].JudulQuiz}</h2>
                 <p className="mb-5" style={{ maxWidth: '600px', margin: '0 auto', marginBottom: '60px' }}>
                 Tes ini terdiri dari {currentData[0].JumlahSoal} soal Anda hanya memiliki waktu {convertToMinutes(currentData[0].Durasi)} menit untuk mengerjakan semua soal, dimulai saat Anda mengklik tombol
                     "Mulai Post Test" di bawah ini.

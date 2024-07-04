@@ -24,13 +24,15 @@ export default function MasterForumAdd({ onChangePage }) {
   const [isLoading, setIsLoading] = useState(false);
   const [isFormDisabled, setIsFormDisabled] = useState(false);
   const [formData, setFormData] = useState({
-    materiId: AppContext_test.dataIDMateri,
+    materiId: AppContext_master.dataIDMateri,
     karyawanId: AppContext_test.activeUser,
     forumJudul: AppContext_test.ForumForm?.forumJudul || "",
     forumIsi: AppContext_test.ForumForm?.forumIsi || "",
     forumStatus: "Aktif",
     forumCreatedBy: AppContext_test.displayName,
   });
+  
+  const [resetStepper, setResetStepper] = useState(0);
 
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
@@ -57,7 +59,9 @@ export default function MasterForumAdd({ onChangePage }) {
     setErrors({});
     setIsError({ error: false, message: "" });
   };
-
+  useEffect(() => {
+    setResetStepper((prev) => !prev + 1);
+  });
   const handleAdd = async (e) => {
     e.preventDefault();
 
@@ -87,8 +91,10 @@ export default function MasterForumAdd({ onChangePage }) {
       } else {
         SweetAlert("Sukses", "Data Forum berhasil disimpan", "success");
         setIsFormDisabled(true);
+        setResetStepper((prev) => !prev + 1);
         AppContext_test.formSavedForum = true;
-        // onChangePage("index", kategori);
+        
+        setResetStepper((prev) => !prev + 1);
       }
     } catch (error) {
       setIsError({
@@ -121,6 +127,7 @@ export default function MasterForumAdd({ onChangePage }) {
       <form onSubmit={handleAdd}>
         <div>
           <Stepper
+            key={resetStepper}
             steps={[
               { label: 'Materi', onClick: () => onChangePage("courseAdd") },
               { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
@@ -129,27 +136,9 @@ export default function MasterForumAdd({ onChangePage }) {
               { label: 'Post Test', onClick: () => onChangePage("posttestAdd") }
             ]}
             activeStep={3}
-            styleConfig={{
-              activeBgColor: '#67ACE9',
-              activeTextColor: '#FFFFFF',
-              completedBgColor: '#67ACE9',
-              completedTextColor: '#FFFFFF',
-              inactiveBgColor: '#E0E0E0',
-              inactiveTextColor: '#000000',
-              size: '2em',
-              circleFontSize: '1rem',
-              labelFontSize: '0.875rem',
-              borderRadius: '50%',
-              fontWeight: 500
-            }}
-            connectorStyleConfig={{
-              completedColor: '#67ACE9',
-              activeColor: '#67ACE9',
-              disabledColor: '#BDBDBD',
-              size: 1,
-              stepSize: '2em',
-              style: 'solid'
-            }}
+            
+            styleConfig={AppContext_master.styleConfig}
+            connectorStyleConfig={AppContext_master.connectorStyleConfig}
           />
         </div>
 

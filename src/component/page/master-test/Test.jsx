@@ -150,7 +150,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
     let countBenar = 0;
     const totalNilai = answers.reduce((accumulator, currentValue) => {
       const nilaiSelected = parseFloat(currentValue.nilaiSelected) || 0;
-      if (nilaiSelected != 0){
+      if (nilaiSelected !== 0) {
         countBenar += 1;
       }
       return accumulator + nilaiSelected;
@@ -158,23 +158,24 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
     formDataRef.current.nilai = totalNilai;
     formDataRef.current.answers = submittedAnswers;
     formDataRef.current.jumlahBenar = countBenar;
-    try {
-      const response1 = await UseFetch(
-        API_LINK + "Quiz/SaveTransaksiQuiz",
-        formDataRef.current
-      );
-      const response2 = await UseFetch(
-        API_LINK + "Materis/SaveProgresMateri",
-        formUpdate.current
-      );
-      const response = await UseFetch( API_LINK + "Materis/UpdatePoinProgresMateri", {
-        materiId: AppContext_test.materiId,
-      });
+    let responseSave = false;
+    let maxRetries = 10; 
+    let retryCount = 0;
 
-    } catch (error) {
-      console.error("Error:", error);
+    while ((!responseSave) && retryCount < maxRetries) {
+      try {
+        const [response1] = await Promise.all([
+          UseFetch(API_LINK + "Quiz/SaveTransaksiQuiz", formDataRef.current)
+        ]);
+        if (response1.data != 0){
+          responseSave = true;
+        }
+      } catch (error) {
+        console.error("Error:", error);
+      }
     }
   };
+
 
   const retryRequest = async (url, data, maxRetries = 100, delay = 50) => {
     let attempts = 0;

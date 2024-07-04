@@ -43,6 +43,7 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
       setSelectedQuestion(selectedQuestion + totalQuestion - 1);
     }
   };
+  AppContext_test.quizType = quizType;
   const selectNextQuestion = () => {
     if (selectedQuestion < totalQuestion) {
       setSelectedQuestion(selectedQuestion + 1);

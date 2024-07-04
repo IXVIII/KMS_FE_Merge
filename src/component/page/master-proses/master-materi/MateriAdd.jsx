@@ -23,7 +23,8 @@ export default function MastermateriAdd({ onChangePage }) {
   const [isLoading, setIsLoading] = useState(false);
   const [listKategori, setListKategori] = useState([]);
   const [isFormDisabled, setIsFormDisabled] = useState(false); 
-
+  console.log()
+  const [resetStepper, setResetStepper] = useState(0);
   const fileInputRef = useRef(null);
   const gambarInputRef = useRef(null);
   const vidioInputRef = useRef(null);
@@ -203,9 +204,11 @@ export default function MastermateriAdd({ onChangePage }) {
     }
   };
 */}
+
 const fetchDataKategori = async (retries = 3, delay = 1000) => {
   for (let i = 0; i < retries; i++) {
   try {
+    console.log(AppContext_test.KeyKelompokKeahlian)
   const data = await UseFetch(API_LINK + "Program/GetKategoriKKById", { kategori });
   const mappedData = data.map(item => ({
     value: item.Key,
@@ -256,7 +259,9 @@ useEffect(() => {
     isMounted = false;
   };
 }, [kategori]);
-
+  useEffect(() => {
+    setResetStepper((prev) => !prev + 1);
+  });
 useEffect(() => {
   if (AppContext_master.MateriForm && AppContext_master.MateriForm.current && Object.keys(AppContext_master.MateriForm.current).length > 0) {
     formDataRef.current = { ...formDataRef.current, ...AppContext_master.MateriForm.current };
@@ -266,7 +271,6 @@ useEffect(() => {
     setIsFormDisabled(false);
   }
 }, [AppContext_master.MateriForm, AppContext_master.formSavedMateri]);
-
 // Render form
 const dataSaved = AppContext_master.formSavedMateri; // Menyimpan nilai AppContext_master.formSavedMateri untuk menentukan apakah form harus di-disable atau tidak
 
@@ -292,27 +296,8 @@ if (isLoading) return <Loading />;
               { label: 'Post Test', onClick: () => onChangePage("posttestAdd") }
             ]}
             activeStep={0}
-            styleConfig={{
-              activeBgColor: '#67ACE9',
-              activeTextColor: '#FFFFFF',
-              completedBgColor: '#67ACE9',
-              completedTextColor: '#FFFFFF',
-              inactiveBgColor: '#E0E0E0',
-              inactiveTextColor: '#000000',
-              size: '2em',
-              circleFontSize: '1rem',
-              labelFontSize: '0.875rem',
-              borderRadius: '50%',
-              fontWeight: 500
-            }}
-            connectorStyleConfig={{
-              completedColor: '#67ACE9',
-              activeColor: '#67ACE9',
-              disabledColor: '#BDBDBD',
-              size: 1,
-              stepSize: '2em',
-              style: 'solid'
-            }}
+            styleConfig={AppContext_master.styleConfig}
+            connectorStyleConfig={AppContext_master.connectorStyleConfig}
           />
         </div>
   

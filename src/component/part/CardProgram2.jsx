@@ -2,17 +2,17 @@ import React, { useState } from "react";
 import Button from "./Button";
 import CardKategoriProgram from "./CardKategoriProgram2";
 import Icon from "./Icon";
+import AppContext_test from "../page/master-test/TestContext";
 
 const MAX_DESCRIPTION_LENGTH = 200; // Sesuaikan dengan panjang maksimum yang diinginkan
 
 const CardProgram = ({ program, onChangePage }) => {
   const [isContentVisible, setIsContentVisible] = useState(false);
   const [expandDeskripsi, setExpandDeskripsi] = useState(false);
-
   const toggleContentVisibility = () => {
     setIsContentVisible(!isContentVisible);
   };
-
+  AppContext_test.KeyKelompokKeahlian = program["Kode KK"];
   const handleExpandDescription = () => {
     setExpandDeskripsi(!expandDeskripsi);
   };
