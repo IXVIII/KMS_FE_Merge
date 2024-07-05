@@ -56,8 +56,7 @@ export default function MasterProsesIndex({ onChangePage }) {
     order: "asc",
     kategori:AppContext_test.KategoriIdByKK,
   });
-  console.log(currentData)
-  // AppContext_test.kategoriId = withID;
+  // AppContext'_test.kategoriId = withID;
   // const kategori = withID;
   const searchQuery = useRef(null);
   const searchFilterSort = useRef(null);
@@ -145,6 +144,7 @@ export default function MasterProsesIndex({ onChangePage }) {
                 currentFilter
             );
 
+  console.log('ds', data)
             if (data === "ERROR") {
                 setIsError(true);
             } else if (data.length === 0) {

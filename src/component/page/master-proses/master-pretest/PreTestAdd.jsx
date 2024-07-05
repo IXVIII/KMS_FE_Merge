@@ -14,6 +14,7 @@ import Swal from 'sweetalert2';
 import { Editor } from '@tinymce/tinymce-react';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
+
 export default function MasterPreTestAdd({ onChangePage }) {
   const [formContent, setFormContent] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -24,14 +25,16 @@ export default function MasterPreTestAdd({ onChangePage }) {
   const [timer, setTimer] = useState('');
   const gambarInputRef = useRef(null);
 
-  console.log("dd", AppContext_master)
+  const [resetStepper, setResetStepper] = useState(0);
   const handleChange = (name, value) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: value,
     }));
   };
-
+  useEffect(() => {
+    setResetStepper((prev) => !prev + 1);
+  });
   const handlePointChange = (e, index) => {
     const { value } = e.target;
 
@@ -153,6 +156,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
     }, 0);
 
     if (totalQuestionPoint + totalOptionPoint !== 100) {
+      
+      setResetStepper((prev) => !prev + 1);
       Swal.fire({
         title: 'Gagal!',
         text: 'Total skor harus berjumlah 100',
@@ -224,7 +229,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
           if (question.type === 'Essay' || question.type === 'Praktikum') {
             const answerData = {
               urutanChoice: '',
-              answerText: '', 
+              answerText: question.correctAnswer, 
               questionId: questionId,
               nilaiChoice: question.point,
               quecreatedby: AppContext_test.displayName,
@@ -263,6 +268,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
               }
             }
           }
+          
+          setResetStepper((prev) => !prev + 1);
         } catch (error) {
           console.error('Gagal menyimpan pertanyaan:', error);
           Swal.fire({
@@ -288,6 +295,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
           setSelectedFile(null);
           setTimer('');
           setIsButtonDisabled(true);
+
         }
       });
   
@@ -607,6 +615,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
       <form id="myForm" onSubmit={handleAdd}>
         <div>
           <Stepper
+            key={resetStepper}
             steps={[
               { label: 'Materi', onClick: () => onChangePage("materiAdd") },
               { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
@@ -615,27 +624,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
               { label: 'Post Test', onClick: () => onChangePage("posttestAdd") }
             ]}
             activeStep={1}
-            styleConfig={{
-              activeBgColor: '#67ACE9',
-              activeTextColor: '#FFFFFF',
-              completedBgColor: '#67ACE9',
-              completedTextColor: '#FFFFFF',
-              inactiveBgColor: '#E0E0E0',
-              inactiveTextColor: '#000000',
-              size: '2em',
-              circleFontSize: '1rem',
-              labelFontSize: '0.875rem',
-              borderRadius: '50%',
-              fontWeight: 500
-            }}
-            connectorStyleConfig={{
-              completedColor: '#67ACE9',
-              activeColor: '#67ACE9',
-              disabledColor: '#BDBDBD',
-              size: 1,
-              stepSize: '2em',
-              style: 'solid'
-            }}
+            styleConfig={AppContext_master.styleConfig}
+            connectorStyleConfig={AppContext_master.connectorStyleConfig}
           />
         </div>
         <div className="card">

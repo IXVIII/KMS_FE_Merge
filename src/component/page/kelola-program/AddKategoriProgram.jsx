@@ -84,7 +84,7 @@ export default function KategoriProgramAdd({ onChangePage, withID }) {
           } else {
             SweetAlert(
               "Sukses",
-              "Data Mata Kuliah berhasil disimpan",
+              "Data Kategori berhasil disimpan",
               "success"
             );
             onChangePage("index");
@@ -109,7 +109,7 @@ export default function KategoriProgramAdd({ onChangePage, withID }) {
         <form onSubmit={handleAdd}>
           <div className="card">
             <div className="card-header bg-primary fw-medium text-white">
-              Tambah Mata Kuliah{" "}
+              Tambah Kategori{" "}
               <span className="badge text-bg-dark">Draft</span>
             </div>
             <div className="card-body p-4">
@@ -123,7 +123,7 @@ export default function KategoriProgramAdd({ onChangePage, withID }) {
                     forInput="nama"
                     label="Nama Kategori"
                     isRequired
-                    placeholder="Nama Mata Kuliah (Kelompok Keilmuan)"
+                    placeholder="Nama Kategori"
                     value={formDataRef.current.nama}
                     onChange={handleInputChange}
                     errorMessage={errors.nama}

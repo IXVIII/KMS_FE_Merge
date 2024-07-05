@@ -34,15 +34,18 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
   async function updateProgres() {
     let success = false;
     let retryCount = 0;
-    const maxRetries = 5; 
+    let maxRetries = 10; 
 
     while (!success && retryCount < maxRetries) {
       try {
-        AppContext_test.refreshPage += 1;
-        await axios.post(API_LINK + "Materis/UpdatePoinProgresMateri", {
+        const response = await axios.post(API_LINK + "Materis/UpdatePoinProgresMateri", {
           materiId: AppContext_test.materiId,
         });
-        success = true; 
+
+        if (response.status === 200){
+          success = true;
+          console.log('ds', response)
+        }
       } catch (error) {
         console.error("Failed to save progress:", error);
         retryCount += 1;
@@ -72,45 +75,46 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
     let isMounted = true;
 
     const fetchData_posttest = async (retries = 10, delay = 1000) => {
-    for (let i = 0; i < retries; i++) {
-      setIsLoading(true);
-      try {
-        const dataQuiz = await getMateri();
-        setCurrentData(dataQuiz);
-        isMounted = true;
-      } catch (error) {
-        if (isMounted) {
-          setIsError(true);
-          console.error("Fetch error:", error);
-          if (i < retries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
-          } else {
-            return;
+      for (let i = 0; i < retries; i++) {
+        setIsLoading(true);
+        try {
+          const [dataQuiz] = await Promise.all([getMateri()]);
+          if (isMounted) {
+            setCurrentData(dataQuiz);
+          }
+        } catch (error) {
+          if (isMounted) {
+            setIsError(true);
+            console.error("Fetch error:", error);
+            if (i < retries - 1) {
+              await new Promise((resolve) => setTimeout(resolve, delay));
+            } else {
+              return; // Exit function if max retries reached
+            }
+          }
+        } finally {
+          if (isMounted) {
+            setIsLoading(false);
           }
         }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
       }
-    }
     };
 
-    const getMateri = async (retries = 10, delay = 5000) => {
+    const getMateri = async (retries = 10, delay = 2000) => {
       for (let i = 0; i < retries; i++) {
         try {
           const response = await axios.post(API_LINK + "Materis/GetDataMateriById", {
             materiId: AppContext_test.materiId,
           });
-          if (response.data.length != 0) {
+          if (response.data.length !== 0) {
             return response.data;
           }
         } catch (error) {
-          console.error("Error fetching quiz data:", error);
+          console.error("Error fetching materi data:", error);
           if (i < retries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
+            await new Promise((resolve) => setTimeout(resolve, delay));
           } else {
-            throw error;
+            throw error; // Throw error if max retries reached
           }
         }
       }
@@ -119,9 +123,10 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
     fetchData_posttest();
 
     return () => {
-      isMounted = false; 
+      isMounted = false;
     };
-  }, [materiId]);
+  }, [AppContext_test.materiId]);
+
 
   useEffect(() => {
     updateProgres();

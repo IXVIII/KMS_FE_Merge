@@ -6,10 +6,10 @@ const MAX_DESCRIPTION_LENGTH = 100;
 
 const CardKategoriProgram = ({ onChangePage, kategori }) => {
   const [expandDeskripsi, setExpandDeskripsi] = useState(false);
-
   const handleExpandDescription = () => {
     setExpandDeskripsi(!expandDeskripsi);
   };
+  console.log(kategori)
 
   return (
     <>

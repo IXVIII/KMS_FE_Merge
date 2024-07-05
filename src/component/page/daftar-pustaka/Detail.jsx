@@ -12,28 +12,30 @@ export default function MasterDaftarPustakaDetail({ onChangePage, withID }) {
   const [file, setFile] = useState("");
 
   useEffect(() => {
-    // fetch(
-    //   API_LINK +
-    //     `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
-    //       withID.File
-    //     )}`
-    // )
-    //   .then((response) => response.blob())
-    //   .then((blob) => {
-    //     const url = URL.createObjectURL(blob);
-    //     setFile(url);
-    //   })
-    //   .catch((error) => {
-    //     console.error("Error fetching file:", error);
-    //   });
-    AppContext_test.urlMateri = withID.File;
-
     let fileExt = withID.File.split(".").pop().toLowerCase();
     setFileExtension(fileExt);
   }, [withID]);
 
   useEffect(() => {
     console.log(fileExtension);
+    if (fileExtension === "mp4") {
+      AppContext_test.urlMateri = withID.File;
+    } else {
+    fetch(
+      API_LINK +
+        `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
+          withID.File
+        )}`
+    )
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        setFile(url);
+      })
+      .catch((error) => {
+        console.error("Error fetching file:", error);
+      });
+    }
   }, [fileExtension]);
 
   return (
@@ -61,17 +63,20 @@ export default function MasterDaftarPustakaDetail({ onChangePage, withID }) {
                 />
               </div>
               <div className="mt-0 col-lg-9 mb-2">
-                {/* <object
-                  data={file}
-                  type={
-                    fileExtension === "pdf"
-                      ? "application/pdf"
-                      : "application/mp4"
-                  }
-                  width="100%"
-                  height="500"
-                ></object> */}
-                <KMS_VideoPlayer videoFileName={withID.File} />
+                {fileExtension === "pdf" ? (
+                  <object
+                    data={file}
+                    type={
+                      fileExtension === "pdf"
+                        ? "application/pdf"
+                        : "application/mp4"
+                    }
+                    width="100%"
+                    height="500"
+                  ></object>
+                ) : (
+                  <KMS_VideoPlayer videoFileName={withID.File} />
+                )}
               </div>
               <hr />
               <div className="col-md-12">

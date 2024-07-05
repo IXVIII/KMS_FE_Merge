@@ -29,9 +29,10 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
 
   AppContext_test.refreshPage = "hasiltest";
   function lihatHasil() {
-    onChangePage("detailtest", AppContext_test.quizType, materiId);
+    onChangePage("detailtest", "Pretest", materiId);
   }
   function bacaMateri() {
+    console.log('ddd', materiId)
     onChangePage("materipdf", true, materiId);
   }
   
@@ -57,7 +58,7 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
               setCurrentData(data);
             }
           } else {
-            throw new Error("Data format is incorrect");
+            // throw new Error("Data format is incorrect");
           }
         }
       } catch (error) {
@@ -172,11 +173,11 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
                           label="Lihat Hasil" 
                           onClick={lihatHasil}
                         />
-                        <Button 
+                        {/* <Button 
                           classType="primary ms-2 px-4 py-2"
                           label="Baca Materi"
                           onClick={bacaMateri}
-                        />
+                        /> */}
                       </div>
                     </div>
                   </div>
@@ -228,7 +229,7 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
                         Anda telah berhasil mengerjakan Pre Test, silahkan baca materi yang telah disediakan dan kerjakan Post Test.
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'center' }}>
-                        <Button
+                        {/* <Button
                           classType="secondary me-2 px-4 py-2"
                           label="Lihat Hasil"
                           onClick={lihatHasil}
@@ -241,8 +242,8 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
                             cursor: 'pointer',
                             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                           }}
-                        />
-                        <Button
+                        /> */}
+                        {/* <Button
                           classType="primary ms-2 px-4 py-2"
                           label="Baca Materi"
                           onClick={bacaMateri}
@@ -255,7 +256,7 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
                             cursor: 'pointer',
                             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
                           }}
-                        />
+                        /> */}
                       </div>
                     </div>
                   </div>

@@ -25,15 +25,17 @@ export default function MasterPostTestAdd({ onChangePage }) {
   const [timer, setTimer] = useState('');
   const gambarInputRef = useRef(null);
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
+  const [resetStepper, setResetStepper] = useState(0);
 
-  console.log("dd", AppContext_master)
   const handleChange = (name, value) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: value,
     }));
   };
-
+  useEffect(() => {
+    setResetStepper((prev) => !prev + 1);
+  });
   const handlePointChange = (e, index) => {
     const { value } = e.target;
 
@@ -239,7 +241,6 @@ export default function MasterPostTestAdd({ onChangePage }) {
   
             try {
               const answerResponse = await axios.post(API_LINK + 'Choices/SaveDataChoice', answerData);
-              console.log('Jawaban Essay berhasil disimpan:', answerResponse.data);
             } catch (error) {
               console.error('Gagal menyimpan jawaban Essay:', error);
               Swal.fire({
@@ -259,12 +260,8 @@ export default function MasterPostTestAdd({ onChangePage }) {
                 quecreatedby: AppContext_test.displayName,
               };
   
-              console.log("hasil multiple choice")
-              console.log(answerData);
-  
               try {
                 const answerResponse = await axios.post(API_LINK + 'Choices/SaveDataChoice', answerData);
-                console.log('Jawaban multiple choice berhasil disimpan:', answerResponse.data);
               } catch (error) {
                 console.error('Gagal menyimpan jawaban multiple choice:', error);
                 Swal.fire({
@@ -276,6 +273,8 @@ export default function MasterPostTestAdd({ onChangePage }) {
               }
             }
           }
+          
+          setResetStepper((prev) => !prev + 1);
         } catch (error) {
           console.error('Gagal menyimpan pertanyaan:', error);
           Swal.fire({
@@ -302,6 +301,8 @@ export default function MasterPostTestAdd({ onChangePage }) {
           setTimer('');
           setIsButtonDisabled(true);
           onChangePage("index");
+          
+          setResetStepper((prev) => !prev);
         }
       });
   
@@ -394,7 +395,6 @@ export default function MasterPostTestAdd({ onChangePage }) {
   };
 
   setFormContent(updatedFormContent);
-  console.log(updatedFormContent)
 };
 
   const handleDuplicateQuestion = (index) => {
@@ -513,13 +513,18 @@ export default function MasterPostTestAdd({ onChangePage }) {
         confirmButtonText: 'OK'
       });
     } else {
-      alert("Pilih file Excel terlebih dahulu!");
+      Swal.fire({
+        title: 'Gagal!',
+        text: 'Pilih file Excel terlebih dahulu!',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
     }
   };
 
   const handleDownloadTemplate = () => {
     const link = document.createElement('a');
-    link.href = '/template.xlsx'; // Path to your template file in the public directory
+    link.href = '/template.xlsx'; 
     link.download = 'template.xlsx';
     link.click();
   };
@@ -633,6 +638,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
       <form id="myForm" onSubmit={handleAdd}>
         <div>
           <Stepper
+            key={resetStepper}
             steps={[
               { label: 'Materi', onClick: () => onChangePage("materiAdd") },
               { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
@@ -641,27 +647,9 @@ export default function MasterPostTestAdd({ onChangePage }) {
               { label: 'Post Test', onClick: () => onChangePage("posttestAdd") }
             ]}
             activeStep={4}
-            styleConfig={{
-              activeBgColor: '#67ACE9',
-              activeTextColor: '#FFFFFF',
-              completedBgColor: '#67ACE9',
-              completedTextColor: '#FFFFFF',
-              inactiveBgColor: '#E0E0E0',
-              inactiveTextColor: '#000000',
-              size: '2em',
-              circleFontSize: '1rem',
-              labelFontSize: '0.875rem',
-              borderRadius: '50%',
-              fontWeight: 500
-            }}
-            connectorStyleConfig={{
-              completedColor: '#67ACE9',
-              activeColor: '#67ACE9',
-              disabledColor: '#BDBDBD',
-              size: 1,
-              stepSize: '2em',
-              style: 'solid'
-            }}
+            
+            styleConfig={AppContext_master.styleConfig}
+            connectorStyleConfig={AppContext_master.connectorStyleConfig}
           />
         </div>
         <div className="card">

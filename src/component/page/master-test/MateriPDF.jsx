@@ -80,10 +80,20 @@ export default function MasterTestIndex({ onChangePage }) {
 
     while (!success && retryCount < maxRetries) {
       try {
-        AppContext_test.refreshPage += 1;
-        await axios.post(API_LINK + "Materis/SaveProgresMateri", formUpdate.current);
-        fetchDataWithRetry_rightBar();
-        success = true; 
+        const response2Promise = UseFetch(API_LINK + "Materis/UpdatePoinProgresMateri", {
+            materiId: AppContext_test.materiId,
+        });
+        
+        const responsePromise = axios.post(API_LINK + "Materis/SaveProgresMateri", formUpdate.current);
+
+        const [response2, response] = await Promise.all([response2Promise, responsePromise]);
+
+        if (response2.data != 0 && response.data != 0) {
+            success = true;
+            AppContext_test.refreshPage += retryCount;
+        }
+
+        
       } catch (error) {
         console.error("Failed to save progress:", error);
         retryCount += 1;
@@ -94,53 +104,32 @@ export default function MasterTestIndex({ onChangePage }) {
     }
   }
 
-  async function updateProgres() {
-    let success = false;
-    let retryCount = 0;
-    const maxRetries = 5; 
+  // async function updateProgres() {
+  //   let success = false;
+  //   let retryCount = 0;
+  //   let maxRetries = 5; 
 
-    while (!success && retryCount < maxRetries) {
-      try {
-        AppContext_test.refreshPage += 1;
-        await axios.post(API_LINK + "Materis/UpdatePoinProgresMateri", {
-          materiId: AppContext_test.materiId,
-        });
-        success = true; 
-      } catch (error) {
-        console.error("Failed to save progress:", error);
-        retryCount += 1;
-        if (retryCount >= maxRetries) {
-          console.error("Max retries reached. Stopping attempts to save progress.");
-        }
-      }
-    }
-  };
+  //   while (!success) {
+  //     try {
+  //       await axios.post(API_LINK + "Materis/UpdatePoinProgresMateri", {
+  //         materiId: AppContext_test.materiId,
+  //       });
+  //       success = true; 
+  //     } catch (error) {
+  //       console.error("Failed to save progress:", error);
+  //       retryCount += 1;
+  //       maxRetries += 1;
+  //       if (retryCount >= maxRetries) {
+  //         console.error("Max retries reached. Stopping attempts to save progress.");
+  //       }
+  //     }
+  //   }
+  // };
 
-  const fetchDataWithRetry_rightBar = async (retries = 10, delay = 5000) => {
-    for (let i = 0; i < retries; i++) {
-      try {
-        const response = await axios.post(API_LINK + "Materis/GetProgresMateri", {
-          materiId: AppContext_test.materiId,
-          karyawanId: AppContext_test.activeUser,
-        });
-        if (response.data != 0) {
-          AppContext_test.refreshPage += 1;
-          return response.data;
-        }
-      } catch (error) {
-        console.error("Error fetching progres data:", error);
-        if (i < retries - 1) {
-          await new Promise(resolve => setTimeout(resolve, delay));
-        } else {
-          throw error;
-        }
-      }
-    }
-  };
-
+  
   useEffect(() => {
     saveProgress();
-    updateProgres();
+    // updateProgres();
   }, []);
 
   function handleSetCurrentPage(newCurrentPage) {

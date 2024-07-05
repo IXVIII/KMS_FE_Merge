@@ -17,8 +17,6 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
   const [currentRespondentIndex, setCurrentRespondentIndex] = useState(0);
   const [currentQuestions, setCurrentQuestions] = useState([]);
   const [currentAnswers, setCurrentAnswers] = useState([]);
-  // const [badges, setBadges] = useState([]); // Add state for badges
-  // const [reviewStatus, setReviewStatus] = useState([]);
   const [badges, setBadges] = useState([]);
   const [reviewStatus, setReviewStatus] = useState([]);
 
@@ -36,8 +34,9 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
           p4: materiId,
           p5: idKaryawan,
           p6: idQuiz,
+          p7: AppContext_test.activeUser,
         });
-        console.log("awokaok", review)
+        console.log("awokaok", idTransaksi, idSoal)
         SweetAlert(
           "Sukses",
           "Review jawaban telah berhasil disimpan!",
@@ -84,8 +83,8 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
             } else {
               setCurrentData(data);
               // Initialize badges array
-              setBadges(Array(data.length).fill(null));
-              setReviewStatus(Array(data.length).fill(null).map(() => Array(currentQuestions.length).fill(false)));
+              setBadges(Array(data.length).fill(null).map(() => Array(0).fill(0)));
+              setReviewStatus(Array(data.length).fill(null).map(() => Array(0).fill(false)));
               await fetchQuestions(data[0].qui_tipe);
               await fetchAnswers(data[0].qui_tipe, data[0].kry_id);
             }
@@ -105,38 +104,38 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
       }
     };
 
-    const fetchDataWithRetry = async (retries = 10, delay = 5000) => {
-      for (let i = 0; i < retries; i++) {
-        try {
-          setIsLoading(true)
-          const response = await axios.post(API_LINK + "Quiz/GetDataTransaksiReview", {
-            quizId: AppContext_test.materiId,
-          });
-          if (response.data.length !== 0) {
-            setIsLoading(false)
-            const filteredTransaksi = response.data.filter(transaksi =>
-              transaksi.trq_status === "Not Reviewed"
-            );
-            return filteredTransaksi;
-          }
-        } catch (error) {
-          console.error("Error fetching quiz data:", error);
-          if (i < retries - 1) {
-            await new Promise(resolve => setTimeout(resolve, delay));
-          } else {
-            throw error;
-          }
+  const fetchDataWithRetry = async (retries = 10, delay = 1000) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        setIsLoading(true)
+        const response = await axios.post(API_LINK + "Quiz/GetDataTransaksiReview", {
+          quizId: AppContext_test.materiId,
+        });
+        if (response.data.length !== 0) {
+          setIsLoading(false)
+          const filteredTransaksi = response.data.filter(transaksi =>
+            transaksi.trq_status === "Not Reviewed"
+          );
+          return filteredTransaksi;
+        }
+      } catch (error) {
+        console.error("Error fetching quiz data:", error);
+        if (i < retries - 1) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+        } else {
+          throw error;
         }
       }
-    };
-    fetchData();
+    }
+  };
+  fetchData();
 
-    return () => {
+  return () => {
       isMounted = false; // cleanup flag
     };
   }, [AppContext_test.materiId, AppContext_test.refresh]);
 
-  const fetchQuestions = async (questionType, retries = 10, delay = 5000) => {
+  const fetchQuestions = async (questionType, retries = 10, delay = 1000) => {
     for (let i = 0; i < retries; i++) {
       try {
         const response = await axios.post(API_LINK + "Quiz/GetDataQuestion", {
@@ -162,7 +161,7 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     }
   };
 
-  const fetchAnswers = async (questionType, karyawanId, retries = 10, delay = 5000) => {
+  const fetchAnswers = async (questionType, karyawanId, retries = 10, delay = 1000) => {
     for (let i = 0; i < retries; i++) {
       try {
         setIsLoading(true);
@@ -189,14 +188,13 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     }
   };
 
-
   useEffect(() => {
     if (currentData.length > 0) {
       fetchQuestions(currentData[currentRespondentIndex].qui_tipe);
       fetchAnswers(currentData[currentRespondentIndex].qui_tipe, currentData[currentRespondentIndex].kry_id);
     }
   }, [currentRespondentIndex, currentData]);
-
+  
   const handlePreviousRespondent = () => {
     setCurrentRespondentIndex(
       (currentRespondentIndex - 1 + currentData.length) % currentData.length
@@ -208,23 +206,19 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
       (currentRespondentIndex + 1) % currentData.length
     );
   };
-
+  useEffect(() => {
+    console.log('badges: ', badges)
+    console.log('review status: ', reviewStatus)
+  }, [badges, reviewStatus]);
   const handleReview = (idSoal, isCorrect, karyawanId, quizId, transaksiId) => {
     const updatedRespondent = { ...currentData[currentRespondentIndex] };
-
-    // Update reviewStatus object
-    // setReviewStatus({
-    //   ...reviewStatus,
-    //   [idSoal]: true
-    // });
     const updatedReviewStatus = [...reviewStatus];
-    updatedReviewStatus[currentRespondentIndex][idSoal] = true;
+    updatedReviewStatus[currentRespondentIndex][idSoal] = isCorrect;
     setReviewStatus(updatedReviewStatus);
 
-    const updatedBadges = [...badges];
-    updatedBadges[idSoal] = isCorrect ? 'success' : 'danger';
+    const updatedBadges = [...badges ];
+    updatedBadges[currentRespondentIndex][idSoal] = isCorrect ? 'success' : 'danger';
     setBadges(updatedBadges);
-
     const detail = {
       idSoal: idSoal,
       isCorrect: isCorrect,
@@ -242,10 +236,6 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
       )
     );
   };
-  // useEffect(() => {
-  //   // console.log(formDataReview)
-  // }, [formDataReview]);
-
 
   const handleAnswerChange = (questionIndex, value) => {
     const updatedRespondent = { ...currentData[currentRespondentIndex] };
@@ -257,17 +247,17 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     );
   };
 
-   const handleCancelReview = (idSoal) => {
-      const updatedReviewStatus = [...reviewStatus];
-      updatedReviewStatus[currentRespondentIndex] = Array(currentQuestions.length).fill(false);
-      setReviewStatus(updatedReviewStatus);
-      const index = formDataReview.findIndex(detail => detail.idSoal === idSoal);
-      if (index !== -1) {
-        formDataReview.splice(index, 1); 
-      }
+  const handleCancelReview = (idSoal) => {
+    const updatedReviewStatus = [...reviewStatus];
+    updatedReviewStatus[currentRespondentIndex][idSoal] = null;
+    setReviewStatus(updatedReviewStatus);
+    const index = formDataReview.findIndex(detail => detail.idSoal === idSoal);
+    if (index !== -1) {
+      formDataReview.splice(index, 1); 
+    }
 
-      badges[idSoal] = null;
-    };
+    badges[idSoal] = null;
+  };
 
   if (isLoading) {
     return <Loading />;
@@ -292,7 +282,6 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
     );
   }
 
-
   const currentRespondent = currentData[currentRespondentIndex];
   const jawabanPenggunaStr = currentRespondent.trq_jawaban_pengguna;
 
@@ -308,8 +297,6 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
 });
   const validJawabanPengguna = processedJawaban.filter(item => item.length === 3);
 
-
-  // Map the filtered array to the desired format
   const formattedAnswers = validJawabanPengguna.map(item => ({
     idSoal: item[1],
     namaFile: item[2]
@@ -406,9 +393,9 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
                       <Badge bg="secondary" className="me-2">
                         {question.TipeSoal === "Essay" ? "Essay" : "Praktikum"}
                       </Badge>
-                      {badges[question.Key] && 
-                        <Badge bg={badges[question.Key]} className="me-2">
-                          {badges[question.Key] === 'success' ? 'Benar' : 'Salah'}
+                      {badges[currentRespondentIndex][question.Key] && 
+                        <Badge bg={badges[currentRespondentIndex][question.Key]} className="me-2">
+                          {badges[currentRespondentIndex][question.Key] === 'success' ? 'Benar' : 'Salah'}
                         </Badge>
                       }
                     </div>
@@ -442,18 +429,18 @@ export default function MasterMateriReviewJawaban({ onChangePage, status, withID
                   </Form>
                 </Card.Body>
                 <Card.Footer className="text-end">
-                {!reviewStatus[currentRespondentIndex][question.Key] ? (
+                {reviewStatus[currentRespondentIndex][question.Key] == null ? (
                   <>
                     <Button
                       variant="success"
                       className="me-2"
-                      onClick={() => handleReview(question.Key, "true", currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
+                      onClick={() => handleReview(question.Key, true, currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
                     >
                       Benar
                     </Button>
                     <Button
                       variant="danger"
-                      onClick={() => handleReview(question.Key, "false", currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
+                      onClick={() => handleReview(question.Key, false, currentRespondent.kry_id, currentRespondent.qui_id, currentRespondent.trq_id)}
                     >
                       Salah
                     </Button>

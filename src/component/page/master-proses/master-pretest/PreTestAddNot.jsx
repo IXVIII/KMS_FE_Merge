@@ -23,7 +23,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [timer, setTimer] = useState('');
   const gambarInputRef = useRef(null);
-  console.log(AppContext_master)
+  
+  const [resetStepper, setResetStepper] = useState(0);
   const handleChange = (name, value) => {
     setFormData((prevFormData) => ({
       ...prevFormData,
@@ -100,7 +101,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
     gambar: null,
     questionDeskripsi: '',
     status: 'Aktif',
-    quecreatedby: AppContexAppContext_testt_master.DisplayName,
+    quecreatedby: AppContext_master.DisplayName,
   };
 
   const handleQuestionTypeChange = (e, index) => {
@@ -270,6 +271,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
               }
             }
           }
+          
+          setResetStepper((prev) => !prev + 1);
         } catch (error) {
           console.error('Gagal menyimpan pertanyaan:', error);
           Swal.fire({
@@ -625,6 +628,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
       <form id="myForm" onSubmit={handleAdd}>
         <div>
           <Stepper
+          key={resetStepper}
             steps={[
               { label: 'Materi', onClick: () => onChangePage("materiAdd") },
               { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
