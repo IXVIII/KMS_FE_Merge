@@ -5,6 +5,7 @@ import { API_LINK, APPLICATION_NAME } from "../../util/Constants";
 import { validateAllInputs, validateInput } from "../../util/ValidateForm";
 import { encryptId } from "../../util/Encryptor";
 import logo from "../../../assets/IMG_Logo.png";
+import PPP from "../../../assets/P - KNOW.png";
 import UseFetch from "../../util/UseFetch";
 import Button from "../../part/Button";
 import Input from "../../part/Input";
@@ -154,16 +155,16 @@ export default function Login() {
           >
             <div
               className="card w-50"
-              style={{ minWidth: "360px", maxWidth: "500px" }}
+              style={{ minWidth: "360px", maxWidth: "600px", padding: "20px" }}
             >
               <div className="card-body p-4 text-center">
                 <img
-                  src={logo}
+                  src={PPP}
                   alt="Logo AstraTech"
-                  className="w-100 px-4 py-4"
+                  className="w-75 px-4 py-4"
                 />
                 <p className="lead fw-medium fs-5 text-nowrap">
-                  {APPLICATION_NAME.toUpperCase()}
+                  {/* {APPLICATION_NAME.toUpperCase()} */}
                 </p>
                 <div style={{ textAlign: "left" }}>
                   <div className="py-2 px-1">
