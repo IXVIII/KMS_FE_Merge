@@ -14,6 +14,7 @@ import Swal from 'sweetalert2';
 import { Editor } from '@tinymce/tinymce-react';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
+
 export default function MasterPreTestAdd({ onChangePage }) {
   const [formContent, setFormContent] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -228,7 +229,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
           if (question.type === 'Essay' || question.type === 'Praktikum') {
             const answerData = {
               urutanChoice: '',
-              answerText: '', 
+              answerText: question.correctAnswer, 
               questionId: questionId,
               nilaiChoice: question.point,
               quecreatedby: AppContext_test.displayName,

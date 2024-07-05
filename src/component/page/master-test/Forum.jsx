@@ -25,14 +25,13 @@ export default function Forum({ onChangePage, isOpen }) {
     detailId: currentData[0]?.Key,
   });
   const handleReply = (item) => {
-    console.log('bjir', item)
     formDataRef.current = {
       forumId: item.Key,
       karyawanId: AppContext_test.activeUser,
       isiDetailForum: "",
       statusDetailForum: "Aktif",
       createdBy: AppContext_test.displayName,
-      detailId: item.DetailId,
+      detailId: item.ChildDetailId,
     };
     setReplyMessage(`Membalas: ${item.IsiDetailForum}`); 
     setShowReplyInput(true); 
@@ -89,12 +88,10 @@ export default function Forum({ onChangePage, isOpen }) {
         API_LINK + "Forum/SaveTransaksiForum",
         formDataRef.current
       );
-      console.log("woi", formDataRef.current)
       const updatedForumData = await fetchDataWithRetry();
       setCurrentData(updatedForumData); 
       formDataRef.current.isiDetailForum = "";
       handleCancelReply()
-      console.log(formDataRef.current)
       } catch (error) {
         console.error("Error sending reply:", error);
       } finally {
@@ -107,7 +104,6 @@ export default function Forum({ onChangePage, isOpen }) {
       formDataRef.current.forumId = currentData[0]?.Key;
       formDataRef.current.detailId = currentData[0]?.Key;
     }
-    console.log(currentData)
   }, [currentData]);
   useEffect(() => {
     let isMounted = true;
@@ -219,19 +215,24 @@ export default function Forum({ onChangePage, isOpen }) {
                   {item.CreatedByDetailForum} - {formatDate(item.CreatedDateDetailForum)}
               </div>
             </div>
-            <p
-              className="mb-0"
-              style={{
-                maxWidth: "1500px",
-                marginBottom: "0px",
-                fontSize: "14px",
-                textAlign: "left",
-                marginLeft: "10px",
-                flex: 1
-              }}
-            >
+            <div>
+              <p
+                className="mb-0"
+                style={{
+                  maxWidth: "1500px",
+                  marginBottom: "0px",
+                  fontSize: "14px",
+                  textAlign: "left",
+                  marginLeft: "10px",
+                  flex: 1
+                }}
+              >
+              </p>
+            </div>
+            <div>
               {item.IsiDetailForum}
-            </p>
+
+            </div>
             <div style={{ display: "flex", justifyContent: "flex-start", marginLeft: "10px", paddingTop:"10px", paddingBottom:"10px" }}>
               <button
                 className="btn btn-outline-primary btn-sm"
@@ -242,9 +243,11 @@ export default function Forum({ onChangePage, isOpen }) {
             </div>
 
             {currentData
-              .filter((reply) => reply.ChildDetailId === item.DetailId)
+              .filter((reply) => reply.ChildDetailId == item.DetailId)
               .map((reply) => (
                 <div key={reply.DetailId} style={{ marginLeft: "30px"}}>
+                  {
+                console.log(currentData, item)}
                   {visibleReplies.includes(reply.DetailId) && (
                     <div style={{paddingBottom:"20px" }}>
                       <div className="d-flex align-items-center " >
@@ -284,11 +287,13 @@ export default function Forum({ onChangePage, isOpen }) {
                           marginLeft: "10px",
                         }}
                       >
-                        <div dangerouslySetInnerHTML={{ __html: item.IsiForum }} />
+                        <div>
+                          <div dangerouslySetInnerHTML={{ __html: reply.IsiDetailForum }} />
+                        </div>
                       </div>
 
                       <i
-                        className="btn btn-outline-primary btn-sm" 
+                        className="btn btn-outline-primary btn-sm mt-2" 
                         onClick={() => handleReply(reply)}
                       >
                         Balas
@@ -382,7 +387,9 @@ const handleHideReplies = (detailId) => {
               marginLeft: "10px",
             }}
           >
-            <div dangerouslySetInnerHTML={{ __html: item.IsiForum }} />
+            <div>
+              <div dangerouslySetInnerHTML={{ __html: item.IsiForum }} />
+            </div>
           </div>
         </div>
       </div>

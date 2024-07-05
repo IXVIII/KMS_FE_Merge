@@ -241,7 +241,6 @@ export default function MasterPostTestAdd({ onChangePage }) {
   
             try {
               const answerResponse = await axios.post(API_LINK + 'Choices/SaveDataChoice', answerData);
-              console.log('Jawaban Essay berhasil disimpan:', answerResponse.data);
             } catch (error) {
               console.error('Gagal menyimpan jawaban Essay:', error);
               Swal.fire({
@@ -261,12 +260,8 @@ export default function MasterPostTestAdd({ onChangePage }) {
                 quecreatedby: AppContext_test.displayName,
               };
   
-              console.log("hasil multiple choice")
-              console.log(answerData);
-  
               try {
                 const answerResponse = await axios.post(API_LINK + 'Choices/SaveDataChoice', answerData);
-                console.log('Jawaban multiple choice berhasil disimpan:', answerResponse.data);
               } catch (error) {
                 console.error('Gagal menyimpan jawaban multiple choice:', error);
                 Swal.fire({
@@ -400,7 +395,6 @@ export default function MasterPostTestAdd({ onChangePage }) {
   };
 
   setFormContent(updatedFormContent);
-  console.log(updatedFormContent)
 };
 
   const handleDuplicateQuestion = (index) => {
