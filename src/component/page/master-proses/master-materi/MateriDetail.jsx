@@ -101,12 +101,12 @@ export default function MasterMateriDetail({ onChangePage }) {
                                     src={Materi.Gambar}
                                     alt="gambar"
                                     className="img-fluid"
-                                    style={{ width: "100%", height: "auto", maxWidth: "300px", maxHeight: "300px" }}
+                                    style={{ width: "100%", height: "auto", maxWidth: "300px", maxHeight: "300px", objectFit: "cover" }}
                                 />
                             </div>
                             <div className="col-lg-9 mt-3 mt-lg-0">
                                 <h4>Deskripsi</h4>
-                                <p>{Materi.Keterangan}</p>
+                                <p style={{textAlign:"justify"}}>{Materi.Keterangan}</p>
                                 <h5>Kata Kunci</h5>
                                 <p>{Array.isArray(Materi["Kata Kunci"]) ? Materi["Kata Kunci"].join(", ") : Materi["Kata Kunci"]}</p>
                             </div>

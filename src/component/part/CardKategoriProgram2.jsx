@@ -9,7 +9,6 @@ const CardKategoriProgram = ({ onChangePage, kategori }) => {
   const handleExpandDescription = () => {
     setExpandDeskripsi(!expandDeskripsi);
   };
-  console.log(kategori)
 
   return (
     <>
