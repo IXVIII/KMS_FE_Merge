@@ -98,8 +98,9 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId, quizI
           id: materiId,
           userId: AppContext_test.activeUser, 
           tipeQuiz: quizType,
-          idQuiz: AppContext_test.reviewQuizId,
+          idQuiz: quizId,
         });
+        console.log('ddd', materiId, AppContext_test.activeUser, quizType, AppContext_test.reviewQuizId)
         const jawabanPenggunaStr = answerResponse.data[0].JawabanPengguna;
 
         const jawabanPengguna = jawabanPenggunaStr

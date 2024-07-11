@@ -201,7 +201,7 @@ export default function MasterForumEdit({ onChangePage }) {
                       id="forumIsi"
                       value={formData.forumIsi}
                       onEditorChange={(content) => setFormData({ ...formData, forumIsi: content })}
-                      apiKey='v5s2v6diqyjyw3k012z4k2o0epjmq6wil26i10xjh53bbk7y'
+                      apiKey='ci4fa00c13rk9erot37prff8jjekb93mdcwji9rtr2envzvi'
                       init={{
                         height: 300,
                         menubar: false,

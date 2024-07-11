@@ -29,8 +29,9 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
 
   AppContext_test.refreshPage = "hasiltest";
   function lihatHasil() {
-    onChangePage("detailtest", "Pretest", materiId);
+    onChangePage("detailtest", "Pretest", AppContext_test.materiId);
   }
+  
   function bacaMateri() {
     console.log('ddd', materiId)
     onChangePage("materipdf", true, materiId);

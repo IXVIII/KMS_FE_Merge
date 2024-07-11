@@ -120,11 +120,42 @@ export default function MasterPostTestAdd({ onChangePage }) {
       setFormContent(updatedFormContent);
     }
   };
+const isStartDateBeforeEndDate = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return start <= end;
+  };
 
   const handleAdd = async (e) => {
     e.preventDefault();
 
-    // Check if all "Pilgan" type questions have more than one option
+    formData.timer = convertTimeToSeconds(timer);
+
+    const validationErrors = await validateAllInputs(
+      formData,
+      userSchema,
+      setErrors
+    );
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      Swal.fire({
+        title: 'Gagal!',
+        text: 'Pastikan semua data terisi dengan benar!.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    if (!isStartDateBeforeEndDate(formData.tanggalAwal, formData.tanggalAkhir)) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'Tanggal awal tidak boleh lebih dari tanggal akhir.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
     for (let question of formContent) {
       if (question.type === 'Pilgan' && question.options.length < 2) {
           Swal.fire({
@@ -233,7 +264,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
           if (question.type === 'Essay' || question.type === 'Praktikum') {
             const answerData = {
               urutanChoice: '',
-              answerText: question.correctAnswer, // Pastikan menggunakan correctAnswer dari question
+              answerText: question.correctAnswer ? question.correctAnswer : "0", 
               questionId: questionId,
               nilaiChoice: question.point,
               quecreatedby: AppContext_test.displayName,
@@ -934,7 +965,7 @@ export default function MasterPostTestAdd({ onChangePage }) {
                             soal: content,
                           }));
                         }}
-                        apiKey="la2hd1ehvumeir6fa5kxxltae8u2whzvx1jptw6dqm4dgf2g"
+                        apiKey="ci4fa00c13rk9erot37prff8jjekb93mdcwji9rtr2envzvi"
                         init={{
                           height: 300,
                           menubar: false,

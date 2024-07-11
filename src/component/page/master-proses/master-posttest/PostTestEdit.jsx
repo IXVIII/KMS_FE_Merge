@@ -165,8 +165,42 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
         }
     };
 
-    const handleAdd = async (e) => {
-        e.preventDefault();
+    const isStartDateBeforeEndDate = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return start <= end;
+  };
+
+  const handleAdd = async (e) => {
+    e.preventDefault();
+
+    formData.timer = convertTimeToSeconds(timer);
+
+    const validationErrors = await validateAllInputs(
+      formData,
+      userSchema,
+      setErrors
+    );
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      Swal.fire({
+        title: 'Gagal!',
+        text: 'Pastikan semua data terisi dengan benar!.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    if (!isStartDateBeforeEndDate(formData.tanggalAwal, formData.tanggalAkhir)) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'Tanggal awal tidak boleh lebih dari tanggal akhir.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
 
         const totalQuestionPoint = formContent.reduce((total, question) => total + parseInt(question.point), 0);
         const totalOptionPoint = formContent.reduce((total, question) => {
@@ -839,7 +873,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                                                                 soal: content,
                                                             }));
                                                         }}
-                                                        apiKey="la2hd1ehvumeir6fa5kxxltae8u2whzvx1jptw6dqm4dgf2g"
+                                                        apiKey="ci4fa00c13rk9erot37prff8jjekb93mdcwji9rtr2envzvi"
                                                         init={{
                                                             height: 300,
                                                             menubar: false,
@@ -1003,11 +1037,15 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                         label="Kembali"
                         onClick={() => onChangePage("forumEdit")}
                     />
-                    <Button
-                        classType="primary ms-2 px-4 py-2"
-                        type="submit"
-                        label="Simpan"
-                    />
+                    {hasTest ? (
+                        <Button
+                            classType="primary ms-2 px-4 py-2"
+                            type="submit"
+                            label="Simpan"
+                        />
+                    ) : (
+                      null  
+                    )}
                 </div>
             </form>
         </>
