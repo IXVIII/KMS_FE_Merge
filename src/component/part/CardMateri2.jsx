@@ -51,9 +51,10 @@ function CardMateri({
         }
         return (
           <div className="mt-4 col-lg-6" key={book.Key}>
-            <div className="card" style={{ borderColor: "#67ACE9", height: "auto" }}>
+            <div className="card" style={{ borderColor: book.Status === "Aktif" ? "blue" : "grey", height: "auto" }}>
+              
             <div className="card-body d-flex align-items-start position-relative">
-                <img
+                <img  
                   src={book.Gambar}
                   alt="gambar"
                   style={{
@@ -90,6 +91,9 @@ function CardMateri({
                     <span style={{ fontSize: "12px" }}> {book.Uploader} • {book.Creadate?.slice(0, 10)}</span>
                   </div>
                   <div>
+                     {/* textAlign: 'right' */}
+                     {/* textAlign: 'left' */}
+                     {/* textAlign: 'center' */}
                     <p className="card-text p-0 m-0" style={{ fontSize: "12px", maxHeight: "75px", overflow: "hidden", textAlign: 'justify' }}>
                       {book.Keterangan.length > MAX_DESCRIPTION_LENGTH && !expandDeskripsi[book.Key] ? (
                         <>

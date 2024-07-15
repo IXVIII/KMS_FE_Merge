@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { object, string } from "yup";
+import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
 import SweetAlert from "../../../util/SweetAlert";
 import Button from "../../../part/Button";
 import Input from "../../../part/Input";
@@ -75,19 +76,22 @@ export default function MasterForumEdit({ onChangePage }) {
   const handleAdd = async (e) => {
     e.preventDefault();
 
-    const validationErrors = await userSchema.validate(formData, { abortEarly: false })
-      .then(() => ({ forumJudul: '', forumIsi: '' }))
-      .catch((err) => {
-        const errors = err.inner.reduce((acc, current) => {
-          acc[current.path] = current.message;
-          return acc;
-        }, {});
-        setErrors(errors);
-        return errors;
-      });
+    const validationErrors = await validateAllInputs(formData, userSchema, setErrors);
+    const isEmptyData = Object.values(formData).some(value => value === "");
 
-    setIsLoading(true);
-    setIsError(false);
+    if (isEmptyData) {
+      setIsError({
+        error: true,
+        message: "Data tidak boleh kosong",
+      });
+      return;
+    }
+
+    if (Object.values(validationErrors).every((error) => !error)) {
+      setIsLoading(true);
+      setIsError({ error: false, message: "" });
+      setErrors({});
+    }
 
     try {
       const response = await axios.post(API_LINK + "Forum/EditDataForum", {
@@ -114,9 +118,6 @@ export default function MasterForumEdit({ onChangePage }) {
     return <Loading />;
   }
 
-  if (isError) {
-    return <Alert type="danger" message="Error fetching data." />;
-  }
 
   return (
     <>
