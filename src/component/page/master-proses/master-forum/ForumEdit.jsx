@@ -71,6 +71,7 @@ export default function MasterForumEdit({ onChangePage }) {
     fetchData();
   }, [Materi]);
 
+
   const handleAdd = async (e) => {
     e.preventDefault();
 
@@ -89,17 +90,15 @@ export default function MasterForumEdit({ onChangePage }) {
     setIsError(false);
 
     try {
-      console.log("FormData being sent:", formData);
-      const response = await UseFetch(API_LINK + "Forum/EditDataForum", {
+      const response = await axios.post(API_LINK + "Forum/EditDataForum", {
         p1: Materi.Key,
         p2: formData.forumJudul,
         p3: formData.forumIsi,
         p4: AppContext_test.displayName,
       });
-
+      console.log("FormData being sent:", Materi.Key,formData,AppContext_test.displayName,);
       if (response.status === 200) {
         SweetAlert("Berhasil", "Data forum berhasil diubah!", "success");
-        // onChangePage("forumEdit");
       } else {
         throw new Error("Gagal untuk menyimpan data forum");
       }

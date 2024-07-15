@@ -70,6 +70,8 @@ export default function MasterSharingAdd({ onChangePage }) {
     }));
   };
 
+  let hasPdfFile = false;
+  let hasVideoFile = false;
   const handleAdd = async (e) => {
     e.preventDefault();
 
@@ -99,6 +101,7 @@ export default function MasterSharingAdd({ onChangePage }) {
             formDataRef.current["mat_sharing_expert_pdf"] = data.newFileName;
           })
         );
+        hasPdfFile = true;
       }
 
       if (vidioInputRef.current && vidioInputRef.current.files.length > 0) {
@@ -107,6 +110,17 @@ export default function MasterSharingAdd({ onChangePage }) {
             formDataRef.current["mat_sharing_expert_video"] = data.newFileName;
           })
         );
+        hasVideoFile = true;
+      }
+      console.log(hasPdfFile, hasVideoFile)
+      if (!hasPdfFile && !hasVideoFile) {
+        setIsLoading(false);
+        setIsError(prevError => ({
+          ...prevError,
+          error: true,
+          message: "Harus memilih salah satu file PDF atau file video, tidak boleh keduanya kosong."
+        }));
+        return;
       }
 
       Promise.all(uploadPromises).then(() => {
