@@ -62,7 +62,16 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
     });
 
     const userSchema = object({
+        quizId: string(),
+        materiId: string(),
         quizJudul: string(),
+        quizDeskripsi: string().required('Quiz deskripsi harus diisi'),
+        quizTipe: string(),
+        tanggalAwal: string().required('Tanggal awal harus diisi'),
+        tanggalAkhir: string().required('Tanggal akhir harus diisi'),
+        timer: string().required('Durasi harus diisi'),
+        status: string(),
+        createdby: string(),
     });
 
     const initialFormQuestion = {
@@ -181,6 +190,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
       userSchema,
       setErrors
     );
+    console.log(validationErrors)
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       Swal.fire({
@@ -202,26 +212,29 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
       return;
     }
 
-        const totalQuestionPoint = formContent.reduce((total, question) => total + parseInt(question.point), 0);
+        const totalQuestionPoint = formContent.reduce((total, question) => {
+        if (question.type !== 'Pilgan') {
+            total = total + parseInt(question.point)
+        }
+            return total;
+        }, 0);
+
         const totalOptionPoint = formContent.reduce((total, question) => {
         if (question.type === 'Pilgan') {
-            
             return total + question.options.reduce((optionTotal, option) => optionTotal + parseInt(option.point || 0), 0);
         }
         return total;
-
         }, 0);
+
+        if (totalQuestionPoint + totalOptionPoint !== 100) {
         
-        // Total point dari semua pertanyaan dan opsi harus berjumlah 100, tidak kurang dan tidak lebih
-        // if (totalQuestionPoint + totalOptionPoint !== 100) {
-        if (totalQuestionPoint !== 100) {
-            console.log( totalQuestionPoint , totalOptionPoint )
-            Swal.fire({
-                title: 'Peringatan!',
-                text: 'Total skor harus berjumlah 100',
-                icon: 'warning',
-                confirmButtonText: 'OK'
-            });
+        setResetStepper((prev) => !prev + 1);
+        Swal.fire({
+            title: 'Gagal!',
+            text: 'Total skor harus berjumlah 100',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
         return;
         }
 

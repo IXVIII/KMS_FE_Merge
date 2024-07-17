@@ -31,6 +31,7 @@ export default function MasterCourseEdit({onChangePage}) {
   
   const kategori = AppContext_test.KategoriIdByKK;
   const Materi = AppContext_test.DetailMateriEdit;
+  console.log('dsdssd', Materi.Key)
   // console.log('deyail mat',Materi)
 
   // console.log("kategori di materi: " + AppContext_test.KategoriIdByKK);
@@ -64,6 +65,7 @@ export default function MasterCourseEdit({onChangePage}) {
 
   
   const userSchema = object({
+    mat_id: string(),
     kat_id: string(),
     mat_judul: string().required('Judul materi harus diisi'),
     mat_file_pdf: string(),
@@ -76,6 +78,7 @@ export default function MasterCourseEdit({onChangePage}) {
     createBy: string(),
   });
 
+  console.log(userSchema);
   const handleInputChange = async (e) => {
     // console.log("DADA: " + formDataRef.current.kat_id + formDataRef.current.mat_kat);
     const { name, value } = e.target;
@@ -150,6 +153,8 @@ useEffect(() => {
     e.preventDefault();
     // Validasi data form
     const validationErrors = await validateAllInputs(formDataRef.current, userSchema, setErrors);
+    console.log('ds', formDataRef.current)
+    console.log('dssss', userSchema)
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
@@ -178,6 +183,7 @@ useEffect(() => {
         );
       }
       Promise.all(uploadPromises).then(() => {
+      console.log('dada')
         UseFetch(API_LINK + "Materis/EditDataMateri", formDataRef.current)
           .then((data) => {
             if (data === "ERROR") {
