@@ -62,7 +62,16 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
     });
 
     const userSchema = object({
+        quizId: string(),
+        materiId: string(),
         quizJudul: string(),
+        quizDeskripsi: string().required('Quiz deskripsi harus diisi'),
+        quizTipe: string(),
+        tanggalAwal: string().required('Tanggal awal harus diisi'),
+        tanggalAkhir: string().required('Tanggal akhir harus diisi'),
+        timer: string().required('Durasi harus diisi'),
+        status: string(),
+        createdby: string(),
     });
 
     const initialFormQuestion = {
@@ -165,29 +174,67 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
         }
     };
 
-    const handleAdd = async (e) => {
-        e.preventDefault();
+    const isStartDateBeforeEndDate = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return start <= end;
+  };
 
-        const totalQuestionPoint = formContent.reduce((total, question) => total + parseInt(question.point), 0);
+  const handleAdd = async (e) => {
+    e.preventDefault();
+
+    formData.timer = convertTimeToSeconds(timer);
+
+    const validationErrors = await validateAllInputs(
+      formData,
+      userSchema,
+      setErrors
+    );
+    console.log(validationErrors)
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      Swal.fire({
+        title: 'Gagal!',
+        text: 'Pastikan semua data terisi dengan benar!.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    if (!isStartDateBeforeEndDate(formData.tanggalAwal, formData.tanggalAkhir)) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'Tanggal awal tidak boleh lebih dari tanggal akhir.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+        const totalQuestionPoint = formContent.reduce((total, question) => {
+        if (question.type !== 'Pilgan') {
+            total = total + parseInt(question.point)
+        }
+            return total;
+        }, 0);
+
         const totalOptionPoint = formContent.reduce((total, question) => {
         if (question.type === 'Pilgan') {
-            
             return total + question.options.reduce((optionTotal, option) => optionTotal + parseInt(option.point || 0), 0);
         }
         return total;
-
         }, 0);
+
+        if (totalQuestionPoint + totalOptionPoint !== 100) {
         
-        // Total point dari semua pertanyaan dan opsi harus berjumlah 100, tidak kurang dan tidak lebih
-        // if (totalQuestionPoint + totalOptionPoint !== 100) {
-        if (totalQuestionPoint !== 100) {
-            console.log( totalQuestionPoint , totalOptionPoint )
-            Swal.fire({
-                title: 'Peringatan!',
-                text: 'Total skor harus berjumlah 100',
-                icon: 'warning',
-                confirmButtonText: 'OK'
-            });
+        setResetStepper((prev) => !prev + 1);
+        Swal.fire({
+            title: 'Gagal!',
+            text: 'Total skor harus berjumlah 100',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
         return;
         }
 
@@ -839,7 +886,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                                                                 soal: content,
                                                             }));
                                                         }}
-                                                        apiKey="la2hd1ehvumeir6fa5kxxltae8u2whzvx1jptw6dqm4dgf2g"
+                                                        apiKey="ci4fa00c13rk9erot37prff8jjekb93mdcwji9rtr2envzvi"
                                                         init={{
                                                             height: 300,
                                                             menubar: false,
@@ -1003,11 +1050,15 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                         label="Kembali"
                         onClick={() => onChangePage("forumEdit")}
                     />
-                    <Button
-                        classType="primary ms-2 px-4 py-2"
-                        type="submit"
-                        label="Simpan"
-                    />
+                    {hasTest ? (
+                        <Button
+                            classType="primary ms-2 px-4 py-2"
+                            type="submit"
+                            label="Simpan"
+                        />
+                    ) : (
+                      null  
+                    )}
                 </div>
             </form>
         </>

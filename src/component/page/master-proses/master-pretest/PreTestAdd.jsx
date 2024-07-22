@@ -93,8 +93,16 @@ export default function MasterPreTestAdd({ onChangePage }) {
     quecreatedby: AppContext_test.displayName,
   });
 
-  const userSchema = object({
+   const userSchema = object({
+    materiId: string(),
     quizJudul: string(),
+    quizDeskripsi: string().required('Quiz deskripsi harus diisi'),
+    quizTipe: string(),
+    tanggalAwal: string().required('Tanggal awal harus diisi'),
+    tanggalAkhir: string().required('Tanggal akhir harus diisi'),
+    timer: string().required('Durasi harus diisi'),
+    status: string(),
+    createdby: string(),
   });
 
   const initialFormQuestion = {
@@ -123,9 +131,42 @@ export default function MasterPreTestAdd({ onChangePage }) {
 
   const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
+  const isStartDateBeforeEndDate = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return start <= end;
+  };
+
   const handleAdd = async (e) => {
     e.preventDefault();
 
+    formData.timer = convertTimeToSeconds(timer);
+
+    const validationErrors = await validateAllInputs(
+      formData,
+      userSchema,
+      setErrors
+    );
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      Swal.fire({
+        title: 'Gagal!',
+        text: 'Pastikan semua data terisi dengan benar!.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    if (!isStartDateBeforeEndDate(formData.tanggalAwal, formData.tanggalAkhir)) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'Tanggal awal tidak boleh lebih dari tanggal akhir.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
     // Check if all "Pilgan" type questions have more than one option
     for (let question of formContent) {
       if (question.type === 'Pilgan' && question.options.length < 2) {
@@ -168,7 +209,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
     }
   
     try {
-      formData.timer = convertTimeToSeconds(timer)
       const response = await axios.post(API_LINK + 'Quiz/SaveDataQuiz', formData);
       if (response.data.length === 0) {
         Swal.fire({
@@ -200,7 +240,12 @@ export default function MasterPreTestAdd({ onChangePage }) {
               formQuestion.gambar = uploadResult.newFileName;
             } catch (uploadError) {
               console.error('Gagal mengunggah gambar:', uploadError);
-              alert('Gagal mengunggah gambar untuk pertanyaan: ' + question.text);
+              Swal.fire({
+              title: 'Gagal!',
+              text: 'Gagal untuk mengunggah gambar',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
               return;
             }
           } else {
@@ -229,7 +274,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
           if (question.type === 'Essay' || question.type === 'Praktikum') {
             const answerData = {
               urutanChoice: '',
-              answerText: question.correctAnswer, 
+              answerText: question.correctAnswer ? question.correctAnswer : "0", 
               questionId: questionId,
               nilaiChoice: question.point,
               quecreatedby: AppContext_test.displayName,
@@ -295,7 +340,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
           setSelectedFile(null);
           setTimer('');
           setIsButtonDisabled(true);
-
+          
         }
       });
   
@@ -310,26 +355,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
     }
   };
 
-  // const handleQuestionTypeChange = (e, index) => {
-  //   const { value } = e.target;
-  //   const updatedFormContent = [...formContent];
-  //   updatedFormContent[index] = {
-  //     ...updatedFormContent[index],
-  //     type: value,
-  //     options: value === "Essay" ? [] : updatedFormContent[index].options,
-  //   };
-  //   setFormContent(updatedFormContent);
-
-  //   // Pastikan tipeQuestion diperbarui dengan benar di formQuestion
-  //   updateFormQuestion('tipeQuestion', value);
-  // };
-
-  const handleQuestionTextChange = (e, index) => {
-    const { value } = e.target;
-    const updatedFormContent = [...formContent];
-    updatedFormContent[index].text = value;
-    setFormContent(updatedFormContent);
-  };
 
   const handleOptionLabelChange = (e, questionIndex, optionIndex) => {
     const { value } = e.target;
@@ -351,14 +376,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
     updatedSelectedOptions[index] = value;
     setSelectedOptions(updatedSelectedOptions);
   };
-
-  // const handleAddOption = (index) => {
-  //   const updatedFormContent = [...formContent];
-  //   if (updatedFormContent[index].type === "Pilgan") {
-  //     updatedFormContent[index].options.push({ label: "", value: "" });
-  //     setFormContent(updatedFormContent);
-  //   }
-  // };
 
   const handleChangeQuestion = (index) => {
   const updatedFormContent = [...formContent];
@@ -442,24 +459,21 @@ export default function MasterPreTestAdd({ onChangePage }) {
 
     const initialSelectedOptions = questions.map((question, index) => {
       if (question.type === 'Pilgan') {
-        // Temukan indeks jawaban benar di dalam options
         const correctIndex = question.options.findIndex((option) => option.value === question.correctAnswer);
 
         if (correctIndex !== -1) {
-          // Jika jawaban benar ditemukan, pilih radio button tersebut
           return question.options[correctIndex].value;
         } else {
-          // Jika jawaban benar tidak ditemukan, tetapkan nilai kosong
           return "";
         }
       } else {
-        // Tidak ada pilihan awal untuk pertanyaan Essay
         return "";
       }
     });
 
     setSelectedOptions(initialSelectedOptions);
     setFormContent(questions);
+    console.log("ddsds", questions)
   };
 
   const handleFileChange = (e, index) => {
@@ -506,7 +520,12 @@ export default function MasterPreTestAdd({ onChangePage }) {
         confirmButtonText: 'OK'
       });
     } else {
-      alert("Pilih file Excel terlebih dahulu!");
+      Swal.fire({
+        title: 'Gagal!',
+        text: 'Pilih file Excel terlebih dahulu!',
+        icon: 'warning',
+        confirmButtonText: 'OK'
+      });
     }
   };
 
@@ -643,6 +662,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
                   value={formData.quizDeskripsi}
                   onChange={handleInputChange}
                   isRequired={true}
+                  errorMessage={errors.quizDeskripsi}
                 />
               </div>
             </div>
@@ -693,6 +713,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
                   value={formData.tanggalAwal}
                   onChange={(e) => handleChange('tanggalAwal', e.target.value)}
                   isRequired={true}
+                  forInput="tanggalAwal"
+                  errorMessage={errors.tanggalAwal}
                 />
               </div>
               <div className="col-lg-4">
@@ -702,6 +724,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
                   value={formData.tanggalAkhir}
                   onChange={(e) => handleChange('tanggalAkhir', e.target.value)}
                   isRequired={true}
+                  forInput="tanggalAkhir"
+                  errorMessage={errors.tanggalAkhir}
                 />
               </div>
             </div>
@@ -844,7 +868,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
                             soal: content,
                           }));
                         }}
-                        apiKey="la2hd1ehvumeir6fa5kxxltae8u2whzvx1jptw6dqm4dgf2g"
+                        apiKey="ci4fa00c13rk9erot37prff8jjekb93mdcwji9rtr2envzvi"
                         init={{
                           height: 300,
                           menubar: false,

@@ -31,6 +31,7 @@ export default function MasterCourseEdit({onChangePage}) {
   
   const kategori = AppContext_test.KategoriIdByKK;
   const Materi = AppContext_test.DetailMateriEdit;
+  console.log('dsdssd', Materi.Key)
   // console.log('deyail mat',Materi)
 
   // console.log("kategori di materi: " + AppContext_test.KategoriIdByKK);
@@ -62,19 +63,22 @@ export default function MasterCourseEdit({onChangePage}) {
   //   mat_gambar: "FILE_1717049166708.jpg",
   // });
 
+  
   const userSchema = object({
     mat_id: string(),
     kat_id: string(),
-    mat_judul: string(),
+    mat_judul: string().required('Judul materi harus diisi'),
     mat_file_pdf: string(),
     mat_file_video: string(),
-    mat_pengenalan: string(),
-    mat_keterangan: string(),
+    mat_pengenalan: string().required('Pengenalan materi harus diisi'),
+    mat_keterangan: string().required('Keterangan materi harus diisi'),
     kry_id: string(),
-    mat_kata_kunci: string(),
+    mat_kata_kunci: string().required('Kata kunci materi harus diisi'),
     mat_gambar: string(),
+    createBy: string(),
   });
 
+  console.log(userSchema);
   const handleInputChange = async (e) => {
     // console.log("DADA: " + formDataRef.current.kat_id + formDataRef.current.mat_kat);
     const { name, value } = e.target;
@@ -149,6 +153,8 @@ useEffect(() => {
     e.preventDefault();
     // Validasi data form
     const validationErrors = await validateAllInputs(formDataRef.current, userSchema, setErrors);
+    console.log('ds', formDataRef.current)
+    console.log('dssss', userSchema)
     if (Object.values(validationErrors).every((error) => !error)) {
       setIsLoading(true);
       setIsError((prevError) => ({ ...prevError, error: false }));
@@ -176,10 +182,8 @@ useEffect(() => {
           })
         );
       }
-      // Setelah semua upload selesai
       Promise.all(uploadPromises).then(() => {
-        // Log formDataRef akhir untuk memastikan semua field terisi dengan benar
-        // console.log("Final formDataRef:", JSON.stringify(formDataRef.current));
+      console.log('dada')
         UseFetch(API_LINK + "Materis/EditDataMateri", formDataRef.current)
           .then((data) => {
             if (data === "ERROR") {
@@ -331,7 +335,7 @@ useEffect(() => {
                     id="mat_pengenalan"
                     value={formDataRef.current.mat_pengenalan}
                     onEditorChange={(content) => handleInputChange({ target: { name: 'mat_pengenalan', value: content } })}
-                    apiKey='v5s2v6diqyjyw3k012z4k2o0epjmq6wil26i10xjh53bbk7y'
+                    apiKey='ci4fa00c13rk9erot37prff8jjekb93mdcwji9rtr2envzvi'
                     init={{
                       height: 300,
                       menubar: false,

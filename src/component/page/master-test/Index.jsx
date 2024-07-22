@@ -107,16 +107,14 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
   }
 
   function handleSearch() {
-    const searchTerm = searchQuery.current.value.toLowerCase();
-    const statusFilterValue = searchFilterStatus.current.value;
-    const isStatusFilterSelected = statusFilterValue !== "" && statusFilterValue !== "Semua";
-
-    const newStatus = isStatusFilterSelected ? statusFilterValue : "Semua";
-    setCurrentFilter((prevFilter) => ({
-      ...prevFilter,
-      query: searchTerm,
-      status: newStatus,
-    }));
+    setIsLoading(true);
+    setCurrentFilter((prevFilter) => {
+      return {
+        ...prevFilter,
+        page: 1,
+        query: searchQuery.current.value,
+      };
+    });
   }
 
   function handleStatusChange(event) {
@@ -156,6 +154,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
             API_LINK + "Materis/GetDataMateri",
             currentFilter
           );
+          console.log("bjir", currentFilter)
           if (data.length != 0) {
             setCurrentData(inisialisasiData);
             const formattedData = data.map((value) => ({
@@ -217,7 +216,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
     };
 
     fetchData();
-  }, [AppContext_test.refreshPage]);
+  }, [AppContext_test.refreshPage, currentFilter]);
   
   return (
     <div className="container">
@@ -236,7 +235,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
               <Input
                 ref={searchQuery}
                 forInput="pencarianMateri"
-                placeholder="Search"
+                placeholder="Cari Judul Materi"
               />
               <Button
                 iconName="search"
@@ -244,7 +243,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
                 title="Cari"
                 onClick={handleSearch}
               />
-              <Filter>
+              {/* <Filter>
                 <DropDown
                   ref={searchFilterSort}
                   forInput="ddUrut"
@@ -263,7 +262,7 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
                   defaultValue="Semua"
                   // onChange={handleStatusChange}
                 />
-              </Filter>
+              </Filter> */}
             </div>
           </div>
           <div className="mt-3">

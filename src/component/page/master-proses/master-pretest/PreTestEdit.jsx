@@ -40,15 +40,15 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
         modifby: 'Admin',
     });
 
-    const [formQuestion, setFormQuestion] = useState({
-        quizId: '',
-        soal: '',
-        tipeQuestion: 'Essay',
-        gambar: '',
-        questionDeskripsi: '',
-        status: 'Aktif',
-        quemodifby: 'Admin',
-    });
+    // const [formQuestion, setFormQuestion] = useState({
+    //     quizId: '',
+    //     soal: '',
+    //     tipeQuestion: 'Essay',
+    //     gambar: '',
+    //     questionDeskripsi: '',
+    //     status: 'Aktif',
+    //     quemodifby: 'Admin',
+    // });
 
     formData.timer = timer;
 
@@ -61,7 +61,16 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
     });
 
     const userSchema = object({
+        quizId: string(),
+        materiId: string(),
         quizJudul: string(),
+        quizDeskripsi: string().required('Quiz deskripsi harus diisi'),
+        quizTipe: string(),
+        tanggalAwal: string().required('Tanggal awal harus diisi'),
+        tanggalAkhir: string().required('Tanggal akhir harus diisi'),
+        timer: string().required('Durasi harus diisi'),
+        status: string(),
+        createdby: string(),
     });
 
     const initialFormQuestion = {
@@ -164,20 +173,82 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
         }
     };
 
-    const handleAdd = async (e) => {
-        e.preventDefault();
+    const isStartDateBeforeEndDate = (startDate, endDate) => {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return start <= end;
+  };
 
-        const totalQuestionPoint = formContent.reduce((total, question) => total + parseInt(question.point), 0);
+  const handleAdd = async (e) => {
+    e.preventDefault();
+
+    formData.timer = convertTimeToSeconds(timer);
+
+    const validationErrors = await validateAllInputs(
+      formData,
+      userSchema,
+      setErrors
+    );
+    console.log('tes', validationErrors)
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      Swal.fire({
+        title: 'Gagal!',
+        text: 'Pastikan semua data terisi dengan benar!.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+    if (!isStartDateBeforeEndDate(formData.tanggalAwal, formData.tanggalAkhir)) {
+      Swal.fire({
+        title: 'Error!',
+        text: 'Tanggal awal tidak boleh lebih dari tanggal akhir.',
+        icon: 'error',
+        confirmButtonText: 'OK'
+      });
+      return;
+    }
+
+            // Check if all "Pilgan" type questions have more than one option
+        for (let question of formContent) {
+        if (question.type === 'Pilgan' && question.options.length < 2) {
+            Swal.fire({
+                title: 'Gagal!',
+                text: 'Opsi pilihan ganda harus lebih dari satu',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+        }
+    
+        // Hitung total point dari semua pertanyaan dan opsi
+        
+        const totalQuestionPoint = formContent.reduce((total, question) => {
+        if (question.type !== 'Pilgan') {
+            total = total + parseInt(question.point)
+        }
+            return total;
+        }, 0);
+
         const totalOptionPoint = formContent.reduce((total, question) => {
         if (question.type === 'Pilgan') {
             return total + question.options.reduce((optionTotal, option) => optionTotal + parseInt(option.point || 0), 0);
         }
         return total;
         }, 0);
-        
-        // Total point dari semua pertanyaan dan opsi harus berjumlah 100, tidak kurang dan tidak lebih
+
         if (totalQuestionPoint + totalOptionPoint !== 100) {
-        alert('Total skor harus berjumlah 100');
+        
+        setResetStepper((prev) => !prev + 1);
+        Swal.fire({
+            title: 'Gagal!',
+            text: 'Total skor harus berjumlah 100',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
         return;
         }
 
@@ -192,10 +263,8 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
             }
 
             const quizId = response.data[0].hasil;
-            console.log("quizId = " + quizId)
             for (let i = 0; i < formContent.length; i++) {
                 const question = formContent[i];
-                console.log("formvontetn", formContent[i])
                 const formQuestion = {
                     questionId: question.key,
                     quizId: quizId,
@@ -206,7 +275,6 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                     status: 'Aktif',
                     quemodifby: 'Admin',
                 };
-                console.log(question.key)
                 if (question.type === 'Essay' || question.type === 'Praktikum') {
                     if (question.selectedFile) {
                         try {
@@ -215,7 +283,12 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                             formQuestion.gambar = uploadResult.newFileName;
                         } catch (uploadError) {
                             console.error('Gagal mengunggah gambar:', uploadError);
-                            alert('Gagal mengunggah gambar untuk pertanyaan: ' + question.text);
+                            Swal.fire({
+              title: 'Gagal!',
+              text: 'Gagal untuk mengunggah gambar',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
                             return;
                         }
                     } else {
@@ -233,7 +306,12 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                     //   console.log('Pertanyaan berhasil disimpan:', questionResponse.data);
 
                     if (questionResponse.data.length === 0) {
-                        alert('Gagal menyimpan question')
+                        Swal.fire({
+              title: 'Gagal!',
+              text: 'Data yang dimasukkan tidak valid atau kurang',
+              icon: 'error',
+              confirmButtonText: 'OK'
+            });
                         return
                     }
 
@@ -247,14 +325,18 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                             quemodifby: 'Admin',
                             type: 'Essay'
                         };
-                        console.log(answerData)
 
                         try {
                             const answerResponse = await axios.post(API_LINK + 'Choices/UpdateDataChoice', answerData);
                             //   console.log('Jawaban essay berhasil disimpan:', answerResponse.data);
                         } catch (error) {
                             console.error('Gagal menyimpan jawaban essay:', error);
-                            alert('Gagal menyimpan jawaban essay');
+                             Swal.fire({
+                title: 'Gagal!',
+                text: 'Data yang dimasukkan tidak valid atau kurang',
+                icon: 'error',
+                confirmButtonText: 'OK'
+              });
                         }
                     } else if (question.type === 'Pilgan') {
                         for (const [optionIndex, option] of question.options.entries()) {
@@ -275,30 +357,52 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                                 // console.log('Jawaban multiple choice berhasil disimpan:', answerResponse.data);
                             } catch (error) {
                                 console.error('Gagal menyimpan jawaban multiple choice:', error);
-                                alert('Gagal menyimpan jawaban multiple choice');
+                                Swal.fire({
+                                title: 'Gagal!',
+                                text: 'Data yang dimasukkan tidak valid atau kurang',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                                });
                             }
                         }
                     }
                 } catch (error) {
                     console.error('Gagal menyimpan pertanyaan:', error);
-                    alert('Gagal menyimpan pertanyaan');
+                    Swal.fire({
+                        title: 'Gagal!',
+                        text: 'Data yang dimasukkan tidak valid atau kurang',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 }
             }
 
             // Tampilkan pesan sukses atau lakukan tindakan lain yang diperlukan setelah semua data berhasil disimpan
             Swal.fire({
                 title: 'Berhasil!',
-                text: 'Pretest berhasil diubah',
+                text: 'Pretest berhasil ditambahkan',
                 icon: 'success',
                 confirmButtonText: 'OK'
-            }).then(() => {
-                // Redirect to index page
-                window.location.href = '/master_proses'; // Ganti '/index' dengan URL tujuan Anda
+            }).then((result) => {
+                if (result.isConfirmed) {
+                setFormContent([]);
+                setSelectedOptions([]);
+                setErrors({});
+                setSelectedFile(null);
+                setTimer('');
+                setIsButtonDisabled(true);
+                onChangePage("materiEdit");
+                }
             });
 
         } catch (error) {
             console.error('Gagal menyimpan data:', error);
-            alert('Gagal menyimpan data');
+            Swal.fire({
+                title: 'Gagal!',
+                text: 'Terjadi kesalahan saat menyimpan data.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
         }
     };
 
@@ -397,8 +501,6 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
         const file = e.target.files[0];
         const updatedFormContent = [...formContent];
         updatedFormContent[index].selectedFile = file;
-        console.log("handle file change")
-        console.log(updatedFormContent);
         setFormContent(updatedFormContent);
     };
 
@@ -750,41 +852,6 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                                 <div className="row mb-4">
                                     <div className="mb-2">
                                     </div>
-                                    {/* <div className="col-lg-4">
-                                        <Button
-                                            onClick={() => addQuestion("Essay")}
-                                            iconName="plus"
-                                            classType="primary btn-sm px-3 py-1"
-                                        />
-                                        <input
-                                            type="file"
-                                            id="fileInput"
-                                            style={{ display: 'none' }}
-                                            onChange={handleFileChange}
-                                        />
-                                        <Button
-                                            iconName="upload"
-                                            classType="primary btn-sm mx-2 px-3 py-1"
-                                            onClick={() => document.getElementById('fileInput').click()} // Memicu klik pada input file
-                                        />
-                                        {/* Tampilkan nama file yang dipilih */}
-                                        {/* {selectedFile && <span>{selectedFile.name}</span>}
-                                    </div>
-                                    <div className="p-2">
-                                        <Button
-                                            iconName="upload"
-                                            classType="primary btn-sm px-3 py-1"
-                                            onClick={handleUploadFile}
-                                            label="Unggah File"
-                                        />
-
-                                        <Button
-                                            iconName="download"
-                                            label="Unduh Template"
-                                            classType="warning btn-sm px-3 py-1 mx-2"
-                                            onClick={handleDownloadTemplate}
-                                        />
-                                    </div>  */}
                                 </div>
                                 {formContent.map((question, index) => (
                                     <div key={index} className="card mb-4">
@@ -820,14 +887,8 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                                                             const updatedFormContent = [...formContent];
                                                             updatedFormContent[index].text = content;
                                                             setFormContent(updatedFormContent);
-
-                                                            // Update formQuestion.soal
-                                                            setFormQuestion((prevFormQuestion) => ({
-                                                                ...prevFormQuestion,
-                                                                soal: content,
-                                                            }));
                                                         }}
-                                                        apiKey="la2hd1ehvumeir6fa5kxxltae8u2whzvx1jptw6dqm4dgf2g"
+                                                        apiKey="ci4fa00c13rk9erot37prff8jjekb93mdcwji9rtr2envzvi"
                                                         init={{
                                                             height: 300,
                                                             menubar: false,
@@ -989,13 +1050,17 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                     <Button
                         classType="outline-secondary me-2 px-4 py-2"
                         label="Kembali"
-                        onClick={() => onChangePage("forumEdit")}
+                        onClick={() => onChangePage("materiEdit")}
                     />
-                    <Button
-                        classType="primary ms-2 px-4 py-2"
-                        type="submit"
-                        label="Simpan"
-                    />
+                    {hasTest ? (
+                        <Button
+                            classType="primary ms-2 px-4 py-2"
+                            type="submit"
+                            label="Simpan"
+                        />
+                    ) : (
+                      null  
+                    )}
                     <Button
                         classType="dark ms-3 px-4 py-2"
                         label="Berikutnya"

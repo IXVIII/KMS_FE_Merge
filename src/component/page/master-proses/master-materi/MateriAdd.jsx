@@ -23,16 +23,13 @@ export default function MastermateriAdd({ onChangePage }) {
   const [isLoading, setIsLoading] = useState(false);
   const [listKategori, setListKategori] = useState([]);
   const [isFormDisabled, setIsFormDisabled] = useState(false); 
-  console.log()
   const [resetStepper, setResetStepper] = useState(0);
   const fileInputRef = useRef(null);
   const gambarInputRef = useRef(null);
   const vidioInputRef = useRef(null);
 
   const kategori = AppContext_master.KategoriIdByKK;
-  // console.log("kategiri :"+ AppContext_master.KategoriIdByKK)
-  // console.log("kategiri"+AppContext_master)
-
+  
   // Referensi ke form data menggunakan useRef
   const formDataRef = useRef({
     kat_id: AppContext_master.KategoriIdByKK,
@@ -50,13 +47,13 @@ export default function MastermateriAdd({ onChangePage }) {
   // Validasi skema menggunakan Yup
   const userSchema = object({
     kat_id: string(),
-    mat_judul: string(),
+    mat_judul: string().required('Judul materi harus diisi'),
     mat_file_pdf: string(),
     mat_file_video: string(),
-    mat_pengenalan: string(),
-    mat_keterangan: string(),
+    mat_pengenalan: string().required('Pengenalan materi harus diisi'),
+    mat_keterangan: string().required('Keterangan materi harus diisi'),
     kry_id: string(),
-    mat_kata_kunci: string(),
+    mat_kata_kunci: string().required('Kata kunci materi harus diisi'),
     mat_gambar: string(),
     createBy: string(),
   });
@@ -284,6 +281,13 @@ if (isLoading) return <Loading />;
           <Alert type="danger" message={isError.message} />
         </div>
       )}
+      <style>
+        {`
+          .mce-notification {
+            display: none !important;
+          }
+        `}
+      </style>
       <form onSubmit={handleAdd}>
         {/* Isi form dengan penambahan disabled={isFormDisabled || dataSaved} */}
         <div>
@@ -374,7 +378,7 @@ if (isLoading) return <Loading />;
                     id="mat_pengenalan"
                     value={formDataRef.current.mat_pengenalan}
                     onEditorChange={(content) => handleInputChange({ target: { name: 'mat_pengenalan', value: content } })}
-                    apiKey='v5s2v6diqyjyw3k012z4k2o0epjmq6wil26i10xjh53bbk7y'
+                    apiKey="ci4fa00c13rk9erot37prff8jjekb93mdcwji9rtr2envzvi"
                     init={{
                       height: 300,
                       menubar: false,

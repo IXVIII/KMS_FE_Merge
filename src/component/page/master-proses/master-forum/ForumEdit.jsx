@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { object, string } from "yup";
+import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
 import SweetAlert from "../../../util/SweetAlert";
 import Button from "../../../part/Button";
 import Input from "../../../part/Input";
@@ -71,35 +72,37 @@ export default function MasterForumEdit({ onChangePage }) {
     fetchData();
   }, [Materi]);
 
+
   const handleAdd = async (e) => {
     e.preventDefault();
 
-    const validationErrors = await userSchema.validate(formData, { abortEarly: false })
-      .then(() => ({ forumJudul: '', forumIsi: '' }))
-      .catch((err) => {
-        const errors = err.inner.reduce((acc, current) => {
-          acc[current.path] = current.message;
-          return acc;
-        }, {});
-        setErrors(errors);
-        return errors;
-      });
+    const validationErrors = await validateAllInputs(formData, userSchema, setErrors);
+    const isEmptyData = Object.values(formData).some(value => value === "");
 
-    setIsLoading(true);
-    setIsError(false);
+    if (isEmptyData) {
+      setIsError({
+        error: true,
+        message: "Data tidak boleh kosong",
+      });
+      return;
+    }
+
+    if (Object.values(validationErrors).every((error) => !error)) {
+      setIsLoading(true);
+      setIsError({ error: false, message: "" });
+      setErrors({});
+    }
 
     try {
-      console.log("FormData being sent:", formData);
-      const response = await UseFetch(API_LINK + "Forum/EditDataForum", {
+      const response = await axios.post(API_LINK + "Forum/EditDataForum", {
         p1: Materi.Key,
         p2: formData.forumJudul,
         p3: formData.forumIsi,
         p4: AppContext_test.displayName,
       });
-
+      console.log("FormData being sent:", Materi.Key,formData,AppContext_test.displayName,);
       if (response.status === 200) {
         SweetAlert("Berhasil", "Data forum berhasil diubah!", "success");
-        // onChangePage("forumEdit");
       } else {
         throw new Error("Gagal untuk menyimpan data forum");
       }
@@ -115,9 +118,6 @@ export default function MasterForumEdit({ onChangePage }) {
     return <Loading />;
   }
 
-  if (isError) {
-    return <Alert type="danger" message="Error fetching data." />;
-  }
 
   return (
     <>
@@ -201,7 +201,7 @@ export default function MasterForumEdit({ onChangePage }) {
                       id="forumIsi"
                       value={formData.forumIsi}
                       onEditorChange={(content) => setFormData({ ...formData, forumIsi: content })}
-                      apiKey='v5s2v6diqyjyw3k012z4k2o0epjmq6wil26i10xjh53bbk7y'
+                      apiKey='ci4fa00c13rk9erot37prff8jjekb93mdcwji9rtr2envzvi'
                       init={{
                         height: 300,
                         menubar: false,

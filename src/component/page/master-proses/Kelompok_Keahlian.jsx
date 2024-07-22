@@ -88,7 +88,11 @@ export default function SubKKIndex({ onChangePage }) {
           for (const program of programData) {
             const categoryData = await UseFetch(
               API_LINK + "Program/GetKategoriByProgram",
-              { p1: program.Key }
+              { p1: program.Key,
+                p2: '',
+                p3: '',
+                p4: 'Aktif'
+              }
             );
 
             const categoriesWithMaterialCounts = await Promise.all(

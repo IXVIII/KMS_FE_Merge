@@ -73,7 +73,7 @@ export default function KKIndex({ onChangePage }) {
     try {
       while (true) {
         let data = await UseFetch(API_LINK + "KKs/GetDataKK", currentFilter);
-
+        console.log("HALOHA", currentFilter);
         if (data === "ERROR") {
           throw new Error(
             "Terjadi kesalahan: Gagal mengambil daftar Kelompok Keahlian."
