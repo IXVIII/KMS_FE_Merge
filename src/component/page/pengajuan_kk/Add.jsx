@@ -41,7 +41,7 @@ export default function PengajuanAdd({ onChangePage, withID }) {
     kry_id: string(),
     status: string(),
     creaby: string(),
-    lampirans: array().of(string()),
+    lampirans: array().of(string()).required("harus diisi"),
   });
 
   const [fileInfos, setFileInfos] = useState([]);
@@ -137,6 +137,15 @@ export default function PengajuanAdd({ onChangePage, withID }) {
   const handleAdd = async (e) => {
     e.preventDefault();
 
+    if (fileInfos.length === 0) {
+      SweetAlert(
+        "Gagal",
+        "Pengajuan gagal. Tolong lampirkan minimal 1 file",
+        "warning"
+      );
+      return;
+    }
+
     const validationErrors = await validateAllInputs(
       formDataRef.current,
       userSchema,
@@ -147,7 +156,12 @@ export default function PengajuanAdd({ onChangePage, withID }) {
       setIsError((prevError) => ({ ...prevError, error: false }));
       setErrors({});
 
-      SweetAlert("Konfirmasi", "Apakah Anda yakin ingin mengirim pengajuan ini?", "info", "Ya").then(async (confirm) => {
+      SweetAlert(
+        "Konfirmasi",
+        "Apakah Anda yakin ingin mengirim pengajuan ini?",
+        "info",
+        "Ya"
+      ).then(async (confirm) => {
         if (confirm) {
           setIsLoading(true);
 
@@ -180,10 +194,15 @@ export default function PengajuanAdd({ onChangePage, withID }) {
             if (response === "ERROR") {
               setIsError({
                 error: true,
-                message: "Terjadi kesalahan: Gagal menyimpan data Pengajuan KK.",
+                message:
+                  "Terjadi kesalahan: Gagal menyimpan data Pengajuan KK.",
               });
             } else {
-              SweetAlert("Sukses", "Data Pengajuan berhasil disimpan", "success");
+              SweetAlert(
+                "Sukses",
+                "Data Pengajuan berhasil disimpan",
+                "success"
+              );
               window.location.reload();
             }
           } catch (error) {
@@ -199,67 +218,6 @@ export default function PengajuanAdd({ onChangePage, withID }) {
       });
     }
   };
-
-  // const handleAdd = async (e) => {
-  //   e.preventDefault();
-
-  //   const validationErrors = await validateAllInputs(
-  //     formDataRef.current,
-  //     userSchema,
-  //     setErrors
-  //   );
-
-  //   if (Object.values(validationErrors).every((error) => !error)) {
-  //     setIsError((prevError) => ({ ...prevError, error: false }));
-  //     setErrors({});
-
-  //     const uploadPromises = [];
-  //     formDataRef.current.lampirans = [];
-
-  //     lampiranRefs.current.forEach((ref) => {
-  //       if (ref && ref.current && ref.current.files.length > 0) {
-  //         uploadPromises.push(
-  //           uploadFile(ref.current).then((data) => {
-  //             if (data !== "ERROR" && data.newFileName) {
-  //               formDataRef.current.lampirans.push({
-  //                 pus_file: data.newFileName,
-  //               });
-  //             } else {
-  //               throw new Error("File upload failed");
-  //             }
-  //           })
-  //         );
-  //       }
-  //     });
-
-  //     try {
-  //       await Promise.all(uploadPromises);
-
-  //       const response = await UseFetch(
-  //         API_LINK + "Pengajuans/SaveAnggotaKK",
-  //         formDataRef.current
-  //       );
-  //       if (response === "ERROR") {
-  //         setIsError({
-  //           error: true,
-  //           message: "Terjadi kesalahan: Gagal menyimpan data Pengajuan KK.",
-  //         });
-  //       } else {
-  //         SweetAlert("Sukses", "Data Pengajuan berhasil disimpan", "success");
-  //         window.location.reload();
-  //       }
-  //     } catch (error) {
-  //       setIsError({
-  //         error: true,
-  //         message:
-  //           "Terjadi kesalahan: Gagal mengupload file atau menyimpan data.",
-  //       });
-  //     } finally {
-  //       setIsLoading(false);
-  //     }
-
-  //   }
-  // };
 
   return (
     <>
@@ -315,6 +273,7 @@ export default function PengajuanAdd({ onChangePage, withID }) {
                         {[...Array(lampiranCount)].map((_, index) => (
                           <div key={index}>
                             <FileUpload
+                              isRequired="true"
                               forInput={`lampiran_${index}`}
                               label={`Lampiran ${index + 1}`}
                               onChange={() =>

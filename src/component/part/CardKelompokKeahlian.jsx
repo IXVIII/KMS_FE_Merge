@@ -189,28 +189,6 @@ function CardKelompokKeahlian({
         {data.members ? (
           <div className="img-container" style={{ width: "28%" }}>
             {members.map((person, index) => (
-              <a key={index} href={person.link}>
-                <img
-                  src={person.imgSource}
-                  alt={person.name}
-                  className="img-fluid rounded-circle"
-                  width="45"
-                  style={{
-                    position: "relative",
-                    left: `${-15 * index}px`,
-                    zIndex: `${3 - index}`,
-                    border: "solid black 1px",
-                  }}
-                />
-              </a>
-            ))}
-          </div>
-        ) : (
-          ""
-        )}
-        {data.members ? (
-          <div className="img-container" style={{ width: "28%" }}>
-            {members.map((person, index) => (
               <div style={{ width: "55%", marginLeft: "-10px" }}>
                 <p className="lh-sm mb-0">
                   {members.map((person, index) => (

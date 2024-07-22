@@ -29,6 +29,8 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [listKK, setListKK] = useState([]);
+  const [fileExtension, setFileExtension] = useState("");
+  const [file, setFile] = useState("");
 
   const fileInputRef = useRef(null);
   const gambarInputRef = useRef(null);
@@ -37,7 +39,7 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
     pus_id: withID.Key,
     pus_judul: withID.Judul,
     kke_id: "",
-    pus_file: withID.fls,
+    pus_file: withID.File,
     pus_keterangan: withID.Keterangan,
     pus_kata_kunci: withID["Kata Kunci"],
     pus_gambar: withID.gbr,
@@ -90,6 +92,28 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
   };
 
   useEffect(() => {
+    console.log(fileExtension);
+    if (fileExtension === "mp4") {
+      AppContext_test.urlMateri = withID.File;
+    } else {
+    fetch(
+      API_LINK +
+        `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
+          withID.File
+        )}`
+    )
+      .then((response) => response.blob())
+      .then((blob) => {
+        const url = URL.createObjectURL(blob);
+        setFile(url);
+      })
+      .catch((error) => {
+        console.error("Error fetching file:", error);
+      });
+    }
+  }, [fileExtension]);
+
+  useEffect(() => {
     const fetchDataKK = async () => {
       setIsError((prevError) => ({ ...prevError, error: false }));
 
@@ -100,7 +124,7 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
           sort: "[Nama Kelompok Keahlian] asc",
           status: "Aktif",
         });
-        console.log("KK: " + JSON.stringify(data));
+        // console.log("KK: " + JSON.stringify(data));
 
         if (data === "ERROR") {
           throw new Error("Terjadi kesalahan: Gagal mengambil daftar prodi.");
@@ -133,16 +157,7 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
     fetchDataKK();
   }, [withID]);
 
-  useEffect(() => {
-    console.log("sda: " + JSON.stringify(listKK));
-  });
-
   const handleAdd = async (e) => {
-    // formDataRef.current.pus_kata_kunci = values.pus_keterangan;
-    // formDataRef.current.pus_gambar = values.pus_gambar;
-    // formDataRef.current.pus_kata_kunci = values.pus_kata_kunci;
-    // formDataRef.current.pus_status = values.pus_status;
-    // formDataRef.current.pus_keterangan = values.pus_keterangan;
     e.preventDefault();
 
     const validationErrors = await validateAllInputs(
@@ -176,11 +191,12 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
         );
       }
 
-      console.log(fileInputRef.current);
+      // console.log(fileInputRef.current);
+      console.log("FORM: "+JSON.stringify(formDataRef.current));
 
       Promise.all(uploadPromises).then(() => {
-        console.log(formDataRef.current.pus_gambar);
-        console.log(formDataRef.current.pus_file);
+        console.log("gambar"+formDataRef.current.pus_gambar);
+        console.log("file"+formDataRef.current.pus_file);
         UseFetch(API_LINK + "Pustakas/UpdateDataPustaka", formDataRef.current)
           .then((data) => {
             if (data === "ERROR") {
@@ -264,9 +280,9 @@ export default function MasterDaftarPustakaEdit({ onChangePage, withID }) {
                   // key={index}
                   title={"File Pustaka Sebelumnya"}
                   data={
-                    withID.File ? (
+                    file ? (
                       <a
-                        href={withID.File}
+                        href={file}
                         target="_blank"
                         rel="noopener noreferrer"
                       >
