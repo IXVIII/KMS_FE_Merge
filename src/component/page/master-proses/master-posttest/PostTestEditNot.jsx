@@ -94,7 +94,16 @@ export default function MasterPostTestAdd({ onChangePage }) {
   });
 
   const userSchema = object({
-    quizJudul: string(),
+      quizId: string(),
+      materiId: string(),
+      quizJudul: string(),
+      quizDeskripsi: string().required('Quiz deskripsi harus diisi'),
+      quizTipe: string(),
+      tanggalAwal: string().required('Tanggal awal harus diisi'),
+      tanggalAkhir: string().required('Tanggal akhir harus diisi'),
+      timer: string().required('Durasi harus diisi'),
+      status: string(),
+      createdby: string(),
   });
 
   const initialFormQuestion = {
@@ -136,6 +145,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
       userSchema,
       setErrors
     );
+    console.log(validationErrors)
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       Swal.fire({

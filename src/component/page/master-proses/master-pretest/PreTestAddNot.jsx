@@ -79,7 +79,9 @@ export default function MasterPreTestAdd({ onChangePage }) {
     status: 'Aktif',
     createdby: AppContext_test.DisplayName,
   });
+
   formData.timer = timer;
+
   const [formChoice, setFormChoice] = useState({
     urutanChoice: '',
     isiChoice: '',
@@ -135,8 +137,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
   const handleAdd = async (e) => {
     e.preventDefault();
 
-    formData.timer = convertTimeToSeconds(timer);
-
+      formData.timer = convertTimeToSeconds(timer)
     const validationErrors = await validateAllInputs(
       formData,
       userSchema,
@@ -201,6 +202,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
       }
   
       try {
+    formData.timer = convertTimeToSeconds();
         const response = await axios.post(API_LINK + 'Quiz/SaveDataQuiz', formData);
         if (response.data.length === 0) {
           Swal.fire({
@@ -601,6 +603,7 @@ export default function MasterPreTestAdd({ onChangePage }) {
     }));
   };
     const convertTimeToSeconds = () => {
+        console.log(hours, minutes)
         return parseInt(hours) * 3600 + parseInt(minutes) * 60;
     };
     
