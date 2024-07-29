@@ -3,7 +3,8 @@ import Button from "../../../part/Button";
 import { object, string } from "yup";
 import Input from "../../../part/Input";
 import Loading from "../../../part/Loading";
-import { Stepper } from 'react-form-stepper';
+import { Stepper, Step, StepLabel } from '@mui/material';
+
 import * as XLSX from 'xlsx';
 import axios from 'axios';
 import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
@@ -15,6 +16,24 @@ import { Editor } from '@tinymce/tinymce-react';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 
+const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+
+function getStepContent(stepIndex) {
+  switch (stepIndex) {
+    case 0:
+      return 'materiAdd';
+    case 1:
+      return 'pretestAdd';
+    case 2:
+      return 'sharingAdd';
+    case 3:
+      return 'forumAdd';
+    case 4:
+      return 'posttestAdd';
+    default:
+      return 'Unknown stepIndex';
+  }
+}
 export default function MasterPreTestAdd({ onChangePage }) {
   const [formContent, setFormContent] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -24,7 +43,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
   const [selectedFile, setSelectedFile] = useState(null);
   const [timer, setTimer] = useState('');
   const gambarInputRef = useRef(null);
-
   const [resetStepper, setResetStepper] = useState(0);
   const handleChange = (name, value) => {
     setFormData((prevFormData) => ({
@@ -32,9 +50,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
       [name]: value,
     }));
   };
-  useEffect(() => {
-    setResetStepper((prev) => !prev + 1);
-  });
   const handlePointChange = (e, index) => {
     const { value } = e.target;
 
@@ -167,7 +182,6 @@ export default function MasterPreTestAdd({ onChangePage }) {
       });
       return;
     }
-    // Check if all "Pilgan" type questions have more than one option
     for (let question of formContent) {
       if (question.type === 'Pilgan' && question.options.length < 2) {
           Swal.fire({
@@ -209,6 +223,8 @@ export default function MasterPreTestAdd({ onChangePage }) {
     }
   
     try {
+      
+      formData.timer = convertTimeToSeconds(timer);
       const response = await axios.post(API_LINK + 'Quiz/SaveDataQuiz', formData);
       if (response.data.length === 0) {
         Swal.fire({
@@ -594,6 +610,21 @@ export default function MasterPreTestAdd({ onChangePage }) {
       return `${formatHours}:${formatMinutes}`;
   };
 
+  
+  const [activeStep, setActiveStep] = useState(1);
+
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleReset = () => {
+    setActiveStep(0);
+  };
+
   if (isLoading) return <Loading />;
 
   return (
@@ -633,19 +664,28 @@ export default function MasterPreTestAdd({ onChangePage }) {
       </style>
       <form id="myForm" onSubmit={handleAdd}>
         <div>
-          <Stepper
-            key={resetStepper}
-            steps={[
-              { label: 'Materi', onClick: () => onChangePage("materiAdd") },
-              { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
-              { label: 'Sharing Expert', onClick: () => onChangePage("sharingAdd") },
-              { label: 'Forum', onClick: () => onChangePage("forumAdd") },
-              { label: 'Post Test', onClick: () => onChangePage("posttestAdd") }
-            ]}
-            activeStep={1}
-            styleConfig={AppContext_master.styleConfig}
-            connectorStyleConfig={AppContext_master.connectorStyleConfig}
-          />
+          <Stepper activeStep={activeStep}>
+            {steps.map((label, index) => (
+              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          <div>
+            {activeStep === steps.length ? (
+              <div>
+                <Button onClick={handleReset}>Reset</Button>
+              </div>
+            ) : (
+              <div>
+                <Button disabled={activeStep === 0} onClick={handleBack}>
+                  Back
+                </Button>
+                <Button variant="contained" color="primary" onClick={handleNext}>
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
         <div className="card">
           <div className="card-header bg-outline-primary fw-medium text-black">

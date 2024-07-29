@@ -5,11 +5,11 @@ import Alert from "../part/Alert";
 import Loading from "../part/Loading";
 import axios from "axios";
 import AppContext_test from '../page/master-test/TestContext';
+import { faL } from '@fortawesome/free-solid-svg-icons';
 export default function KMS_VideoViewer({ videoFileName }) {
   const [isLoading, setIsLoading] = useState(true);
   const [isError, setIsError] = useState(false);
   const [videoUrl, setVideoUrl] = useState(null); // State for video URL
-
   useEffect(() => {
     if (AppContext_test.urlMateri) {
       setIsLoading(true); 
@@ -26,6 +26,7 @@ export default function KMS_VideoViewer({ videoFileName }) {
           const blob = new Blob([response.data], { type: response.headers['content-type'] });
           const url = URL.createObjectURL(blob);
           setVideoUrl(url); 
+          setIsError(false)
           setIsLoading(false); 
         } catch (error) {
           setIsError(true);
@@ -39,7 +40,7 @@ export default function KMS_VideoViewer({ videoFileName }) {
       setIsError(true);
       setIsLoading(false);
     }
-  }, [videoFileName]); 
+  }, [videoFileName, AppContext_test.urlMateri, isError]); 
 
   return (
     <>

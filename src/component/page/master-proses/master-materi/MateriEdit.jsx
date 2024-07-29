@@ -11,11 +11,30 @@ import Input from "../../../part/Input";
 import FileUpload from "../../../part/FileUpload";
 import Loading from "../../../part/Loading";
 import Alert from "../../../part/Alert";
-import { Stepper } from 'react-form-stepper';
 import uploadFile from "../../../util/UploadFile";
 import AppContext_master from "../MasterContext";
 import { Editor } from '@tinymce/tinymce-react';
 import AppContext_test from "../../master-test/TestContext";
+import { Stepper, Step, StepLabel } from '@mui/material';
+
+const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+
+function getStepContent(stepIndex) {
+  switch (stepIndex) {
+    case 0:
+      return 'materiAdd';
+    case 1:
+      return 'pretestAdd';
+    case 2:
+      return 'sharingAdd';
+    case 3:
+      return 'forumAdd';
+    case 4:
+      return 'posttestAdd';
+    default:
+      return 'Unknown stepIndex';
+  }
+}
 export default function MasterCourseEdit({onChangePage}) {
   // console.log("ID: " + JSON.stringify(Materi));
   // console.log("onChangePage prop:", onChangePage);
@@ -202,6 +221,20 @@ useEffect(() => {
     }
   };
 
+  const [activeStep, setActiveStep] = useState(0);
+
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleReset = () => {
+    setActiveStep(0);
+  };
+
   if (isLoading) return <Loading />;
 
   return (
@@ -213,37 +246,29 @@ useEffect(() => {
       )}
       <form onSubmit={handleAdd}>
         <div>
-        <Stepper
-           steps={[
-            { label: 'Materi', onClick: () => onChangePage("materiEdit") },
-            { label: 'Pretest', onClick: () => onChangePage("pretestEdit") },
-            { label: 'Sharing Expert', onClick: () => onChangePage("sharingEdit") },
-            { label: 'Forum', onClick: () => onChangePage("forumEdit") },
-            { label: 'Post Test', onClick: () => onChangePage("posttestEdit") }
-          ]}
-            activeStep={0} 
-            styleConfig={{
-              activeBgColor: '#67ACE9', // Warna latar belakang langkah aktif
-              activeTextColor: '#FFFFFF', // Warna teks langkah aktif
-              completedBgColor: '#67ACE9', // Warna latar belakang langkah selesai
-              completedTextColor: '#FFFFFF', // Warna teks langkah selesai
-              inactiveBgColor: '#E0E0E0', // Warna latar belakang langkah non-aktif
-              inactiveTextColor: '#000000', // Warna teks langkah non-aktif
-              size: '2em', // Ukuran langkah
-              circleFontSize: '1rem', // Ukuran font label langkah
-              labelFontSize: '0.875rem', // Ukuran font label langkah
-              borderRadius: '50%', // Radius sudut langkah
-              fontWeight: 500 // Ketebalan font label langkah
-            }}
-            connectorStyleConfig={{
-              completedColor: '#67ACE9', // Warna penghubung selesai
-              activeColor: '#67ACE9', // Warna penghubung aktif
-              disabledColor: '#BDBDBD', // Warna penghubung non-aktif
-              size: 1, // Ketebalan penghubung
-              stepSize: '2em', // Ukuran langkah, digunakan untuk menghitung ruang yang dipadatkan antara langkah dan awal penghubung
-              style: 'solid' // Gaya penghubung
-            }}
-          />
+          <Stepper activeStep={activeStep}>
+            {steps.map((label, index) => (
+              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          <div>
+            {activeStep === steps.length ? (
+              <div>
+                <Button onClick={handleReset}>Reset</Button>
+              </div>
+            ) : (
+              <div>
+                <Button disabled={activeStep === 0} onClick={handleBack}>
+                  Back
+                </Button>
+                <Button variant="contained" color="primary" onClick={handleNext}>
+                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="card">

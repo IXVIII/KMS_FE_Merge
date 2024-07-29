@@ -8,11 +8,29 @@ import Button from "../../../part/Button";
 import FileUpload from "../../../part/FileUpload";
 import Loading from "../../../part/Loading";
 import Alert from "../../../part/Alert";
-import { Stepper } from 'react-form-stepper';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";  
 import uploadFile from "../../../util/UploadFile";
+import { Stepper, Step, StepLabel } from '@mui/material';
 
+const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+
+function getStepContent(stepIndex) {
+  switch (stepIndex) {
+    case 0:
+      return 'materiAdd';
+    case 1:
+      return 'pretestAdd';
+    case 2:
+      return 'sharingAdd';
+    case 3:
+      return 'forumAdd';
+    case 4:
+      return 'posttestAdd';
+    default:
+      return 'Unknown stepIndex';
+  }
+}
 export default function MasterSharingEditNot({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -60,94 +78,6 @@ export default function MasterSharingEditNot({ onChangePage }) {
       [ref.current.name]: error,
     }));
   };
-
-//   const handleAdd = async (e) => {
-//     e.preventDefault();
-//     const validationErrors = await validateAllInputs(
-//         formDataRef.current,
-//         userSchema,
-//         setErrors
-//     );
-
-//     const isPdfEmpty = !fileInputRef.current.files.length;
-//     const isVideoEmpty = !vidioInputRef.current.files.length;
-
-//     if (isPdfEmpty && isVideoEmpty) {
-//         setErrors((prevErrors) => ({
-//             ...prevErrors,
-//             mat_sharing_expert_pdf: "Pilih salah satu antara PDF atau Video",
-//             mat_sharing_expert_video: "Pilih salah satu antara PDF atau Video",
-//         }));
-//         return;
-//     }
-
-//     if (
-//         Object.values(validationErrors).every((error) => !error) &&
-//         (!isPdfEmpty || !isVideoEmpty)
-//     ) {
-//         setIsLoading(true);
-//         setIsError({ error: false, message: "" });
-//         setErrors({});
-
-//         const uploadPromises = [];
-
-//         if (fileInputRef.current && fileInputRef.current.files.length > 0) {
-//             uploadPromises.push(
-//                 uploadFile(fileInputRef.current).then((data) => {
-//                     formDataRef.current.mat_sharing_expert_pdf = data.newFileName;
-//                 })
-//             );
-//         }
-
-//         if (vidioInputRef.current && vidioInputRef.current.files.length > 0) {
-//             uploadPromises.push(
-//                 uploadFile(vidioInputRef.current).then((data) => {
-//                     formDataRef.current.mat_sharing_expert_video = data.newFileName;
-//                 })
-//             );
-//         }
-
-//         Promise.all(uploadPromises)
-//             .then(() => {
-//                 console.log("Form Data:", formDataRef.current);
-//                 return UseFetch(
-//                   API_LINK + "SharingExperts/SaveDataSharing",
-//                   formDataRef.current
-//                 );
-//             })
-//             .then((data) => {
-//                 if (data === "ERROR") {
-//                     setIsError({
-//                         error: true,
-//                         message: "Terjadi kesalahan: Gagal menyimpan data Sharing.",
-//                     });
-//                 } else {
-//                   if (AppContext_test.DetailMateriEdit) {
-//                     const updatedDetailMateri = updatedData[0];
-//                     AppContext_test.DetailMateriEdit.Sharing_pdf = updatedDetailMateri.Sharing_pdf || null;
-//                     AppContext_test.DetailMateriEdit.Sharing_video = updatedDetailMateri.Sharing_video || null;
-//                   }
-//                   SweetAlert(
-//                     "Sukses",
-//                     "Data Sharing Expert berhasil disimpan",
-//                     "success"
-//                   ).then(() => {
-//                     onChangePage("sharingEdit", AppContext_test.DetailMateriEdit);
-//                   });
-//                 }
-//             })
-//             .catch((error) => {
-//                 console.error("Error:", error);
-//                 setIsError({
-//                     error: true,
-//                     message: "Terjadi kesalahan: Gagal menyimpan data.",
-//                 });
-//             })
-//             .finally(() => {
-//                 setIsLoading(false);
-//             });
-//     }
-// };
 const handleAdd = async (e) => {
   e.preventDefault();
   const validationErrors = await validateAllInputs(
@@ -363,6 +293,19 @@ const handleAdd = async (e) => {
   }
 };
 
+const [activeStep, setActiveStep] = useState(2);
+
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleReset = () => {
+    setActiveStep(0);
+  };
 
 
   if (isLoading) return <Loading />;
@@ -376,37 +319,29 @@ const handleAdd = async (e) => {
       )}
       <form onSubmit={handleAdd}>
         <div>
-          <Stepper
-            steps={[
-              { label: 'Materi', onClick: () => onChangePage("materiEdit") },
-              { label: 'Pretest', onClick: () => onChangePage("pretestEdit") },
-              { label: 'Sharing Expert', onClick: () => onChangePage("sharingEdit") },
-              { label: 'Forum', onClick: () => onChangePage("forumEdit") },
-              { label: 'Post Test', onClick: () => onChangePage("posttestEdit") }
-            ]}
-            activeStep={2}
-            styleConfig={{
-              activeBgColor: '#67ACE9',
-              activeTextColor: '#FFFFFF',
-              completedBgColor: '#67ACE9',
-              completedTextColor: '#FFFFFF',
-              inactiveBgColor: '#E0E0E0',
-              inactiveTextColor: '#000000',
-              size: '2em',
-              circleFontSize: '1rem',
-              labelFontSize: '0.875rem',
-              borderRadius: '50%',
-              fontWeight: 500
-            }}
-            connectorStyleConfig={{
-              completedColor: '#67ACE9',
-              activeColor: '#67ACE9',
-              disabledColor: '#BDBDBD',
-              size: 1,
-              stepSize: '2em',
-              style: 'solid'
-            }}
-          />
+          <Stepper activeStep={activeStep}>
+            {steps.map((label, index) => (
+              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          <div>
+            {activeStep === steps.length ? (
+              <div>
+                <Button onClick={handleReset}>Reset</Button>
+              </div>
+            ) : (
+              <div>
+                <Button disabled={activeStep === 0} onClick={handleBack}>
+                  Back
+                </Button>
+                <Button variant="contained" color="primary" onClick={handleNext}>
+                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="card">

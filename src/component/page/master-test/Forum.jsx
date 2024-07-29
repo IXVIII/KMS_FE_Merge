@@ -33,6 +33,7 @@ export default function Forum({ onChangePage, isOpen }) {
       createdBy: AppContext_test.displayName,
       detailId: item.ChildDetailId,
     };
+    console.log('dss', formDataRef.current  )
     setReplyMessage(`Membalas: ${item.IsiDetailForum}`); 
     setShowReplyInput(true); 
   };

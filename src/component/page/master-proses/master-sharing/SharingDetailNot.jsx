@@ -8,11 +8,29 @@ import Button from "../../../part/Button";
 import FileUpload from "../../../part/FileUpload";
 import Loading from "../../../part/Loading";
 import Alert from "../../../part/Alert";
-import { Stepper } from 'react-form-stepper';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 import uploadFile from "../../../util/UploadFile";
+import { Stepper, Step, StepLabel } from '@mui/material';
 
+const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+
+function getStepContent(stepIndex) {
+  switch (stepIndex) {
+    case 0:
+      return 'materiAdd';
+    case 1:
+      return 'pretestAdd';
+    case 2:
+      return 'sharingAdd';
+    case 3:
+      return 'forumAdd';
+    case 4:
+      return 'posttestAdd';
+    default:
+      return 'Unknown stepIndex';
+  }
+}
 export default function MasterSharingDetailNot({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -277,7 +295,19 @@ export default function MasterSharingDetailNot({ onChangePage }) {
     }
 };
 
+const [activeStep, setActiveStep] = useState(2);
 
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleReset = () => {
+    setActiveStep(0);
+  };
   
 
   if (isLoading) return <Loading />;
@@ -291,37 +321,29 @@ export default function MasterSharingDetailNot({ onChangePage }) {
       )}
       <form onSubmit={handleAdd}>
         <div>
-          <Stepper
-            steps={[
-              { label: 'Materi', onClick: () => onChangePage("materiDetail") },
-              { label: 'Pretest', onClick: () => onChangePage("pretestDetail") },
-              { label: 'Sharing Expert', onClick: () => onChangePage("sharingDetail") },
-              { label: 'Forum', onClick: () => onChangePage("forumDetail") },
-              { label: 'Post Test', onClick: () => onChangePage("posttestDetail") }
-            ]}
-            activeStep={2}
-            styleConfig={{
-              activeBgColor: '#67ACE9',
-              activeTextColor: '#FFFFFF',
-              completedBgColor: '#67ACE9',
-              completedTextColor: '#FFFFFF',
-              inactiveBgColor: '#E0E0E0',
-              inactiveTextColor: '#000000',
-              size: '2em',
-              circleFontSize: '1rem',
-              labelFontSize: '0.875rem',
-              borderRadius: '50%',
-              fontWeight: 500
-            }}
-            connectorStyleConfig={{
-              completedColor: '#67ACE9',
-              activeColor: '#67ACE9',
-              disabledColor: '#BDBDBD',
-              size: 1,
-              stepSize: '2em',
-              style: 'solid'
-            }}
-          />
+          <Stepper activeStep={activeStep}>
+            {steps.map((label, index) => (
+              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          <div>
+            {activeStep === steps.length ? (
+              <div>
+                <Button onClick={handleReset}>Reset</Button>
+              </div>
+            ) : (
+              <div>
+                <Button disabled={activeStep === 0} onClick={handleBack}>
+                  Back
+                </Button>
+                <Button variant="contained" color="primary" onClick={handleNext}>
+                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="card">

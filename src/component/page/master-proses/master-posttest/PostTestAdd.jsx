@@ -3,7 +3,6 @@ import Button from "../../../part/Button";
 import { object, string } from "yup";
 import Input from "../../../part/Input";
 import Loading from "../../../part/Loading";
-import { Stepper } from 'react-form-stepper';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
 import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
@@ -14,7 +13,26 @@ import Swal from 'sweetalert2';
 import { Editor } from '@tinymce/tinymce-react';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
+import { Stepper, Step, StepLabel } from '@mui/material';
 
+const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+
+function getStepContent(stepIndex) {
+  switch (stepIndex) {
+    case 0:
+      return 'materiAdd';
+    case 1:
+      return 'pretestAdd';
+    case 2:
+      return 'sharingAdd';
+    case 3:
+      return 'forumAdd';
+    case 4:
+      return 'posttestAdd';
+    default:
+      return 'Unknown stepIndex';
+  }
+}
 export default function MasterPostTestAdd({ onChangePage }) {
   const [formContent, setFormContent] = useState([]);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -357,20 +375,6 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
     }
   };
 
-  // const handleQuestionTypeChange = (e, index) => {
-  //   const { value } = e.target;
-  //   const updatedFormContent = [...formContent];
-  //   updatedFormContent[index] = {
-  //     ...updatedFormContent[index],
-  //     type: value,
-  //     options: value === "Essay" ? [] : updatedFormContent[index].options,
-  //   };
-  //   setFormContent(updatedFormContent);
-
-  //   // Pastikan tipeQuestion diperbarui dengan benar di formQuestion
-  //   updateFormQuestion('tipeQuestion', value);
-  // };
-
   const handleQuestionTextChange = (e, index) => {
     const { value } = e.target;
     const updatedFormContent = [...formContent];
@@ -398,14 +402,6 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
     updatedSelectedOptions[index] = value;
     setSelectedOptions(updatedSelectedOptions);
   };
-
-  // const handleAddOption = (index) => {
-  //   const updatedFormContent = [...formContent];
-  //   if (updatedFormContent[index].type === "Pilgan") {
-  //     updatedFormContent[index].options.push({ label: "", value: "" });
-  //     setFormContent(updatedFormContent);
-  //   }
-  // };
 
   const handleChangeQuestion = (index) => {
   const updatedFormContent = [...formContent];
@@ -637,6 +633,19 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
       setMinutes(formatMinutes);
       return `${formatHours}:${formatMinutes}`;
   };
+  const [activeStep, setActiveStep] = useState(4);
+
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleReset = () => {
+    setActiveStep(0);
+  };
 
   if (isLoading) return <Loading />;
 
@@ -677,20 +686,29 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
       </style>
       <form id="myForm" onSubmit={handleAdd}>
         <div>
-          <Stepper
-            key={resetStepper}
-            steps={[
-              { label: 'Materi', onClick: () => onChangePage("materiAdd") },
-              { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
-              { label: 'Sharing Expert', onClick: () => onChangePage("sharingAdd") },
-              { label: 'Forum', onClick: () => onChangePage("forumAdd") },
-              { label: 'Post Test', onClick: () => onChangePage("posttestAdd") }
-            ]}
-            activeStep={4}
-            
-            styleConfig={AppContext_master.styleConfig}
-            connectorStyleConfig={AppContext_master.connectorStyleConfig}
-          />
+          <Stepper activeStep={activeStep}>
+            {steps.map((label, index) => (
+              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          <div>
+            {activeStep === steps.length ? (
+              <div>
+                <Button onClick={handleReset}>Reset</Button>
+              </div>
+            ) : (
+              <div>
+                <Button disabled={activeStep === 0} onClick={handleBack}>
+                  Back
+                </Button>
+                <Button variant="contained" color="primary" onClick={handleNext}>
+                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
         <div className="card">
           <div className="card-header bg-outline-primary fw-medium text-black">

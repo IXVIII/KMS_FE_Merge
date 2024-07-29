@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, lazy } from "react";
 import { object, string } from "yup";
 import { API_LINK } from "../../../util/Constants";
 import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
@@ -11,25 +11,46 @@ import FileUpload from "../../../part/FileUpload";
 import uploadFile from "../../../util/UploadFile";
 import Loading from "../../../part/Loading";
 import Alert from "../../../part/Alert";
-import { Stepper } from 'react-form-stepper';
+// import { Stepper } from 'react-form-stepper';
 import AppContext_master from "../MasterContext";
 import AppContext_test from "../../master-test/TestContext";
 import axios from "axios";
 import { Editor } from '@tinymce/tinymce-react';
+
+import { Stepper, Step, StepLabel } from '@mui/material';
+
+const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+
+function getStepContent(stepIndex) {
+  switch (stepIndex) {
+    case 0:
+      return 'materiAdd';
+    case 1:
+      return 'pretestAdd';
+    case 2:
+      return 'sharingAdd';
+    case 3:
+      return 'forumAdd';
+    case 4:
+      return 'posttestAdd';
+    default:
+      return 'Unknown stepIndex';
+  }
+}
 
 export default function MastermateriAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
   const [isLoading, setIsLoading] = useState(false);
   const [listKategori, setListKategori] = useState([]);
-  const [isFormDisabled, setIsFormDisabled] = useState(false); 
+  const [isFormDisabled, setIsFormDisabled] = useState(false);
   const [resetStepper, setResetStepper] = useState(0);
   const fileInputRef = useRef(null);
   const gambarInputRef = useRef(null);
   const vidioInputRef = useRef(null);
 
   const kategori = AppContext_master.KategoriIdByKK;
-  
+
   // Referensi ke form data menggunakan useRef
   const formDataRef = useRef({
     kat_id: AppContext_master.KategoriIdByKK,
@@ -159,7 +180,7 @@ export default function MastermateriAdd({ onChangePage }) {
               AppContext_master.dataIDMateri = data[0].newID;
               SweetAlert("Sukses", "Data Materi berhasil disimpan", "success");
               setIsFormDisabled(true);
-              AppContext_master.formSavedMateri = true; 
+              AppContext_master.formSavedMateri = true;
             } else {
               setIsError(prevError => ({
                 ...prevError,
@@ -202,78 +223,88 @@ export default function MastermateriAdd({ onChangePage }) {
   };
 */}
 
-const fetchDataKategori = async (retries = 3, delay = 1000) => {
-  for (let i = 0; i < retries; i++) {
-  try {
-    console.log(AppContext_test.KeyKelompokKeahlian)
-  const data = await UseFetch(API_LINK + "Program/GetKategoriKKById", { kategori });
-  const mappedData = data.map(item => ({
-    value: item.Key,
-    label: item["Nama Kategori"],
-    idKK: item.idKK,
-    namaKK: item.namaKK
-    }));
-      return mappedData;
-    } catch (error) {
-      console.error("Error fetching kategori data:", error);
-      if (i < retries - 1) {
-        await new Promise(resolve => setTimeout(resolve, delay));
-      } else {
-        throw error;
-      }
-    }
-  }
-};
-
-  
-
-useEffect(() => {
-  let isMounted = true;
-
-  const fetchData = async () => {
-    setIsError({ error: false, message: '' });
-    setIsLoading(true);
-    try {
-      const data = await fetchDataKategori();
-      if (isMounted) {
-        setListKategori(data);
-      }
-    } catch (error) {
-      if (isMounted) {
-        setIsError({ error: true, message: error.message });
-        setListKategori([]);
-      }
-    } finally {
-      if (isMounted) {
-        setIsLoading(false);
+  const fetchDataKategori = async (retries = 3, delay = 1000) => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const data = await UseFetch(API_LINK + "Program/GetKategoriKKById", { kategori });
+        const mappedData = data.map(item => ({
+          value: item.Key,
+          label: item["Nama Kategori"],
+          idKK: item.idKK,
+          namaKK: item.namaKK
+        }));
+        return mappedData;
+      } catch (error) {
+        console.error("Error fetching kategori data:", error);
+        if (i < retries - 1) {
+          await new Promise(resolve => setTimeout(resolve, delay));
+        } else {
+          throw error;
+        }
       }
     }
   };
 
-  fetchData();
 
-  return () => {
-    isMounted = false;
-  };
-}, [kategori]);
+
   useEffect(() => {
-    setResetStepper((prev) => !prev + 1);
-  });
-useEffect(() => {
-  if (AppContext_master.MateriForm && AppContext_master.MateriForm.current && Object.keys(AppContext_master.MateriForm.current).length > 0) {
-    formDataRef.current = { ...formDataRef.current, ...AppContext_master.MateriForm.current };
-  }
+    let isMounted = true;
 
-  if (AppContext_master.formSavedMateri === false) {
-    setIsFormDisabled(false);
-  }
-}, [AppContext_master.MateriForm, AppContext_master.formSavedMateri]);
-// Render form
-const dataSaved = AppContext_master.formSavedMateri; // Menyimpan nilai AppContext_master.formSavedMateri untuk menentukan apakah form harus di-disable atau tidak
+    const fetchData = async () => {
+      setIsError({ error: false, message: '' });
+      setIsLoading(true);
+      try {
+        const data = await fetchDataKategori();
+        if (isMounted) {
+          setListKategori(data);
+        }
+      } catch (error) {
+        if (isMounted) {
+          setIsError({ error: true, message: error.message });
+          setListKategori([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
 
-if (isLoading) return <Loading />;
+    fetchData();
 
-  
+    return () => {
+      isMounted = false;
+    };
+  }, [kategori]);
+  useEffect(() => {
+    if (AppContext_master.MateriForm && AppContext_master.MateriForm.current && Object.keys(AppContext_master.MateriForm.current).length > 0) {
+      formDataRef.current = { ...formDataRef.current, ...AppContext_master.MateriForm.current };
+    }
+
+    if (AppContext_master.formSavedMateri === false) {
+      setIsFormDisabled(false);
+    }
+  }, [AppContext_master.MateriForm, AppContext_master.formSavedMateri]);
+  // Render form
+  const dataSaved = AppContext_master.formSavedMateri; // Menyimpan nilai AppContext_master.formSavedMateri untuk menentukan apakah form harus di-disable atau tidak
+
+  const [activeStep, setActiveStep] = useState(0);
+
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleReset = () => {
+    setActiveStep(0);
+  };
+
+  if (isLoading) return <Loading />;
+
+
   return (
     <>
       {isError.error && (
@@ -291,20 +322,31 @@ if (isLoading) return <Loading />;
       <form onSubmit={handleAdd}>
         {/* Isi form dengan penambahan disabled={isFormDisabled || dataSaved} */}
         <div>
-          <Stepper
-            steps={[
-              { label: 'Materi', onClick: () => onChangePage("materiAdd") },
-              { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
-              { label: 'Sharing Expert', onClick: () => onChangePage("sharingAdd") },
-              { label: 'Forum', onClick: () => onChangePage("forumAdd") },
-              { label: 'Post Test', onClick: () => onChangePage("posttestAdd") }
-            ]}
-            activeStep={0}
-            styleConfig={AppContext_master.styleConfig}
-            connectorStyleConfig={AppContext_master.connectorStyleConfig}
-          />
+          <Stepper activeStep={activeStep}>
+            {steps.map((label, index) => (
+              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          <div>
+            {activeStep === steps.length ? (
+              <div>
+                <Button onClick={handleReset}>Reset</Button>
+              </div>
+            ) : (
+              <div>
+                <Button disabled={activeStep === 0} onClick={handleBack}>
+                  Back
+                </Button>
+                <Button variant="contained" color="primary" onClick={handleNext}>
+                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
-  
+
         <div className="card">
           <div className="card-header bg-outline-primary fw-medium text-black">
             Tambah Materi Baru
@@ -341,7 +383,7 @@ if (isLoading) return <Loading />;
                   onChange={handleInputChange}
                   errorMessage={errors.mat_judul}
                   isRequired
-                  disabled={isFormDisabled || dataSaved} 
+                  disabled={isFormDisabled || dataSaved}
                 />
               </div>
               <div className="col-lg-6">
@@ -354,7 +396,7 @@ if (isLoading) return <Loading />;
                   onChange={handleInputChange}
                   errorMessage={errors.mat_kata_kunci}
                   isRequired
-                  disabled={isFormDisabled || dataSaved} 
+                  disabled={isFormDisabled || dataSaved}
                 />
               </div>
               <div className="col-lg-12">
@@ -366,7 +408,7 @@ if (isLoading) return <Loading />;
                   value={formDataRef.current.mat_keterangan}
                   onChange={handleInputChange}
                   errorMessage={errors.mat_keterangan}
-                  disabled={isFormDisabled || dataSaved} 
+                  disabled={isFormDisabled || dataSaved}
                 />
               </div>
               <div className="col-lg-12">
@@ -392,7 +434,7 @@ if (isLoading) return <Loading />;
                         alignleft aligncenter alignright alignjustify | \
                         bullist numlist outdent indent | removeformat | help'
                     }}
-                    disabled={isFormDisabled || dataSaved} 
+                    disabled={isFormDisabled || dataSaved}
                   />
                   {errors.mat_pengenalan && (
                     <div className="invalid-feedback">{errors.mat_pengenalan}</div>
@@ -410,7 +452,7 @@ if (isLoading) return <Loading />;
                   }
                   errorMessage={errors.mat_gambar}
                   isRequired
-                  disabled={isFormDisabled || dataSaved} 
+                  disabled={isFormDisabled || dataSaved}
                 />
               </div>
               <div className="col-lg-4">
@@ -424,7 +466,7 @@ if (isLoading) return <Loading />;
                   }
                   errorMessage={errors.mat_file_pdf}
                   isRequired
-                  disabled={isFormDisabled || dataSaved} 
+                  disabled={isFormDisabled || dataSaved}
                 />
               </div>
               <div className="col-lg-4">
@@ -444,7 +486,7 @@ if (isLoading) return <Loading />;
             </div>
           </div>
         </div>
-  
+
         <div className="float my-4 mx-1">
           <Button
             classType="outline-secondary me-2 px-4 py-2"
@@ -460,7 +502,7 @@ if (isLoading) return <Loading />;
           <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
-            onClick={() => onChangePage("pretestAdd", AppContext_master.MateriForm = formDataRef)}
+            onClick={() => onChangePage("pretestAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
           />
         </div>
       </form>

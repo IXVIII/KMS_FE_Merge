@@ -3,7 +3,6 @@ import Button from "../../../part/Button";
 import { object, string } from "yup";
 import Input from "../../../part/Input";
 import Loading from "../../../part/Loading";
-import { Stepper } from 'react-form-stepper';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
 import { validateAllInputs, validateInput } from "../../../util/ValidateForm";
@@ -15,6 +14,26 @@ import Swal from 'sweetalert2';
 import AppContext_master from "../../master-test/TestContext";
 import AppContext_test from "../../master-test/TestContext";
 import Alert from "../../../part/Alert";
+import { Stepper, Step, StepLabel } from '@mui/material';
+
+const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+
+function getStepContent(stepIndex) {
+    switch (stepIndex) {
+        case 0:
+            return 'materiAdd';
+        case 1:
+            return 'pretestAdd';
+        case 2:
+            return 'sharingAdd';
+        case 3:
+            return 'forumAdd';
+        case 4:
+            return 'posttestAdd';
+        default:
+            return 'Unknown stepIndex';
+    }
+}
 
 export default function MasterPreTestEdit({ onChangePage, withID }) {
     const [formContent, setFormContent] = useState([]);
@@ -175,67 +194,67 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
     };
 
     const isStartDateBeforeEndDate = (startDate, endDate) => {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    return start <= end;
-  };
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        return start <= end;
+    };
 
-  const handleAdd = async (e) => {
-    e.preventDefault();
+    const handleAdd = async (e) => {
+        e.preventDefault();
 
-    formData.timer = convertTimeToSeconds(timer);
+        formData.timer = convertTimeToSeconds(timer);
 
-    const validationErrors = await validateAllInputs(
-      formData,
-      userSchema,
-      setErrors
-    );
-    console.log(validationErrors)
-    if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
-      Swal.fire({
-        title: 'Gagal!',
-        text: 'Pastikan semua data terisi dengan benar!.',
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
-      return;
-    }
+        const validationErrors = await validateAllInputs(
+            formData,
+            userSchema,
+            setErrors
+        );
+        console.log(validationErrors)
+        if (Object.keys(validationErrors).length > 0) {
+            setErrors(validationErrors);
+            Swal.fire({
+                title: 'Gagal!',
+                text: 'Pastikan semua data terisi dengan benar!.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
 
-    if (!isStartDateBeforeEndDate(formData.tanggalAwal, formData.tanggalAkhir)) {
-      Swal.fire({
-        title: 'Error!',
-        text: 'Tanggal awal tidak boleh lebih dari tanggal akhir.',
-        icon: 'error',
-        confirmButtonText: 'OK'
-      });
-      return;
-    }
+        if (!isStartDateBeforeEndDate(formData.tanggalAwal, formData.tanggalAkhir)) {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Tanggal awal tidak boleh lebih dari tanggal akhir.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
 
         const totalQuestionPoint = formContent.reduce((total, question) => {
-        if (question.type !== 'Pilgan') {
-            total = total + parseInt(question.point)
-        }
+            if (question.type !== 'Pilgan') {
+                total = total + parseInt(question.point)
+            }
             return total;
         }, 0);
 
         const totalOptionPoint = formContent.reduce((total, question) => {
-        if (question.type === 'Pilgan') {
-            return total + question.options.reduce((optionTotal, option) => optionTotal + parseInt(option.point || 0), 0);
-        }
-        return total;
+            if (question.type === 'Pilgan') {
+                return total + question.options.reduce((optionTotal, option) => optionTotal + parseInt(option.point || 0), 0);
+            }
+            return total;
         }, 0);
 
         if (totalQuestionPoint + totalOptionPoint !== 100) {
-        
-        setResetStepper((prev) => !prev + 1);
-        Swal.fire({
-            title: 'Gagal!',
-            text: 'Total skor harus berjumlah 100',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-        return;
+
+            setResetStepper((prev) => !prev + 1);
+            Swal.fire({
+                title: 'Gagal!',
+                text: 'Total skor harus berjumlah 100',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
         }
 
         try {
@@ -483,7 +502,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
         link.click();
     };
 
-    
+
 
     const handleTimerChange = (e) => {
         const { value } = e.target;
@@ -507,7 +526,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
         }));
     };
     const Materi = AppContext_master.DetailMateriEdit;
-    const hasTest  = Materi.Posttest !== null && Materi.Posttest !== "";
+    const hasTest = Materi.Posttest !== null && Materi.Posttest !== "";
 
     const getDataQuiz = async () => {
         setIsLoading(true);
@@ -544,14 +563,14 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
         }
     };
 
-   
+
     const convertTimeToSeconds = () => {
         return parseInt(hours) * 3600 + parseInt(minutes) * 60;
     };
-    
+
     const [hours, setHours] = useState('00');
     const [minutes, setMinutes] = useState('00');
-    
+
     const handleHoursChange = (e) => {
         setHours(e.target.value);
     };
@@ -559,7 +578,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
     const handleMinutesChange = (e) => {
         setMinutes(e.target.value);
     };
-    
+
     const convertSecondsToTimeFormat = (seconds) => {
         const formatHours = Math.floor(seconds / 3600).toString().padStart(2, '0');
         const formatMinutes = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
@@ -571,13 +590,13 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
 
     const getDataQuestion = async () => {
         setIsLoading(true);
-    
+
         try {
             while (true) {
                 const { data } = await axios.post(API_LINK + 'Quiz/GetDataQuestion', {
-                    id: formData.materiId, status: 'Aktif', tipe:'Posttest'
+                    id: formData.materiId, status: 'Aktif', tipe: 'Posttest'
                 });
-                console.log('ds',data)
+                console.log('ds', data)
                 if (data === "ERROR") {
                     throw new Error("Terjadi kesalahan: Gagal mengambil data quiz.");
                 } else if (data.length === 0) {
@@ -585,7 +604,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                 } else {
                     const formattedQuestions = {};
                     const filePromises = [];
-    
+
                     data.forEach((question) => {
                         if (question.Key in formattedQuestions) {
                             formattedQuestions[question.Key].options.push({
@@ -603,7 +622,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                                 point: question.NilaiJawaban || 0,
                                 key: question.Key,
                             };
-    
+
                             if (question.TipeSoal === 'Pilgan') {
                                 formattedQuestions[question.Key].options.push({
                                     id: question.JawabanId,
@@ -612,7 +631,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                                     key: question.Key,
                                 });
                             }
-    
+
                             if (question.Gambar) {
                                 const gambarPromise = fetch(
                                     API_LINK + `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(question.Gambar)}`
@@ -630,9 +649,9 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                             }
                         }
                     });
-    
+
                     await Promise.all(filePromises);
-    
+
                     const formattedQuestionsArray = Object.values(formattedQuestions);
                     setFormContent(formattedQuestionsArray);
                     setIsLoading(false);
@@ -648,8 +667,8 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                 message: e.message,
             }));
         }
-    };   
-    
+    };
+
     useEffect(() => {
         getDataQuiz();
     }, [withID]);
@@ -657,6 +676,20 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
     useEffect(() => {
         if (formData.quizId) getDataQuestion();
     }, [formData.quizId]);
+
+    const [activeStep, setActiveStep] = useState(4);
+
+    const handleNext = () => {
+        setActiveStep((prevActiveStep) => prevActiveStep + 1);
+    };
+
+    const handleBack = () => {
+        setActiveStep((prevActiveStep) => prevActiveStep - 1);
+    };
+
+    const handleReset = () => {
+        setActiveStep(0);
+    };
 
     if (isLoading) return <Loading />;
 
@@ -697,44 +730,37 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
             </style>
             <form id="myForm" onSubmit={handleAdd}>
                 <div>
-                    <Stepper
-                    steps={[
-                    { label: 'Materi', onClick: () => onChangePage("materiEdit") },
-                    { label: 'Pretest', onClick: () => onChangePage("pretestEdit") },
-                    { label: 'Sharing Expert', onClick: () => onChangePage("sharingEdit") },
-                    { label: 'Forum', onClick: () => onChangePage("forumEdit") },
-                    { label: 'Post Test', onClick: () => onChangePage("posttestEdit") }
-                    ]}
-                    activeStep={4}
-                        styleConfig={{
-                            activeBgColor: '#67ACE9',
-                            activeTextColor: '#FFFFFF',
-                            completedBgColor: '#67ACE9',
-                            completedTextColor: '#FFFFFF',
-                            inactiveBgColor: '#E0E0E0',
-                            inactiveTextColor: '#000000',
-                            size: '2em',
-                            circleFontSize: '1rem',
-                            labelFontSize: '0.875rem',
-                            borderRadius: '50%',
-                            fontWeight: 500
-                        }}
-                        connectorStyleConfig={{
-                            completedColor: '#67ACE9',
-                            activeColor: '#67ACE9',
-                            disabledColor: '#BDBDBD',
-                            size: 1,
-                            stepSize: '2em',
-                            style: 'solid'
-                        }}
-                    />
+                    <Stepper activeStep={activeStep}>
+                        {steps.map((label, index) => (
+                            <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
+                                <StepLabel>{label}</StepLabel>
+                            </Step>
+                        ))}
+                    </Stepper>
+                    <div>
+                        {activeStep === steps.length ? (
+                            <div>
+                                <Button onClick={handleReset}>Reset</Button>
+                            </div>
+                        ) : (
+                            <div>
+                                <Button disabled={activeStep === 0} onClick={handleBack}>
+                                    Back
+                                </Button>
+                                <Button variant="contained" color="primary" onClick={handleNext}>
+                                    {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                                </Button>
+                            </div>
+                        )}
+                    </div>
                 </div>
+
                 <div className="card">
                     <div className="card-header bg-outline-primary fw-medium text-black">
                         Edit Posttest
                     </div>
                     <div className="card-body p-4">
-                        {hasTest ? ( 
+                        {hasTest ? (
                             <div>
                                 <div className="row mb-4">
                                     <div className="col-lg">
@@ -757,10 +783,10 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
 
                                         <div className="d-flex align-items-center">
                                             <div className="d-flex align-items-center me-3">
-                                                <select 
-                                                    className="form-select me-2" 
-                                                    name="hours" 
-                                                    value={hours} 
+                                                <select
+                                                    className="form-select me-2"
+                                                    name="hours"
+                                                    value={hours}
                                                     onChange={handleHoursChange}
                                                 >
                                                     {[...Array(24)].map((_, i) => (
@@ -772,10 +798,10 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                                                 <span>Jam</span>
                                             </div>
                                             <div className="d-flex align-items-center">
-                                                <select 
-                                                    className="form-select me-2" 
-                                                    name="minutes" 
-                                                    value={minutes} 
+                                                <select
+                                                    className="form-select me-2"
+                                                    name="minutes"
+                                                    value={minutes}
                                                     onChange={handleMinutesChange}
                                                 >
                                                     {[...Array(60)].map((_, i) => (
@@ -851,7 +877,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                                         <div className="card-header bg-white fw-medium text-black d-flex justify-content-between align-items-center">
                                             <span>Pertanyaan</span>
                                             <span>
-                                                Skor: {(question.type === 'Essay' || question.type ===  'Praktikum' ? parseInt(question.point) : 0) + (question.type === 'Pilgan' ? (question.options || []).reduce((acc, option) => acc + parseInt(option.point), 0) : 0)}
+                                                Skor: {(question.type === 'Essay' || question.type === 'Praktikum' ? parseInt(question.point) : 0) + (question.type === 'Pilgan' ? (question.options || []).reduce((acc, option) => acc + parseInt(option.point), 0) : 0)}
                                             </span>                                    <div className="col-lg-2">
                                                 <select className="form-select" aria-label="Default select example"
                                                     value={question.type}
@@ -1038,7 +1064,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                         ) : (
                             <Alert type="warning" message={(
                                 <span>
-                                Post Test belum ditambahkan. <a onClick={() => onChangePage("posttestEditNot")} className="text-primary">Tambah Data</a>
+                                    Post Test belum ditambahkan. <a onClick={() => onChangePage("posttestEditNot")} className="text-primary">Tambah Data</a>
                                 </span>
                             )} />
                         )}
@@ -1057,7 +1083,7 @@ export default function MasterPreTestEdit({ onChangePage, withID }) {
                             label="Simpan"
                         />
                     ) : (
-                      null  
+                        null
                     )}
                 </div>
             </form>

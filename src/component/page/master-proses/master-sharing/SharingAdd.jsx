@@ -8,10 +8,30 @@ import Button from "../../../part/Button";
 import FileUpload from "../../../part/FileUpload";
 import Loading from "../../../part/Loading";
 import Alert from "../../../part/Alert";
-import { Stepper } from 'react-form-stepper';
 import AppContext_test from "../MasterContext";
 import uploadFile from "../../../util/UploadFile";
 import AppContext_master from "../MasterContext";
+
+import { Stepper, Step, StepLabel } from '@mui/material';
+
+const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
+
+function getStepContent(stepIndex) {
+  switch (stepIndex) {
+    case 0:
+      return 'materiAdd';
+    case 1:
+      return 'pretestAdd';
+    case 2:
+      return 'sharingAdd';
+    case 3:
+      return 'forumAdd';
+    case 4:
+      return 'posttestAdd';
+    default:
+      return 'Unknown stepIndex';
+  }
+}
 export default function MasterSharingAdd({ onChangePage}) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -32,6 +52,7 @@ export default function MasterSharingAdd({ onChangePage}) {
     mat_sharing_expert_video: string(),
   });
 
+
   const handleInputChange = async (e) => {
     const { name, value } = e.target;
     const validationError = await validateInput(name, value, userSchema);
@@ -41,9 +62,6 @@ export default function MasterSharingAdd({ onChangePage}) {
       [validationError.name]: validationError.error,
     }));
   };
-  useEffect(() => {
-    setResetStepper((prev) => !prev + 1);
-  });
   const handleFileChange = async (ref, extAllowed) => {
     const file = ref.current.files[0];
     const fileName = file.name;
@@ -127,6 +145,19 @@ export default function MasterSharingAdd({ onChangePage}) {
       });
     }
   };
+  const [activeStep, setActiveStep] = useState(2);
+
+  const handleNext = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  };
+
+  const handleBack = () => {
+    setActiveStep((prevActiveStep) => prevActiveStep - 1);
+  };
+
+  const handleReset = () => {
+    setActiveStep(0);
+  };
 
   if (isLoading) return <Loading />;
 
@@ -139,19 +170,29 @@ export default function MasterSharingAdd({ onChangePage}) {
       )}
       <form onSubmit={handleAdd}>
         <div>
-          <Stepper
-            key={resetStepper}
-            steps={[
-              { label: 'Materi', onClick: () => onChangePage("materiAdd") },
-              { label: 'Pretest', onClick: () => onChangePage("pretestAdd") },
-              { label: 'Sharing Expert', onClick: () => onChangePage("sharingAdd") },
-              { label: 'Forum', onClick: () => onChangePage("forumAdd") },
-              { label: 'Post Test', onClick: () => onChangePage("posttestAdd") }
-            ]}
-            activeStep={2}
-            styleConfig={AppContext_master.styleConfig}
-            connectorStyleConfig={AppContext_master.connectorStyleConfig}
-          />
+          <Stepper activeStep={activeStep}>
+            {steps.map((label, index) => (
+              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
+                <StepLabel>{label}</StepLabel>
+              </Step>
+            ))}
+          </Stepper>
+          <div>
+            {activeStep === steps.length ? (
+              <div>
+                <Button onClick={handleReset}>Reset</Button>
+              </div>
+            ) : (
+              <div>
+                <Button disabled={activeStep === 0} onClick={handleBack}>
+                  Back
+                </Button>
+                <Button variant="contained" color="primary" onClick={handleNext}>
+                  {activeStep === steps.length - 1 ? 'Finish' : 'Next'}
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="card">
