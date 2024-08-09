@@ -123,8 +123,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
   const handleTextareaChange = (event, index, itemId) => {
     const value = event.target.value;
     handleValueAnswer("", "", "", "essay", index, value, itemId);
-
-    console.log(event, index, itemId)
   };
 
 
@@ -162,12 +160,14 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
     let maxRetries = 10; 
     let retryCount = 0;
 
-    while ((!responseSave) && retryCount < maxRetries) {
+    while ((!responseSave)) {
       try {
-        const [response1] = await Promise.all([
-          UseFetch(API_LINK + "Quiz/SaveTransaksiQuiz", formDataRef.current)
-        ]);
-        if (response1.data != 0){
+        const response = await axios.post(API_LINK + 'Quiz/SaveTransaksiQuiz', formDataRef.current);
+        // const [response1] = await Promise.all([
+        //   UseFetch(API_LINK + "Quiz/SaveTransaksiQuiz", formDataRef.current)
+        // ]);
+        if (response.data.length != 0){
+          console.log('return: ', response.data)
           responseSave = true;
         }
       } catch (error) {
@@ -188,7 +188,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
         if (attempts >= maxRetries) {
           throw new Error("Max retries reached");
         }
-        console.log(`Attempt ${attempts} failed. Retrying in ${delay}ms...`);
         await new Promise(resolve => setTimeout(resolve, delay));
       }
     }
@@ -226,7 +225,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
     const existingAnswerIndex = updatedAnswers.findIndex(
       (ans) => ans.idSoal === idSoal 
     );
-    console.log("ds", updatedAnswers)
     if (file != undefined || file != null){
       const uploadPromises = [];
       const existingAnswerNonPilgan = updatedAnswers.findIndex(
@@ -266,7 +264,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
 
     setAnswers(updatedAnswers);
     setSubmittedAnswers(submitAnswer);
-    console.log(submitAnswer)
     AppContext_test.indexTest = index;
   };
   
@@ -416,7 +413,6 @@ export default function PengerjaanTest({ onChangePage, quizType, materiId }) {
             const key = `${item.question}_${index}`;
             if (index + 1 !== selectedQuestion) return null;
             const currentIndex = index + 1;
-            console.log(item)
             return (
               <div key={key} className="mb-3" style={{ display: 'block', minWidth: '300px', marginRight: '20px' }}>
                 {/* Soal */}

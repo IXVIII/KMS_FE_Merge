@@ -166,8 +166,7 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
   };
 
   const convertToMinutes = (duration) => {
-      AppContext_test.durasiTest = duration;
-      return Math.floor(duration / 3600); 
+      return Math.floor(duration / 60); 
   };
 
   return (

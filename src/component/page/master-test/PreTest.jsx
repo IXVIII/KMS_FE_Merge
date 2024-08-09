@@ -45,7 +45,6 @@ export default function MasterTestPreTest({ onChangePage, CheckDataReady, materi
             getQuiz_pretest()
           ]);
 
-          console.log("ds", data)
           if (isMounted) {
             setCurrentData(dataQuiz);
 

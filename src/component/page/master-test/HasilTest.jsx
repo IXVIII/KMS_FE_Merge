@@ -33,7 +33,6 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
   }
   
   function bacaMateri() {
-    console.log('ddd', materiId)
     onChangePage("materipdf", true, materiId);
   }
   
@@ -55,7 +54,6 @@ export default function MasterTestHasilTest({ onChangePage, quizType, materiId }
           if (data && Array.isArray(data)) {
             if (data.length === 0) {
             } else {
-              console.log("dsds", data)
               setCurrentData(data);
             }
           } else {

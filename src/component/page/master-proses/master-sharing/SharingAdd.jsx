@@ -215,7 +215,7 @@ export default function MasterSharingAdd({ onChangePage}) {
                 <FileUpload
                   ref={vidioInputRef}
                   forInput="mat_sharing_expert_video"
-                  label="Vidio Sharing Expert (.mp4, .mov)"
+                  label="Video Sharing Expert (.mp4, .mov)"
                   formatFile=".mp4,.mov"
                   onChange={() => handleFileChange(vidioInputRef, "mp4,mov")}
                   errorMessage={errors.mat_sharing_expert_video}
