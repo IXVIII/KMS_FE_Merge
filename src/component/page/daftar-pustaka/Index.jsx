@@ -298,7 +298,7 @@ export default function MasterDaftarPustakaIndex({ onChangePage, withID }) {
           {/* Tombol Tambah */}
           <div className="flex-fill">
             <div className="input-group">
-              {activerole === "ROL03" || activerole === "ROL05" ? (
+              {activerole === "ROL03" || activerole === "ROL04" || activerole === "ROL05" || activerole === "ROL06"  ? (
                 <Button
                   iconName="add"
                   classType="success"
