@@ -91,7 +91,43 @@ export default function PICKKDetailPublish({ onChangePage, withID }) {
         } else if (data.length === 0) {
           await new Promise((resolve) => setTimeout(resolve, 2000));
         } else {
-          setListProgram(data);
+          const updatedListProgram = await Promise.all(
+            data.map(async (program) => {
+              try {
+                while (true) {
+                  let data = await UseFetch(
+                    API_LINK + "KategoriProgram/GetKategoriByProgram",
+                    {
+                      page: 1,
+                      query: "",
+                      sort: "[Nama Kategori] asc",
+                      status: "Aktif",
+                      kkeID: program.Key,
+                    }
+                  );
+
+                  if (data === "ERROR") {
+                    throw new Error(
+                      "Terjadi kesalahan: Gagal mengambil data kategori."
+                    );
+                  } else if (data === "data kosong") {
+                    return { ...program, kategori: [] };
+                  } else if (data.length === 0) {
+                    await new Promise((resolve) => setTimeout(resolve, 2000));
+                  } else {
+                    return { ...program, kategori: data };
+                  }
+                }
+              } catch (e) {
+                console.log(e.message);
+                setIsError({ error: true, message: e.message });
+                return { ...program, kategori: [] }; // Handle error case by returning program with empty kategori
+              }
+            })
+          );
+
+          console.log(updatedListProgram);
+          setListProgram(updatedListProgram);
           setIsLoading(false);
           break;
         }
@@ -244,6 +280,49 @@ export default function PICKKDetailPublish({ onChangePage, withID }) {
                       {data.Deskripsi}
                     </p>
                   </div>
+                  <div className="p-3 pt-0">
+                    <p className="text-primary fw-semibold mb-0 mt-2">
+                      Daftar Kategori Program
+                    </p>
+                    <div className="row row-cols-3">
+                      {data.kategori.map((kat, indexKat) => (
+                        <div className="col">
+                          <div className="card card-kategori-program mt-3">
+                            <div className="card-body">
+                              <div className="d-flex justify-content-between">
+                                <h6 className="card-title">
+                                  {index + 1}
+                                  {"-"}
+                                  {indexKat + 1}
+                                  {". "}
+                                  {kat["Nama Kategori"]}
+                                </h6>
+                                <div>
+                                  <Icon
+                                    name="file"
+                                    cssClass="text-primary me-1"
+                                    title="Materi sudah publikasi"
+                                  />
+                                  <span className="text-primary">
+                                    {kat.MateriCount}
+                                  </span>
+                                </div>
+                              </div>
+                              <div className="d-flex mt-2">
+                                <div className="me-2 bg-primary ps-1"></div>
+                                <p
+                                  className="card-subtitle"
+                                  style={{ textAlign: "justify" }}
+                                >
+                                  {kat.Deskripsi}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               ))
             )
@@ -280,7 +359,7 @@ export default function PICKKDetailPublish({ onChangePage, withID }) {
               ></button>
             </div>
             <div class="modal-body">
-              <div className="input-group mb-4">
+              {/* <div className="input-group mb-4">
                 <Input
                   //   ref={searchQuery}
                   forInput="pencarianProduk"
@@ -318,7 +397,7 @@ export default function PICKKDetailPublish({ onChangePage, withID }) {
                     defaultValue="Aktif"
                   />
                 </Filter>
-              </div>
+              </div> */}
               {listAnggota.length > 0 ? (
                 listAnggota[0].Message ? (
                   <p>Tidak Ada Anggota Aktif</p>
@@ -357,13 +436,6 @@ export default function PICKKDetailPublish({ onChangePage, withID }) {
               ) : (
                 <p>Tidak Ada Anggota Aktif</p>
               )}
-            </div>
-            <div className="modal-footer">
-              <Button
-                classType="secondary btn-sm px-3 mt-2"
-                type="submit"
-                label="Kelola"
-              />
             </div>
           </div>
         </div>

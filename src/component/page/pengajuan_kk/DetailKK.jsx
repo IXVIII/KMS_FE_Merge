@@ -97,7 +97,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                       page: 1,
                       query: "",
                       sort: "[Nama Kategori] asc",
-                      status: "",
+                      status: "Aktif",
                       kkeID: program.Key,
                     }
                   );
@@ -334,7 +334,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
               ></button>
             </div>
             <div class="modal-body">
-              <div className="input-group mb-4">
+              {/* <div className="input-group mb-4">
                 <Input
                   //   ref={searchQuery}
                   forInput="pencarianProduk"
@@ -372,7 +372,7 @@ export default function KKDetailPublish({ onChangePage, withID }) {
                     defaultValue="Aktif"
                   />
                 </Filter>
-              </div>
+              </div> */}
               {listAnggota.length > 0 ? (
                 listAnggota[0].Message ? (
                   <p>Tidak Ada Anggota Aktif</p>
@@ -411,13 +411,6 @@ export default function KKDetailPublish({ onChangePage, withID }) {
               ) : (
                 <p>Tidak Ada Anggota Aktif</p>
               )}
-            </div>
-            <div className="modal-footer">
-              <Button
-                classType="secondary btn-sm px-3 mt-2"
-                type="submit"
-                label="Kelola"
-              />
             </div>
           </div>
         </div>
