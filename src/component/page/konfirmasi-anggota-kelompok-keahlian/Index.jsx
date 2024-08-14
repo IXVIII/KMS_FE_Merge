@@ -33,7 +33,9 @@ export default function KonfrimasiAnggotaIndex({ onChangePage }) {
         } else if (data.length === 0) {
           await new Promise((resolve) => setTimeout(resolve, 2000));
         } else {
-          setCurrentData(data);
+          const sortedData = data.sort((a, b) => b.MenungguCount - a.MenungguCount);
+
+          setCurrentData(sortedData);
           setIsLoading(false);
           break;
         }

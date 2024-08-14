@@ -151,9 +151,9 @@ export default function MasterDaftarPustakaIndex({ onChangePage, withID }) {
             if (value["Gambar"]) {
               const gambarPromise = fetch(
                 API_LINK +
-                  `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
-                    value["Gambar"]
-                  )}`
+                `Utilities/Upload/DownloadFile?namaFile=${encodeURIComponent(
+                  value["Gambar"]
+                )}`
               )
                 .then((response) => response.blob())
                 .then((blob) => {
@@ -298,7 +298,7 @@ export default function MasterDaftarPustakaIndex({ onChangePage, withID }) {
           {/* Tombol Tambah */}
           <div className="flex-fill">
             <div className="input-group">
-              {activerole === "ROL03" || activerole === "ROL04" || activerole === "ROL05" || activerole === "ROL06"  ? (
+              {activerole === "ROL03" || activerole === "ROL04" || activerole === "ROL05" || activerole === "ROL06" ? (
                 <Button
                   iconName="add"
                   classType="success"
@@ -347,7 +347,7 @@ export default function MasterDaftarPustakaIndex({ onChangePage, withID }) {
               </Filter>
             </div>
             {currentData.length === 0 || currentData[0].Message ? (
-              <Alert type="warning mt-3" message="Tidak ada data!" />
+              <Alert type="warning mt-3" message="Tidak ada data! Refresh untuk memuat ulang halaman.." />
             ) : (
               <div
                 className="row"

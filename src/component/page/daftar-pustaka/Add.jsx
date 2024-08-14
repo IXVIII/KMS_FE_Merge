@@ -63,7 +63,7 @@ export default function MasterDaftarPustakaAdd({ onChangePage, withID }) {
     const validationError = await validateInput(name, value, userSchema);
     let error = "";
 
-    if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
+    if (fileSize / 1024576 > 5) error = "berkas terlalu besar";
     else if (!extAllowed.split(",").includes(fileExt))
       error = "format berkas tidak valid";
 

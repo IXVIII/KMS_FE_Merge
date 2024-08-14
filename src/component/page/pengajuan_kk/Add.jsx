@@ -45,6 +45,7 @@ export default function PengajuanAdd({ onChangePage, withID }) {
   });
 
   const [fileInfos, setFileInfos] = useState([]);
+  const [fileErrors, setFileErrors] = useState([]);
 
   const lampiranRefs = useRef([]);
 
@@ -110,17 +111,19 @@ export default function PengajuanAdd({ onChangePage, withID }) {
     const validationError = await validateInput(name, value, userSchema);
     let error = "";
 
-    if (fileSize / 1024576 > 10) error = "berkas terlalu besar";
+    if (fileSize / 1024576 > 5) error = "berkas terlalu besar";
     else if (!extAllowed.split(",").includes(fileExt))
       error = "format berkas tidak valid";
 
     if (error) ref.current.value = "";
 
-    setErrors((prevErrors) => ({
-      ...prevErrors,
-      [validationError.name]: error,
-    }));
+    setFileErrors((prevErrors) => {
+      const newErrors = [...prevErrors];
+      newErrors[index] = error;
+      return newErrors;
+    });
 
+    // Update fileInfos array
     if (!error) {
       setFileInfos((prevInfos) => {
         const newInfos = [...prevInfos];
@@ -129,6 +132,12 @@ export default function PengajuanAdd({ onChangePage, withID }) {
           fileSize: (fileSize / 1024 / 1024).toFixed(2) + " MB",
           fileExt,
         };
+        return newInfos;
+      });
+    } else {
+      setFileInfos((prevInfos) => {
+        const newInfos = [...prevInfos];
+        newInfos[index] = null;
         return newInfos;
       });
     }
@@ -276,6 +285,7 @@ export default function PengajuanAdd({ onChangePage, withID }) {
                               isRequired="true"
                               forInput={`lampiran_${index}`}
                               label={`Lampiran ${index + 1}`}
+                              errorMessage={fileErrors[index] ? fileErrors[index] : ""}
                               onChange={() =>
                                 handleFileChange(
                                   lampiranRefs.current[index],
