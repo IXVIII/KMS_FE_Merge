@@ -525,8 +525,22 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
     reader.readAsDataURL(file);
   };
 
-  const handleFileExcel = (e) => {
-    const file = e.target.files[0];
+  const handleFileExcel = (event) => {
+    const file = event.target.files[0];
+    
+    if (!file) return;
+
+    const allowedTypes = ['application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    
+    if (!allowedTypes.includes(file.type)) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Format Berkas Tidak Valid',
+        text: 'Silahkan unggah berkas dengan format: .xls atau .xlsx',
+      });
+      event.target.value = '';
+      return;
+    }
     setSelectedFile(file);
   };
 
@@ -802,6 +816,7 @@ const isStartDateBeforeEndDate = (startDate, endDate) => {
                   id="fileInput"
                   style={{ display: 'none' }}
                   onChange={handleFileExcel }
+                  accept=".xls, .xlsx"
                 />
                 <Button
                   title="Tambah File Excel"

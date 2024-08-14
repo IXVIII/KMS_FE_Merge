@@ -68,7 +68,6 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
   
   function handleSetStatus(id) {
     setIsError(false);
-    console.log("Index ID: " + id);
 
     SweetAlert(
       "Konfirmasi",
@@ -93,7 +92,6 @@ export default function MasterProsesIndex({ onChangePage, withID, isOpen }) {
           })
           .then(() => setIsLoading(false));
       } else {
-        console.log("Operasi dibatalkan.");
       }
     });
   }

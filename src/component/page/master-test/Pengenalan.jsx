@@ -44,7 +44,6 @@ export default function MasterTestIndex({  onChangePage, CheckDataReady, materiI
 
         if (response.status === 200){
           success = true;
-          console.log('ds', response)
         }
       } catch (error) {
         console.error("Failed to save progress:", error);

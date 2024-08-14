@@ -16,6 +16,7 @@ import FileUpload from "../../../part/FileUpload";
 import uploadFile from "../../../util/UploadFile";
 import { Stepper, Step, StepLabel } from '@mui/material';
 
+import axios from "axios";
 const steps = ['Materi', 'Pretest', 'Sharing Expert', 'Forum', 'Post Test'];
 
 function getStepContent(stepIndex) {
@@ -34,6 +35,24 @@ function getStepContent(stepIndex) {
       return 'Unknown stepIndex';
   }
 }
+
+const previewFile = async (namaFile) => {
+    try {
+      namaFile = namaFile.trim();
+      const response = await axios.get(`${API_LINK}Utilities/Upload/DownloadFile`, {
+        params: {
+          namaFile 
+        },
+        responseType: 'arraybuffer' 
+      }); 
+
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch (error) {
+    }
+  };
+
 export default function MasterSharingAdd({ onChangePage }) {
   const [errors, setErrors] = useState({});
   const [isError, setIsError] = useState({ error: false, message: "" });
@@ -67,7 +86,9 @@ export default function MasterSharingAdd({ onChangePage }) {
     }));
   };
 
-  const handleFileChange = async (ref, extAllowed) => {
+  const handlePdfChange = () => handleFileChange(fileInputRef, "pdf", 5);
+  const handleVideoChange = () => handleFileChange(vidioInputRef, "mp4,mov", 100);
+  const handleFileChange = async (ref, extAllowed, maxFileSize) => {
     const { name, value } = ref.current;
     const file = ref.current.files[0];
     const fileName = file.name;
@@ -76,10 +97,13 @@ export default function MasterSharingAdd({ onChangePage }) {
     const validationError = await validateInput(name, value, userSchema);
     let error = "";
 
-    if (fileSize / 1024 / 1024 > 100) error = "berkas terlalu besar";
-    else if (!extAllowed.split(",").includes(fileExt))
-      error = "format berkas tidak valid";
-
+    if (fileSize / 1024 / 1024 > maxFileSize) {
+      error = `Berkas terlalu besar, maksimal ${maxFileSize}MB`;
+      SweetAlert("Error", error, "error");
+    } else if (!extAllowed.split(",").includes(fileExt)) {
+      error = "Format berkas tidak valid";
+      SweetAlert("Error", error, "error");
+    }
     if (error) ref.current.value = "";
 
     setErrors((prevErrors) => ({
@@ -117,6 +141,7 @@ export default function MasterSharingAdd({ onChangePage }) {
         uploadPromises.push(
           uploadFile(fileInputRef.current).then((data) => {
             formDataRef.current["mat_sharing_expert_pdf"] = data.newFileName;
+            AppContext_test.sharingExpertPDF = data.newFileName;
           })
         );
         hasPdfFile = true;
@@ -126,6 +151,7 @@ export default function MasterSharingAdd({ onChangePage }) {
         uploadPromises.push(
           uploadFile(vidioInputRef.current).then((data) => {
             formDataRef.current["mat_sharing_expert_video"] = data.newFileName;
+            AppContext_test.sharingExpertVideo = data.newFileName;
           })
         );
         hasVideoFile = true;
@@ -226,9 +252,22 @@ const [activeStep, setActiveStep] = useState(2);
                     forInput="mat_sharing_expert_pdf"
                     label="File Sharing Expert (.pdf)"
                     formatFile=".pdf"
-                    onChange={() => handleFileChange(fileInputRef, "pdf")}
+                    onChange={() => handlePdfChange(fileInputRef, "pdf")}
                     errorMessage={errors.mat_sharing_expert_pdf}
                   />
+                  {AppContext_test.sharingExpertPDF && (
+                    <a
+                      href="#"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => {
+                        e.preventDefault(); 
+                        previewFile(AppContext_test.sharingExpertPDF); 
+                      }}
+                    >
+                      Lihat berkas yang telah diunggah
+                    </a>
+                  )}
                 </div>
                 <div className="col-lg-6">
                   <FileUpload
@@ -236,9 +275,23 @@ const [activeStep, setActiveStep] = useState(2);
                     forInput="mat_sharing_expert_video"
                     label="Video Sharing Expert (.mp4, .mov)"
                     formatFile=".mp4,.mov"
-                    onChange={() => handleFileChange(vidioInputRef, "mp4,mov")}
+                    maxFileSize={100}
+                    onChange={() => handleVideoChange(vidioInputRef, "mp4,mov")}
                     errorMessage={errors.mat_sharing_expert_video}
                   />
+                  {AppContext_test.sharingExpertVideo && (
+                    <a
+                      href="#"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => {
+                        e.preventDefault(); 
+                        previewFile(AppContext_test.sharingExpertVideo); 
+                      }}
+                    >
+                      Lihat berkas yang telah diunggah
+                    </a>
+                  )}
                 </div>
               </div>
             ) : (

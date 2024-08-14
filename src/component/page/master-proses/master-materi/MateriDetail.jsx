@@ -10,7 +10,6 @@ export default function MasterMateriDetail({ onChangePage }) {
     const [isLoading, setIsLoading] = useState(true);
     const [pdfHeight, setPdfHeight] = useState("500px");
     const Materi = AppContext_test.DetailMateri;
-    console.log(Materi)
     useEffect(() => {
         // Simulate a loading effect
         setTimeout(() => setIsLoading(false), 1000);
@@ -24,7 +23,6 @@ export default function MasterMateriDetail({ onChangePage }) {
             return false;
         }
     };
-    console.log('deyail mat',AppContext_test.DetailMateri)
 
     useEffect(() => {
         const calculatePdfHeight = () => {

@@ -17,12 +17,9 @@ const CardKK = ({ kk, onChangePage }) => {
     setExpandDeskripsi({ ...expandDeskripsi, [key]: !expandDeskripsi[key] });
   };
   useEffect(() => {
-    // Hitung panjang deskripsi
     const descriptionLength = kk.Deskripsi.length;
-    console.log("kk", kk)
-    // Tentukan tinggi kartu berdasarkan panjang deskripsi
     if (descriptionLength > MAX_DESCRIPTION_LENGTH) {
-      setCardHeight("auto"); // Set tinggi kartu menjadi otomatis
+      setCardHeight("auto"); 
     }
   }, [kk.Deskripsi]);
   return (

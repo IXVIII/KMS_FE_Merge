@@ -24,15 +24,12 @@ export default function SubKKIndex({ onChangePage }) {
           p1: AppContext_test.activeUser,
         });
         AppContext_test.karyawanId = kryId[0].kry_id;
-        // const username = AppContext_test.activeUser;
-        const username = "fadli.h"
         setIsError({ error: false, message: "" });
         setIsLoading(true);
 
         let kkData = await UseFetch(API_LINK + "Program/GetDataKKByAKK", {
           p1: AppContext_test.activeUser,
         });
-        console.log("KK Data:", kkData);
 
         if (kkData === "ERROR") {
           throw new Error(
@@ -47,7 +44,6 @@ export default function SubKKIndex({ onChangePage }) {
             API_LINK + "Program/GetProgramByKK",
             { kk: kk.Key }
           );
-          console.log("Program Data for KK:", kk.Key, programData);
 
           if (programData === "ERROR") {
             throw new Error("Terjadi kesalahan: Gagal mengambil data Program.");
@@ -57,7 +53,6 @@ export default function SubKKIndex({ onChangePage }) {
             API_LINK + "Program/CountAnggotaByKK",
             { p1: kk.Key }
           );
-          // console.log("Anggota Count Data for KK:", kk.Key, anggotaCountData);
 
           if (anggotaCountData === "ERROR") {
             throw new Error(
@@ -66,13 +61,11 @@ export default function SubKKIndex({ onChangePage }) {
           }
 
           const anggotaCount = anggotaCountData.length;
-          // console.log("Member Count for KK:", kk.Key, anggotaCount);
 
           const programCountData = await UseFetch(
             API_LINK + "Program/CountProgramByKK",
             { p1: kk.Key }
           );
-          // console.log("Program Count Data for KK:", kk.Key, programCountData);
 
           if (programCountData === "ERROR") {
             throw new Error(
@@ -81,7 +74,6 @@ export default function SubKKIndex({ onChangePage }) {
           }
 
           const programCount = programCountData.length;
-          // console.log("Program Count for KK:", kk.Key, programCount);
 
           const programsWithCategories = [];
 
@@ -119,7 +111,6 @@ export default function SubKKIndex({ onChangePage }) {
           });
         }
 
-        // console.log("KK with Programs:", kkWithPrograms);
         setListKK(kkWithPrograms);
         setIsLoading(false);
         return kkWithPrograms;
@@ -134,134 +125,7 @@ export default function SubKKIndex({ onChangePage }) {
       }
     }
   };
-  /*
-  const getKKAndPrograms = async (retries = 3, delay = 1000) => {
-    const username = "fadli.h";
-    setIsError({ error: false, message: "" });
-    setIsLoading(true); // Set isLoading to true before fetching data
   
-    try {
-      const kkData = await UseFetch(API_LINK + "Program/GetDataKKByPIC", { username });
-      console.log("KK Data:", kkData);
-  
-      if (kkData === "ERROR") {
-        throw new Error("Terjadi kesalahan: Gagal mengambil data Kelompok Keahlian.");
-      }
-  
-      const kkWithPrograms = [];
-  
-      for (const kk of kkData) {
-        const programData = await UseFetch(API_LINK + "Program/GetProgramByKK", { kk: kk.Key });
-        console.log("Program Data for KK:", kk.Key, programData);
-  
-        if (programData === "ERROR") {
-          throw new Error("Terjadi kesalahan: Gagal mengambil data Program.");
-        }
-  
-        const anggotaCountData = await UseFetch(API_LINK + "Program/CountAnggotaByKK", { p1: kk.Key });
-        console.log("Anggota Count Data for KK:", kk.Key, anggotaCountData);
-  
-        if (anggotaCountData === "ERROR") {
-          throw new Error("Terjadi kesalahan: Gagal menghitung jumlah anggota.");
-        }
-  
-        const anggotaCount = anggotaCountData.length;
-        console.log("Member Count for KK:", kk.Key, anggotaCount);
-  
-        const programCountData = await UseFetch(API_LINK + "Program/CountProgramByKK", { p1: kk.Key });
-        console.log("Program Count Data for KK:", kk.Key, programCountData);
-  
-        if (programCountData === "ERROR") {
-          throw new Error("Terjadi kesalahan: Gagal menghitung jumlah program.");
-        }
-  
-        const programCount = programCountData.length;
-        console.log("Program Count for KK:", kk.Key, programCount);
-  
-        // Fetch programs with categories, passing isLoading state
-        const programsWithCategories = await fetchProgramsWithCategories(kk.Key, programData, retries, delay);
-        
-        kkWithPrograms.push({
-          ...kk,
-          programs: programsWithCategories,
-          AnggotaCount: anggotaCount,
-          ProgramCount: programCount
-        });
-      }
-  
-      console.log("KK with Programs:", kkWithPrograms);
-      setListKK(kkWithPrograms);
-      setIsLoading(false); // Set isLoading to false after all data is fetched and processed
-      return kkWithPrograms;
-  
-    } catch (error) {
-      console.error("Error fetching KK and Programs data:", error);
-      setIsLoading(false); // Set isLoading to false if there is an error
-      setIsError({ error: true, message: error.message });
-      throw error; // Propagate the error to the caller
-    }
-  };
-  
-  const fetchProgramsWithCategories = async (kkKey, programData, retries = 3, delay = 1000) => {
-    try {
-      const programsWithCategories = [];
-  
-      for (let i = 0; i < retries; i++) {
-        try {
-          let allCategoriesSuccessfullyFetched = true; // Flag to track if all categories fetched successfully
-  
-          for (const program of programData) {
-            const categoryData = await UseFetch(API_LINK + "Program/GetKategoriByProgram", { p1: program.Key });
-  
-            const categoriesWithMaterialCounts = await Promise.all(
-              categoryData.map(async (category) => {
-                try {
-                  console.log(`Fetching material count for category ${category.Key}...`);
-                  const materialCountData = await UseFetch(API_LINK + "Program/CountMateriByKategori", { p1: category.Key });
-                  console.log(`Material count data for category ${category.Key}:`, materialCountData);
-  
-                  if (!Array.isArray(materialCountData)) {
-                    throw new Error(`Unexpected data format for material count data: ${JSON.stringify(materialCountData)}`);
-                  }
-  
-                  const materialCount = materialCountData.length;
-  
-                  console.log(`Material count for category ${category.Key}: ${materialCount}`);
-  
-                  return { ...category, materialCount };
-                } catch (error) {
-                  console.error(`Error fetching material count for category ${category.Key}:`, error);
-                  allCategoriesSuccessfullyFetched = false; // Set flag to false if any category fails
-                  throw error; // Propagate the error to retry for this category
-                }
-              })
-            );
-  
-            programsWithCategories.push({ ...program, categories: categoriesWithMaterialCounts });
-          }
-  
-          // If all categories are successfully fetched, return the result
-          if (allCategoriesSuccessfullyFetched) {
-            return programsWithCategories;
-          }
-  
-        } catch (error) {
-          console.error(`Error fetching categories (attempt ${i + 1}/${retries})`, error);
-          if (i < retries - 1) {
-            console.log(`Retrying after ${delay}ms...`);
-            await new Promise(resolve => setTimeout(resolve, delay));
-          } else {
-            throw new Error("Terjadi kesalahan: Gagal mengambil data kategori atau materi.");
-          }
-        }
-      }
-  
-    } catch (error) {
-      throw error; // Propagate the error to the calling function
-    }
-  };
-  */
-
   const isDataReadyTemp = "";
   const materiIdTemp = "";
   const isOpenTemp = true;

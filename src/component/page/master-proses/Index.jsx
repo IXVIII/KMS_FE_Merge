@@ -14,6 +14,7 @@ import '@fortawesome/fontawesome-free/css/all.css';
 import "../../../index.css";
 // Definisikan beberapa data contoh untuk tabel
 import AppContext_test from "./MasterContext";
+import AppContext_test2 from "../master-test/TestContext";
 
 const inisialisasiData = [
   {
@@ -88,7 +89,6 @@ export default function MasterProsesIndex({ onChangePage }) {
           })
           .then(() => setIsLoading(false));
       } else {
-        console.log("Operasi dibatalkan.");
       }
     });
   }
@@ -144,7 +144,6 @@ export default function MasterProsesIndex({ onChangePage }) {
                 currentFilter
             );
 
-  console.log('ds', data)
             if (data === "ERROR") {
                 setIsError(true);
             } else if (data.length === 0) {
@@ -297,99 +296,98 @@ export default function MasterProsesIndex({ onChangePage }) {
     fetchData();
 }, [currentFilter]);
 
+  const handleButtonClick = () => {
+    AppContext_test2.sharingExpertPDF = '';
+    AppContext_test2.sharingExpertVideo = '';
+    AppContext_test2.materiVideo = '';
+    AppContext_test2.materiPdf = '';
+    AppContext_test2.materiGambar = ''; 
+    onChangePage("materiAdd"); 
+  };
+
+  if (isLoading) return <Loading />;
+  
   return (
-    <div className="container">
-      <div className="row">
-        <div className="col-lg-12">
-          {isError && (
-            <div className="flex-fill">
-              <Alert
-                type="warning"
-                message="Terjadi kesalahan: Gagal mengambil data materi."
-              />
-            </div>
-          )}
-          <div className="flex-fill">
-            <div className="input-group">
-              <Button
-                iconName="add"
-                classType="success"
-                title="Tambah Materi"
-                label="Tambah Materi"
-                onClick={() => onChangePage("materiAdd")}
-              />
-              <Input
-                ref={searchQuery}
-                forInput="pencarianMateri"
-                placeholder="Search"
-              />
-              <Button
-                iconName="search"
-                classType="primary px-4"
-                title="Cari"
-                onClick={handleSearch}
-              />
-              <Filter>
-                <DropDown
-                  ref={searchFilterSort}
-                  forInput="ddUrut"
-                  label="Urut Berdasarkan"
-                  type="none"
-                  arrData={dataFilterSort}
-                  defaultValue="[Judul] ASC"
-                  // onChange={handleSortChange}
+    isLoading ? (
+      <Loading />
+    ) : (
+      <div className="container">
+        <div className="row">
+          <div className="col-lg-12">
+            {isError && (
+              <div className="flex-fill">
+                <Alert
+                  type="warning"
+                  message="Terjadi kesalahan: Gagal mengambil data materi."
                 />
-                <DropDown
-                  ref={searchFilterStatus}
-                  forInput="ddStatus"
-                  label="Status"
-                  type="semua"
-                  arrData={dataFilterStatus}
-                  defaultValue="Semua"
-                  // onChange={handleStatusChange}
-                />
-              </Filter>
-            </div>
-          </div>
-          <div className="mt-3">
-            {isLoading ? (
-              <Loading />
-            ) : (
-              <div className="row">
-                {currentFilter.status === "Semua" ? (
-                  <>
-                    <CardMateri
-                      materis={currentData}
-                      onDetail={onChangePage}
-                      onEdit={onChangePage}
-                      onStatus={handleSetStatus}
-                      isNonEdit={false}
-                    onReviewJawaban={onChangePage}
-                    />
-                  </>
-                ) : (
-                  <CardMateri
-                    materis={currentData.filter(materi => materi.Status === currentFilter.status)}
-                    onDetail={onChangePage}
-                    onEdit={onChangePage}
-                    onStatus={handleSetStatus}
-                      isNonEdit={false}
-                    onReviewJawaban={onChangePage}
-                  />
-                )}
               </div>
             )}
-            
+            <div className="flex-fill">
+              <div className="input-group">
+                <Button
+                  iconName="add"
+                  classType="success"
+                  title="Tambah Materi"
+                  label="Tambah Materi"
+                  onClick={handleButtonClick}
+                />
+                <Input
+                  ref={searchQuery}
+                  forInput="pencarianMateri"
+                  placeholder="Search"
+                />
+                <Button
+                  iconName="search"
+                  classType="primary px-4"
+                  title="Cari"
+                  onClick={handleSearch}
+                />
+                <Filter>
+                  <DropDown
+                    ref={searchFilterSort}
+                    forInput="ddUrut"
+                    label="Urut Berdasarkan"
+                    type="none"
+                    arrData={dataFilterSort}
+                    defaultValue="[Judul] ASC"
+                    // onChange={handleSortChange}
+                  />
+                  <DropDown
+                    ref={searchFilterStatus}
+                    forInput="ddStatus"
+                    label="Status"
+                    type="semua"
+                    arrData={dataFilterStatus}
+                    defaultValue="Semua"
+                    // onChange={handleStatusChange}
+                  />
+                </Filter>
+              </div>
+            </div>
+            <div className="mt-3">
+              <div className="row">
+                <CardMateri
+                  materis={currentFilter.status === "Semua"
+                    ? currentData
+                    : currentData.filter(materi => materi.Status === currentFilter.status)}
+                  onDetail={onChangePage}
+                  onEdit={onChangePage}
+                  onStatus={handleSetStatus}
+                  isNonEdit={false}
+                  onReviewJawaban={onChangePage}
+                />
+              </div>
+            </div>
           </div>
         </div>
+        <div className="float my-4 mx-1">
+          <Button
+            classType="outline-secondary me-2 px-4 py-2"
+            label="Kembali"
+            onClick={() => onChangePage("kk")}
+          />
+        </div>
       </div>
-      <div className="float my-4 mx-1">
-        <Button
-          classType="outline-secondary me-2 px-4 py-2"
-          label="Kembali"
-          onClick={() => onChangePage("kk")}
-        />
-      </div>
-  </div>
+    )
   );
 }

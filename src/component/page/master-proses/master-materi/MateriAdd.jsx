@@ -48,6 +48,25 @@ export default function MastermateriAdd({ onChangePage }) {
   const fileInputRef = useRef(null);
   const gambarInputRef = useRef(null);
   const vidioInputRef = useRef(null);
+  const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+
+  const previewFile = async (namaFile) => {
+    try {
+      namaFile = namaFile.trim();
+      const response = await axios.get(`${API_LINK}Utilities/Upload/DownloadFile`, {
+        params: {
+          namaFile 
+        },
+        responseType: 'arraybuffer' 
+      }); 
+
+      const blob = new Blob([response.data], { type: response.headers['content-type'] });
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank');
+    } catch (error) {
+    }
+  };
+
 
   const kategori = AppContext_master.KategoriIdByKK;
 
@@ -90,9 +109,11 @@ export default function MastermateriAdd({ onChangePage }) {
     }));
   };
 
-  // Handle file change
-  const handleFileChange = async (ref, extAllowed) => {
+  const handleGambarChange = () => handleFileChange(gambarInputRef, "jpg,png", 5);
+  const handlePdfChange = () => handleFileChange(fileInputRef, "pdf", 5);
+  const handleVideoChange = () => handleFileChange(vidioInputRef, "mp4,mov", 100);
 
+  const handleFileChange = async (ref, extAllowed, maxFileSize) => {
     const { name, value } = ref.current;
     const file = ref.current.files[0];
     const fileName = file.name;
@@ -101,9 +122,13 @@ export default function MastermateriAdd({ onChangePage }) {
     const validationError = await validateInput(name, value, userSchema);
     let error = "";
 
-    if (fileSize / 1024 / 1024 > 100) error = "Berkas terlalu besar";
-    else if (!extAllowed.split(",").includes(fileExt))
+    if (fileSize / 1024 / 1024 > maxFileSize) {
+      error = `Berkas terlalu besar, maksimal ${maxFileSize}MB`;
+      SweetAlert("Error", error, "error");
+    } else if (!extAllowed.split(",").includes(fileExt)) {
       error = "Format berkas tidak valid";
+      SweetAlert("Error", error, "error");
+    }
 
     if (error) ref.current.value = "";
 
@@ -111,6 +136,17 @@ export default function MastermateriAdd({ onChangePage }) {
       ...prevErrors,
       [validationError.name]: error,
     }));
+  };
+
+  
+  const fetchDataMateriById = async (id) => {
+    try {
+      const response = await axios.post(API_LINK + "Materis/GetDataMateriById", id);
+      return response.data;
+    } catch (error) {
+      console.error('Terjadi kesalahan saat mengambil data materi:', error);
+      throw error;
+    }
   };
 
   // Handle form submit
@@ -124,6 +160,7 @@ export default function MastermateriAdd({ onChangePage }) {
     );
 
     if (Object.values(validationErrors).every((error) => !error)) {
+      setIsFormSubmitted(true);
       setIsLoading(true);
       setIsError((prevError) => {
         return { ...prevError, error: false };
@@ -139,6 +176,7 @@ export default function MastermateriAdd({ onChangePage }) {
         uploadPromises.push(
           uploadFile(fileInputRef.current).then((data) => {
             formDataRef.current["mat_file_pdf"] = data.newFileName;
+            AppContext_test.materiPdf = data.newFileName;
             hasPdfFile = true;
           })
         );
@@ -148,6 +186,7 @@ export default function MastermateriAdd({ onChangePage }) {
         uploadPromises.push(
           uploadFile(gambarInputRef.current).then((data) => {
             formDataRef.current["mat_gambar"] = data.newFileName;
+            AppContext_test.materiGambar = data.newFileName;
           })
         );
       }
@@ -156,6 +195,7 @@ export default function MastermateriAdd({ onChangePage }) {
         uploadPromises.push(
           uploadFile(vidioInputRef.current).then((data) => {
             formDataRef.current["mat_file_video"] = data.newFileName;
+            AppContext_test.materiVideo = data.newFileName;
             hasVideoFile = true;
           })
         );
@@ -164,18 +204,12 @@ export default function MastermateriAdd({ onChangePage }) {
       Promise.all(uploadPromises).then(() => {
         if (!hasPdfFile && !hasVideoFile) {
           setIsLoading(false);
-          setIsError(prevError => ({
-            ...prevError,
-            error: true,
-            message: "Harus memilih salah satu file PDF atau file video, tidak boleh keduanya kosong."
-          }));
+          SweetAlert("Terjadi Kesalahan!", "Harus memilih salah satu file PDF atau file video, tidak boleh keduanya kosong.", "error");
           return;
         }
-        console.log('dd', formDataRef.current)
         axios.post(API_LINK + "Materis/SaveDataMateri", formDataRef.current)
           .then(response => {
             const data = response.data;
-            console.log("materiAdd ", data)
             if (data[0].hasil === "OK") {
               AppContext_master.dataIDMateri = data[0].newID;
               SweetAlert("Sukses", "Data Materi berhasil disimpan", "success");
@@ -202,27 +236,6 @@ export default function MastermateriAdd({ onChangePage }) {
     }
   };
 
-  // Fetch data kategori
-  {/*const fetchDataKategori = async (delay = 1000) => {
-    while (true) {
-      try {
-        const data = await UseFetch(API_LINK + "Program/GetKategoriKKById", { kategori });
-        const mappedData = data.map(item => ({
-          value: item.Key,
-          label: item["Nama Kategori"],
-          idKK: item.idKK,
-          namaKK: item.namaKK
-        }));
-  
-        return mappedData;
-      } catch (error) {
-        console.error("Error fetching kategori data:", error);
-        await new Promise(resolve => setTimeout(resolve, delay));
-      }
-    }
-  };
-*/}
-
   const fetchDataKategori = async (retries = 3, delay = 1000) => {
     for (let i = 0; i < retries; i++) {
       try {
@@ -244,8 +257,6 @@ export default function MastermateriAdd({ onChangePage }) {
       }
     }
   };
-
-
 
   useEffect(() => {
     let isMounted = true;
@@ -320,11 +331,10 @@ export default function MastermateriAdd({ onChangePage }) {
         `}
       </style>
       <form onSubmit={handleAdd}>
-        {/* Isi form dengan penambahan disabled={isFormDisabled || dataSaved} */}
         <div>
           <Stepper activeStep={activeStep}>
             {steps.map((label, index) => (
-              <Step key={label} onClick={() => onChangePage(getStepContent(index))}>
+              <Step key={label}>
                 <StepLabel>{label}</StepLabel>
               </Step>
             ))}
@@ -411,7 +421,7 @@ export default function MastermateriAdd({ onChangePage }) {
                   disabled={isFormDisabled || dataSaved}
                 />
               </div>
-              <div className="col-lg-12">
+              <div className="col-lg-12 pb-4" >
                 <div className="form-group">
                   <label htmlFor="pengenalanMateri" className="form-label fw-bold">
                     Pengenalan Materi <span style={{ color: 'Red' }}> *</span>
@@ -448,12 +458,25 @@ export default function MastermateriAdd({ onChangePage }) {
                   label="Gambar Cover (.jpg, .png)"
                   formatFile=".jpg,.png"
                   onChange={() =>
-                    handleFileChange(gambarInputRef, "jpg,png")
+                    handleGambarChange(gambarInputRef, "jpg,png")
                   }
                   errorMessage={errors.mat_gambar}
                   isRequired
                   disabled={isFormDisabled || dataSaved}
                 />
+                {AppContext_test.materiGambar && (
+                  <a
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      e.preventDefault(); 
+                      previewFile(AppContext_test.materiGambar); 
+                    }}
+                  >
+                    Lihat berkas yang telah diunggah
+                  </a>
+                )}
               </div>
               <div className="col-lg-4">
                 <FileUpload
@@ -462,12 +485,25 @@ export default function MastermateriAdd({ onChangePage }) {
                   label="File Materi (.pdf)"
                   formatFile=".pdf"
                   onChange={() =>
-                    handleFileChange(fileInputRef, "pdf")
+                    handlePdfChange(fileInputRef, "pdf")
                   }
                   errorMessage={errors.mat_file_pdf}
                   isRequired
                   disabled={isFormDisabled || dataSaved}
                 />
+                {AppContext_test.materiPdf && (
+                  <a
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      e.preventDefault(); 
+                      previewFile(AppContext_test.materiPdf); 
+                    }}
+                  >
+                    Lihat berkas yang telah diunggah
+                  </a>
+                )}
               </div>
               <div className="col-lg-4">
                 <FileUpload
@@ -475,14 +511,29 @@ export default function MastermateriAdd({ onChangePage }) {
                   forInput="mat_file_video"
                   label="File Materi (.mp4, .mov)"
                   formatFile=".mp4,.mov"
+                  maxFileSize={100}
                   onChange={() =>
-                    handleFileChange(vidioInputRef, "mp4,mov")
+                    handleVideoChange(vidioInputRef, "mp4,mov")
                   }
                   errorMessage={errors.mat_file_video}
                   isRequired
                   disabled={isFormDisabled || dataSaved}
                 />
+                {AppContext_test.materiVideo && (
+                  <a
+                    href="#"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    onClick={(e) => {
+                      e.preventDefault(); 
+                      previewFile(AppContext_test.materiVideo); 
+                    }}
+                  >
+                    Lihat berkas yang telah diunggah
+                  </a>
+                )}
               </div>
+
             </div>
           </div>
         </div>
@@ -497,12 +548,13 @@ export default function MastermateriAdd({ onChangePage }) {
             classType="primary ms-2 px-4 py-2"
             type="submit"
             label="Simpan"
-            disabled={isFormDisabled || dataSaved}
+            isDisabled={isFormDisabled || dataSaved}
           />
           <Button
             classType="dark ms-3 px-4 py-2"
             label="Berikutnya"
             onClick={() => onChangePage("pretestAdd", AppContext_master.MateriForm = formDataRef, AppContext_master.count += 1)}
+            // isDisabled={!isFormSubmitted}
           />
         </div>
       </form>

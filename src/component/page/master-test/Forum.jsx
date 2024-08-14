@@ -31,9 +31,22 @@ export default function Forum({ onChangePage, isOpen }) {
       isiDetailForum: "",
       statusDetailForum: "Aktif",
       createdBy: AppContext_test.displayName,
-      detailId: item.ChildDetailId,
+      detailId: item.DetailId,
+      isiBalasan: item.IsiDetailForum,
     };
-    console.log('dss', formDataRef.current  )
+    setReplyMessage(`Membalas: ${item.IsiDetailForum}`); 
+    setShowReplyInput(true); 
+  };
+  const handleReplySub = (item) => {
+    formDataRef.current = {
+      forumId: item.Key,
+      karyawanId: AppContext_test.activeUser,
+      isiDetailForum: "",
+      statusDetailForum: "Aktif",
+      createdBy: AppContext_test.displayName,
+      detailId: item.ChildDetailId,
+      isiBalasan: item.IsiDetailForum,
+    };
     setReplyMessage(`Membalas: ${item.IsiDetailForum}`); 
     setShowReplyInput(true); 
   };
@@ -83,12 +96,12 @@ export default function Forum({ onChangePage, isOpen }) {
       });
       setErrors({});
     }
-    // console.log("Data yang dikirim ke backend:", formDataRef.current);
     try {
       const response = await axios.post(
         API_LINK + "Forum/SaveTransaksiForum",
         formDataRef.current
       );
+      console.log(response.data)
       const updatedForumData = await fetchDataWithRetry();
       setCurrentData(updatedForumData); 
       formDataRef.current.isiDetailForum = "";
@@ -210,10 +223,10 @@ export default function Forum({ onChangePage, isOpen }) {
                 /> */}
               </div>
               <div>
-                <h6 className="mb-0" style={{ fontSize: "14px", style:"bold"}}>
+                <h6 className="mb-0" style={{ fontSize: "16px", style:"bold"}}>
+                  {item.CreatedByDetailForum} - {formatDate(item.CreatedDateDetailForum)}
                 </h6>
                 
-                  {item.CreatedByDetailForum} - {formatDate(item.CreatedDateDetailForum)}
               </div>
             </div>
             <div>
@@ -247,8 +260,6 @@ export default function Forum({ onChangePage, isOpen }) {
               .filter((reply) => reply.ChildDetailId == item.DetailId)
               .map((reply) => (
                 <div key={reply.DetailId} style={{ marginLeft: "30px"}}>
-                  {
-                console.log(currentData, item)}
                   {visibleReplies.includes(reply.DetailId) && (
                     <div style={{paddingBottom:"20px" }}>
                       <div className="d-flex align-items-center " >
@@ -269,13 +280,21 @@ export default function Forum({ onChangePage, isOpen }) {
                           /> */}
                         </div>
                         <div>
-                          <h6 className="mb-1" style={{ fontSize: "14px" }}>
-                            {/* Membalas: {reply.IsiDetailForum} */}
+                          {/* <h6 className="mb-1" style={{ fontSize: "14px" }}>
+                            Membalas: {reply.IsiDetailForum}
                             {reply.CreatedByDetailForum} - {formatDate(reply.CreatedDateDetailForum)}
-                          </h6>
+                          </h6> */}
                           {/* <h6 className="mb-0" style={nameStyle}>
                             {reply.CreatedByDetailForum} - {formatDate(reply.CreatedDateDetailForum)}
                           </h6> */}
+                          <div>
+                            <h6 className="mb-1" style={{ fontSize: "14px", fontWeight: "bold" }}>
+                              {reply.CreatedByDetailForum} - {formatDate(reply.CreatedDateDetailForum)}
+                            </h6>
+                            <p className="mb-2" style={{ fontSize: "13px", color: "#666" }}>
+                              Membalas: {reply.IsiBalasanForum}
+                            </p>
+                          </div>
                         </div>
                       </div>
                       <div
@@ -295,7 +314,7 @@ export default function Forum({ onChangePage, isOpen }) {
 
                       <i
                         className="btn btn-outline-primary btn-sm mt-2" 
-                        onClick={() => handleReply(reply)}
+                        onClick={() => handleReplySub(reply)}
                       >
                         Balas
                       </i>

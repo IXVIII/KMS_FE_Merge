@@ -8,6 +8,7 @@ const FileUpload = forwardRef(function FileUpload(
     forInput = "",
     isRequired = false,
     isDisabled = false,
+    maxFileSize = 5,
     errorMessage,
     hasExisting,
     ...props
@@ -40,7 +41,7 @@ const FileUpload = forwardRef(function FileUpload(
               ref={ref}
               {...props}
             />
-            <sub>Maksimum ukuran berkas adalah 10 MB</sub>
+            <sub>Maksimum ukuran berkas adalah {maxFileSize} MB</sub>
             {hasExisting && (
               <sub>
                 <br />
